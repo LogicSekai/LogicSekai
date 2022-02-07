@@ -1,16 +1,27 @@
-### Hi there 👋
+<p align="center">
+  <a href="https://logicsekai.com">
+    <img src="https://avatars.githubusercontent.com/u/99180229?s=96&v=4" alt="Logic Sekai logo" width="75" height="75">
+  </a>
+</p>
 
-<!--
-**LogicSekai/LogicSekai** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+<h1 align="center">Logic Sekai</h1>
 
-Here are some ideas to get you started:
+<p>
+  LogicSekai is a small community founded for self-development in the digital field.
+</p>
+<br>
+<span align="center">
 
-- 🔭 I’m currently working on ...
-- 🌱 I’m currently learning ...
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
+[![All Contributors](https://img.shields.io/badge/all_contributors-22-orange.svg?style=flat-square)](#contributors-)
+![GitHub last commit](https://img.shields.io/github/last-commit/stisla/stisla.svg)
+![GitHub repo size in bytes](https://img.shields.io/github/repo-size/badges/shields.svg)
+[![License](https://img.shields.io/github/license/stisla/stisla.svg)](LICENSE)
+![npm version](https://badge.fury.io/js/yarn.svg)
+
+</span>
+
+## Contributors
+Stisla is better because of the [contributors](https://github.com/LogicSekai/LogicSekai/graphs/contributors). Thank them too.
+
+## License
+Logic Sekai is under the [MIT License](LICENSE)
