@@ -1,0 +1,254 @@
+.hero {
+    background-image: url('../img/main-background.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+.main-bg-home {
+    display: grid;
+    /* position: absolute; */
+    width: 100%;
+    height: 100vh;
+    background-image: url('../img/hero-background.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-position-x: -800px;
+}
+
+.mascot,
+.slogan {
+    position: absolute;
+    height: 100vh;
+}
+
+.mascot {
+    width: 100%;
+    opacity: 0.8;
+    background-image: url('../img/character-hero.png');
+    /* background-size: 00px; */
+    background-repeat: no-repeat;
+    background-position-x: -700px;
+    background-position-y: -160px;
+    z-index: 1;
+}
+
+.slogan {
+    margin-top: 20px;
+    width: 100%;
+    z-index: 2;
+}
+
+.slogan .logo {
+    width: 100%;
+}
+
+.slogan .text {
+    right: 10px;
+    margin-top: 120px;
+    width: 100%;
+}
+
+.bt-sosmed {
+    display: flex;
+    /* position: absolute; */
+    /* margin-top: 250px; */
+    /* right: 30px; */
+
+}
+
+.btn-icon {
+    width: 100px;
+}
+
+.main-bg-about {
+    background-image: url('../img/effect-bg-about.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: top;
+    display: flex;
+}
+
+.about {
+    width: 100%;
+    height: 50vh;
+    background-image: url('../img/m/about.png');
+    background-size: 120%;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.a-more {
+    position: absolute;
+    right: 10%;
+    bottom: 1%;
+}
+
+.more {
+    width: 120px;
+}
+
+.bg-modal {
+    font-family: FuturaBkBt !important;
+    background: rgba(255, 255, 255, 0.8) !important;
+    box-shadow: 0 8px 32px 0 rgb(0 0 0 / 37%);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    border-radius: 10px !important;
+    border: 1px solid rgba(255, 255, 255, 0.0) !important;
+}
+
+.main-bg-product {
+    background-image: url('../img/bg-effect-product.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center right;
+}
+
+.product {
+    width: 100%;
+}
+
+.main-bg-gallery {
+    height: 50vh;
+    background-image: url('../img/effect-gallery.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: top;
+    display: flex;
+}
+
+/* Modal */
+.modal-box {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 88;
+    -webkit-animation-name: modalShow;
+    -webkit-animation-duration: 1.5s;
+    animation-name: modalShow;
+    animation-duration: 1.5s;
+}
+
+@-webkit-keyframes modalShow {
+    from {
+        opacity: 0.1;
+        top: 10vh;
+    }
+
+    to {
+        opacity: 1;
+        top: 0;
+    }
+}
+
+@keyframes modalShow {
+    from {
+        opacity: 0.1;
+        top: 10vh;
+    }
+
+    to {
+        opacity: 1;
+        top: 0;
+    }
+}
+
+.modal-row {
+    width: 100%;
+    height: 100vh;
+    background-color: #0d0121;
+    color: #ffffff;
+    font-family: FuturaBkBt;
+    overflow-y: scroll;
+
+    -webkit-box-shadow: 0px -36px 30px #0d0121;
+    -moz-box-shadow: 0px -36px 30px #0d0121;
+    box-shadow: 0px -36px 30px #0d0121;
+}
+
+.modal-group a {
+    -webkit-animation-name: modalBtn;
+    -webkit-animation-duration: 1.5s;
+    animation-name: modalBtn;
+    animation-duration: 1.5s;
+}
+
+@-webkit-keyframes modalBtn {
+    from {
+        background-color: #ffffff;
+    }
+
+    to {
+        background-color: transparent;
+    }
+}
+
+@keyframes modalBtn {
+    from {
+        background-color: #ffffff;
+    }
+
+    to {
+        background-color: transparent;
+    }
+}
+
+.modal-group h5 {
+    -webkit-animation-name: modalTitle;
+    -webkit-animation-duration: 1.5s;
+    animation-name: modalTitle;
+    animation-duration: 1.5s;
+}
+
+@-webkit-keyframes modalTitle {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes modalTitle {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.modal-exit {
+    bottom: 0;
+    background-color: #0d0121;
+    -webkit-animation-name: modalExit;
+    -webkit-animation-duration: 1.5s;
+    animation-name: modalExit;
+    animation-duration: 1.5s;
+}
+
+@-webkit-keyframes modalExit {
+    from {
+        bottom: -40px;
+    }
+
+    to {
+        bottom: 0;
+    }
+}
+
+@keyframes modalExit {
+    from {
+        bottom: -40px;
+    }
+
+    to {
+        bottom: 0;
+    }
+}
