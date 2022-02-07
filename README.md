@@ -6,8 +6,8 @@
 
 <h1 align="center">Logic Sekai</h1>
 
-<p>
-  LogicSekai is a small community founded for self-development in the digital field.
+<p align="center">
+  Logic Sekai is a small community founded for self-development in the digital field.
 </p>
 <br>
 <span align="center">
