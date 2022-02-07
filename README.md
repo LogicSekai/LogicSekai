@@ -11,12 +11,12 @@
 </p>
 <br>
 <span align="center">
-
+<!-- 
 [![All Contributors](https://img.shields.io/badge/all_contributors-22-orange.svg?style=flat-square)](#contributors-)
 ![GitHub last commit](https://img.shields.io/github/last-commit/stisla/stisla.svg)
 ![GitHub repo size in bytes](https://img.shields.io/github/repo-size/badges/shields.svg)
 [![License](https://img.shields.io/github/license/stisla/stisla.svg)](LICENSE)
-![npm version](https://badge.fury.io/js/yarn.svg)
+![npm version](https://badge.fury.io/js/yarn.svg) -->
 
 </span>
 
