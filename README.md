@@ -21,7 +21,7 @@
 </span>
 
 ## Contributors
-Stisla is better because of the [contributors](https://github.com/LogicSekai/LogicSekai/graphs/contributors). Thank them too.
+Logic Sekai is better because of the [contributors](https://github.com/LogicSekai/LogicSekai/graphs/contributors). Thank them too.
 
 ## License
 Logic Sekai is under the [MIT License](LICENSE)
