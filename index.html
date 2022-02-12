@@ -336,6 +336,8 @@
         </button>
     </div>
 
+    <audio id="bgm-audio" loop src="./assets/audio/bgm.mp3"></audio>
+
     <script>
         var liHome = document.getElementById('liHome');
         var liAbout = document.getElementById('liAbout');
@@ -503,18 +505,21 @@
         }
     </script>
     <script>
+        var bgmAudio = document.getElementById('bgm-audio');
         var BGM = new Audio("./assets/audio/bgm.mp3");
         var btnPlay = document.getElementById('bgm-play');
         var btnStop = document.getElementById('bgm-stop');
 
         function stopBGM() {
-            BGM.pause();
+            bgmAudio.pause();
+            // BGM.pause();
             btnStop.classList.remove('d-none');
             btnPlay.classList.add('d-none');
         }
 
         function playBGM() {
-            BGM.play();
+            bgmAudio.play();
+            // BGM.play();
             btnStop.classList.add('d-none');
             btnPlay.classList.remove('d-none');
         }
