@@ -6,6 +6,14 @@
     background-attachment: fixed;
 }
 
+.shake {
+    position: fixed;
+    z-index: 50;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%)
+}
+
 .main-bg-home {
     display: grid;
     /* position: absolute; */
@@ -25,12 +33,14 @@
 }
 
 .mascot {
+    display: none;
     width: 100%;
     opacity: 0.8;
     background-image: url('../img/character-hero.png');
     /* background-size: 00px; */
     background-repeat: no-repeat;
-    background-position-x: -700px;
+    background-position-x: -900px;
+    /* background-position-x: -700px; */
     background-position-y: -160px;
     z-index: 1;
 }
@@ -46,21 +56,29 @@
 }
 
 .slogan .text {
+    display: none;
     right: 10px;
-    margin-top: 120px;
+    margin-top: 60px;
     width: 100%;
 }
 
 .bt-sosmed {
-    display: flex;
+    width: 60%;
+    margin-left: auto;
+    margin-right: 5%;
+    /* display: flex; */
     /* position: absolute; */
     /* margin-top: 250px; */
     /* right: 30px; */
 
 }
 
+.btn-s {
+    margin: auto;
+}
+
 .btn-icon {
-    width: 100px;
+    width: 100%;
 }
 
 .main-bg-about {
@@ -251,4 +269,199 @@
     to {
         bottom: 0;
     }
+}
+
+/* Gallery */
+.gallery-img {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    margin-bottom: 20px;
+}
+
+.gallery-img:nth-child(1) {
+    background-image: url("../img/m/gallery/5.jpg");
+}
+
+.gallery-img:nth-child(2) {
+
+    background-image: url("../img/m/gallery/4.jpg");
+}
+
+.gallery-img:nth-child(3) {
+
+    background-image: url("../img/m/gallery/6.jpg");
+}
+
+.gallery-img:nth-child(4) {
+
+    background-image: url("../img/m/gallery/3.jpg");
+}
+
+.gallery-img:nth-child(5) {
+
+    background-image: url("../img/m/gallery/1.jpg");
+}
+
+.gallery-img:nth-child(6) {
+
+    background-image: url("../img/m/gallery/2.jpg");
+}
+
+/* Team Work */
+
+/* Our wrapper */
+.wrapper {
+    width: 100%;
+    /* height: 600px; */
+    height: 80vh;
+    max-height: 100vh;
+    position: absolute;
+    left: 50%;
+    /* top: 50%; */
+    transform: translate3d(-50%, 0%, 0);
+    overflow: hidden;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+}
+
+
+/* Our image information */
+.bottom,
+.middle,
+.top {
+    width: 100%;
+    height: 100%;
+    background-repeat: no-repeat;
+    /* background-color: white; */
+    background-image: url("../img/hero-background.png");
+    background-size: cover;
+    background-position: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    overflow: hidden;
+
+    /* img {
+        height: 100%;
+    } */
+}
+
+/* .bottom {
+    background: #2196f3;
+}
+
+.middle {
+    background: #bbdefb;
+}
+
+.top {
+    background: #ffffff;
+} */
+
+.top {
+    width: 125px;
+}
+
+.scroller {
+    width: 50px;
+    height: 50px;
+    position: absolute;
+    left: 100px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-radius: 50%;
+    background-color: #fff;
+    opacity: 0.9;
+    transition: opacity 0.12s ease-in-out;
+    pointer-events: auto;
+    cursor: pointer;
+    box-shadow: 3.5px 0px 7px rgba(100, 100, 100, 0.2);
+}
+
+.scroller-middle {
+    margin-top: 25px;
+}
+
+.scroller-top {
+    margin-top: -25px;
+}
+
+
+.scroller:hover {
+    opacity: 1;
+}
+
+.scrolling {
+    pointer-events: none;
+    opacity: 1;
+    /* z-index: 1; */
+}
+
+.scroller__thumb {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    padding: 7px;
+}
+
+.scroller:before,
+.scroller:after {
+    content: " ";
+    display: block;
+    width: 7px;
+    height: 9999px;
+    position: absolute;
+    left: 50%;
+    margin-left: -3.5px;
+    z-index: 30;
+    transition: 0.1s;
+    box-shadow: 3.5px 0px 7px rgba(100, 100, 100, 0.2);
+}
+
+.scroller:before {
+    top: 49px;
+}
+
+.scroller:after {
+    bottom: 49px;
+}
+
+/* If you want to cahnge the colors, make sure you change the fill in the svgs to match */
+.scroller-middle>.scroller__thumb {
+    border: 5px solid #5056b9;
+}
+
+.scroller-middle:before,
+.scroller-middle:after {
+    background: #5056b9;
+}
+
+.scroller-top>.scroller__thumb {
+    border: 5px solid #5056b9;
+}
+
+.scroller-top:before,
+.scroller-top:after {
+    background: #5056b9;
+}
+
+.img-teamwork {
+    width: 100%;
+    height: 80vh;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.teamwork1 {
+    background-image: url("../img/m/kwaii-char.png");
+}
+
+.teamwork2 {
+    background-image: url("../img/m/oedin-char.png");
+}
+
+.teamwork3 {
+    background-image: url("../img/m/pochi-char.png");
 }
