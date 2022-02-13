@@ -532,7 +532,7 @@
 
 .bg-modal {
     font-family: FuturaBkBt !important;
-    background: rgba(57, 54, 54, 0.6) !important;
+    background: rgb(26 26 26) !important;
     box-shadow: 0 8px 32px 0 rgb(0 0 0 / 37%);
     backdrop-filter: blur(2px);
     -webkit-backdrop-filter: blur(2px);
