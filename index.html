@@ -336,7 +336,7 @@
         </button>
     </div>
 
-    <audio id="bgm-audio" loop src="./assets/audio/bgm.mp3"></audio>
+    <audio id="bgm-audio" loop autoplay src="./assets/audio/bgm.mp3"></audio>
 
     <script>
         var liHome = document.getElementById('liHome');
@@ -505,21 +505,18 @@
         }
     </script>
     <script>
-        var bgmAudio = document.getElementById('bgm-audio');
-        var BGM = new Audio("./assets/audio/bgm.mp3");
+        var BGM = document.getElementById('bgm-audio');
         var btnPlay = document.getElementById('bgm-play');
         var btnStop = document.getElementById('bgm-stop');
 
         function stopBGM() {
-            bgmAudio.pause();
-            // BGM.pause();
+            BGM.pause();
             btnStop.classList.remove('d-none');
             btnPlay.classList.add('d-none');
         }
 
         function playBGM() {
-            bgmAudio.play();
-            // BGM.play();
+            BGM.play();
             btnStop.classList.add('d-none');
             btnPlay.classList.remove('d-none');
         }
@@ -564,7 +561,6 @@
                                 stat.classList.add("render");
                                 setTimeout(function () {
                                     prelod.classList.add("fade");
-                                    playBGM();
                                     startHomeEffect();
                                     setTimeout(function () {
                                         prelod.classList.add("d-none");
