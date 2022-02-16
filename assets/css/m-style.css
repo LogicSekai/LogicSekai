@@ -465,3 +465,22 @@
 .teamwork3 {
     background-image: url("../img/m/pochi-char.png");
 }
+
+.bg-cr {
+    height: 100vh;
+    background-image: url('../img/m/footer-effect.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    display: flex;
+}
+
+.cp-rg {
+    width: 100%;
+    height: 300px;
+    margin: auto;
+    background-image: url('../img/m/footer.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+}
