@@ -273,6 +273,7 @@
 
 /* Gallery */
 .gallery-img {
+    display: inline-block;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
