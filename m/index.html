@@ -90,12 +90,12 @@
 </head>
 
 <body class="hero" oncontextmenu="return false" onkeydown="return false;" onmousedown="return false;">
-    <!-- <div id="preloader" class="preload d-flex">
+    <div id="preloader" class="preload d-flex">
         <div class="col-12 m-auto text-center text-white">
             <div id="aniload" class="load m-auto"></div>
             <h2 id="status" class="fbk">Load data</h2>
         </div>
-    </div> -->
+    </div>
 
     <div class="shake w-50 mx-auto bg-white rounded-pill text-center fbk">Shake your phone</div>
 
@@ -228,48 +228,14 @@
                 <div class="modal-group mb-4">
                     <h5>Sosial Media</h5>
                     <div class="form-group mt-2">
-                        <a class="btn btn-md btn-outline-light w-100 my-1" href="https://opensea.io/collection/iluboi"
+                        <a class="btn btn-md btn-outline-light w-100 my-1" href="https://facebook.com/kwaii.id"
                             target="_blank"><i class="fab fa-facebook"></i> Facebook</a>
-                        <a class="btn btn-md btn-outline-light w-100 my-1" href="https://opensea.io/collection/pixsword"
+                        <a class="btn btn-md btn-outline-light w-100 my-1" href="https://www.instagram.com/kwaiichan0/"
                             target="_blank"><i class="fab fa-instagram"></i>
-                            Instagram</a>
-                    </div>
-                </div>
-                <div class="modal-group mb-4">
-                    <h5>OpenSea(NFT)</h5>
-                    <div class="form-group mt-2">
-                        <a class="btn btn-md btn-outline-light w-100 my-1" href="https://opensea.io/collection/pixsword"
-                            target="_blank"><i class="fas fa-location-arrow"></i>
-                            Pixsword</a>
-                        <a class="btn btn-md btn-outline-light w-100 my-1" href="https://opensea.io/collection/iluboi"
-                            target="_blank"><i class="fas fa-caret-up"></i> Iluboi</a>
-                    </div>
-                </div>
-                <div class="modal-group mb-4">
-                    <h5>Lainnya...</h5>
-                    <div class="form-group mt-2">
-                        <a class="btn btn-md btn-outline-light w-100 my-1"
-                            href="https://drive.google.com/drive/folders/1c6rHlCLGwHCcfmP2fJxPmetttHD72za6?usp=sharing"
-                            target="_blank"><i class="fas fa-star"></i> Testimoni</a>
-                        <a class="btn btn-md btn-outline-light w-100 my-1" href="https://sociabuzz.com/kwaii/tribe"
-                            target="_blank"><i class="fas fa-donate"></i> Donasi</a>
-                        <a class="btn btn-md btn-outline-light w-100 my-1" href="https://sociabuzz.com/kwaii/shop"
-                            target="_blank"><i class="fas fa-store"></i> Store</a>
-                        <a class="btn btn-md btn-outline-light w-100 my-1" href="https://cloudcenter-cc.blogspot.com/"
-                            target="_blank"><i class="fas fa-blog"></i> Blog</a>
-                        <a class="btn btn-md btn-outline-light w-100 my-1"
-                            href="https://www.youtube.com/channel/UC14Fir3lBIaVTqzb9y6VBlg" target="_blank"><i
-                                class="fab fa-youtube"></i> YouTube</a>
-                    </div>
-                </div>
-                <div class="modal-group mb-4">
-                    <h5>Sosial Media</h5>
-                    <div class="form-group mt-2">
-                        <a class="btn btn-md btn-outline-light w-100 my-1" href="https://opensea.io/collection/iluboi"
-                            target="_blank"><i class="fab fa-facebook"></i> Facebook</a>
-                        <a class="btn btn-md btn-outline-light w-100 my-1" href="https://opensea.io/collection/pixsword"
+                            Instagram 1</a>
+                        <a class="btn btn-md btn-outline-light w-100 my-1" href="https://www.instagram.com/cameliayu112"
                             target="_blank"><i class="fab fa-instagram"></i>
-                            Instagram</a>
+                            Instagram 2</a>
                     </div>
                 </div>
                 <div class="modal-group mb-4">
@@ -293,7 +259,7 @@
         </div>
     </div>
 
-    <!-- <script>
+    <script>
         ;
         (function () {
             function id(v) {
@@ -350,7 +316,7 @@
             }
             document.addEventListener('DOMContentLoaded', loadbar, false);
         }());
-    </script> -->
+    </script>
     <script src="../assets/shake.js-master/shake.js"></script>
     <script>
         var boxModal = document.getElementById('showModal');
@@ -387,24 +353,13 @@
     </script>
     <script>
         // team work
-        // I hope this over-commenting helps. Let's do this!
-        // Let's use the 'active' variable to let us know when we're using it
-        let active = false;
-        // and define our dom elements to make it easier to read
         let scrollerMiddle = document.querySelector('.scroller-middle');
         let scrollerTop = document.querySelector('.scroller-top');
 
-
-        // First we'll have to set up our event listeners
-        // We want to watch for clicks on our scroller
         scrollerMiddle.addEventListener('mousedown', function () {
             active = "middle";
-            // Add our scrolling class so the scroller has full opacity while active
             scrollerMiddle.classList.add('scrolling');
         });
-        // We also want to watch the body for changes to the state,
-        // like moving around and releasing the click
-        // so let's set up our event listeners
         document.body.addEventListener('mouseup', function () {
             active = false;
             scrollerMiddle.classList.remove('scrolling');
@@ -413,7 +368,6 @@
             active = false;
             scrollerMiddle.classList.remove('scrolling');
         });
-        // We'll have to do the same for our top scroller
         scrollerTop.addEventListener('mousedown', function () {
             active = "top";
             scrollerTop.classList.add('scrolling');
@@ -427,38 +381,26 @@
             scrollerTop.classList.remove('scrolling');
         });
 
-        // Let's figure out where their mouse is at
         document.body.addEventListener('mousemove', function (e) {
             if (!active) return;
-            // Their mouse is here...
             let x = e.pageX;
-            // but we want it relative to our wrapper
             x -= document.querySelector('.wrapper').getBoundingClientRect().left;
-            // Okay let's change our state
             scrollIt(x);
         });
 
-        // Let's use this function
         function scrollIt(x) {
-            // Calculate our transform
             let transform = Math.max(0, (Math.min(x, document.querySelector('.wrapper').offsetWidth)));
-            // we show all our bottom image but how much of our middle and top,
-            // that'll depend on what we're dragging
-            // if we're dragging the middle slider
             if (active === "middle") {
                 document.querySelector('.middle').style.width = transform + "px";
                 scrollerMiddle.style.left = transform - 25 + "px";
-                // if we're using scroller-middle, middle must always be to the right of top
                 if (scrollerTop.getBoundingClientRect().left > scrollerMiddle.getBoundingClientRect().left - 5) {
                     document.querySelector('.top').style.width = transform - 5 + "px";
                     scrollerTop.style.left = transform - 30 + "px";
                 }
             }
-            // if we're dragging the top slider
             if (active === "top") {
                 document.querySelector('.top').style.width = transform + "px";
                 scrollerTop.style.left = transform - 25 + "px";
-                // if we're using scroller-top, top must always be to the left
                 if (scrollerTop.getBoundingClientRect().left > scrollerMiddle.getBoundingClientRect().left - 5) {
                     document.querySelector('.middle').style.width = transform + 5 + "px";
                     scrollerMiddle.style.left = transform - 20 + "px";
@@ -466,8 +408,6 @@
             }
         }
 
-        // Let's set our opening state based off the width, 
-        // we want to show a bit of both images so the user can see what's going on
         active = "middle";
         scrollIt(314);
         active = "top";
@@ -475,8 +415,6 @@
         active = false;
 
 
-        // And finally let's repeat the process for touch events
-        // first our middle scroller...
         scrollerMiddle.addEventListener('touchstart', function () {
             active = "middle";
             scrollerMiddle.classList.add('scrolling');
@@ -490,7 +428,6 @@
             scrollerMiddle.classList.remove('scrolling');
         });
 
-        // then scroller top, our second scroller
         scrollerTop.addEventListener('touchstart', function () {
             active = "top";
             scrollerTop.classList.add('scrolling');
