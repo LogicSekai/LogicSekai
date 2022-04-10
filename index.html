@@ -355,19 +355,15 @@
 
         // Reset Effect Home 
         function resetHomeEffect() {
-            document.getElementById('1').classList.add('d-none');
-            document.getElementById('2').classList.add('d-none');
-            document.getElementById('3').classList.add('d-none');
-            document.getElementById('4').classList.add('d-none');
-            document.getElementById('5').classList.add('d-none');
+            for (let i = 1; i <= 5; i++) {
+                document.getElementById(i).classList.add('d-none');
+            }
         }
 
         function startHomeEffect() {
-            document.getElementById('1').classList.remove('d-none');
-            document.getElementById('2').classList.remove('d-none');
-            document.getElementById('3').classList.remove('d-none');
-            document.getElementById('4').classList.remove('d-none');
-            document.getElementById('5').classList.remove('d-none');
+            for (let i = 1; i <= 5; i++) {
+                document.getElementById(i).classList.remove('d-none');
+            }
         }
 
         function clearMenu() {
@@ -515,6 +511,7 @@
         var BGM = document.getElementById('bgm-audio');
         var btnPlay = document.getElementById('bgm-play');
         var btnStop = document.getElementById('bgm-stop');
+        const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
         function stopBGM() {
             BGM.pause();
@@ -550,33 +547,29 @@
                     if (c === tot) return doneLoading();
                 }
 
-                function doneLoading() {
+                async function doneLoading() {
                     // ovrl.style.opacity = 0;
                     resetHomeEffect();
                     stat.innerHTML = "System synchronize...";
-                    setTimeout(function () {
-                        // ovrl.style.display = "none";
-                        ovrl.classList.add("fade");
-                        stat.classList.add("fade");
-                        setTimeout(function () {
-                            ovrl.style.display = "none";
-                            stat.style.display = "none";
-                            stat.innerHTML = "Rendering, please wait...";
-                            setTimeout(function () {
-                                stat.classList.remove("fade");
-                                stat.style.display = "block";
-                                stat.classList.add("render");
-                                setTimeout(function () {
-                                    prelod.classList.add("fade");
-                                    startHomeEffect();
-                                    setTimeout(function () {
-                                        prelod.classList.add("d-none");
-                                    }, 1000);
-                                }, 2000);
-                            }, 800);
-                        }, 800);
-                    }, 3000);
+                    await sleep(3000)
+                    // ovrl.style.display = "none";
+                    ovrl.classList.add("fade");
+                    stat.classList.add("fade");
+                    await sleep(800)
+                    ovrl.style.display = "none";
+                    stat.style.display = "none";
+                    stat.innerHTML = "Rendering, please wait...";
+                    await sleep(800)
+                    stat.classList.remove("fade");
+                    stat.style.display = "block";
+                    stat.classList.add("render");
+                    await sleep(2000)
+                    prelod.classList.add("fade");
+                    startHomeEffect();
+                    await sleep(1000)
+                    prelod.classList.add("d-none");
                 }
+
                 for (var i = 0; i < tot; i++) {
                     var tImg = new Image();
                     tImg.onload = imgLoaded;
