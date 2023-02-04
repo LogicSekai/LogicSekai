@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#5056b9">
+    <meta name="msapplication-navbutton-color" content="#5056b9">
+    <meta name="apple-mobile-web-app-status-bar-style" content="#5056b9">
+    <link rel="shortcut icon" href="../assets/img/logo.png" type="image/x-icon">
+    <title>Logic Sekai</title>
+    <script>
+        if (!/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+            window.location = "/";
+        }
+    </script>
+    <style>
+        /* Import Fonts */
+        @font-face {
+            font-family: FuturaBkBt;
+            src: url(../assets/fonts/FuturaBookfont.ttf);
+        }
+
+        body {
+            /* overflow: hidden; */
+        }
+
+        .preload {
+            position: fixed;
+            width: 100%;
+            height: 100vh;
+            background-color: #0d0121;
+            z-index: 1032;
+        }
+
+        .load {
+            width: 200px;
+            height: 200px;
+            background-image: url('../assets/img/preload.gif');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .fbk {
+            font-family: FuturaBkBt;
+        }
+
+        .render {
+            -webkit-animation-name: render;
+            -webkit-animation-duration: 1.5s;
+            animation-name: render;
+            animation-duration: 1.5s;
+        }
+
+        @-webkit-keyframes render {
+            from {
+                margin-top: 80px;
+                opacity: 0;
+            }
+
+            to {
+                margin-top: 0px;
+                opacity: 1;
+            }
+        }
+
+        @keyframes render {
+            from {
+                margin-top: 80px;
+                opacity: 0;
+            }
+
+            to {
+                margin-top: 0px;
+                opacity: 1;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="../assets/css/m-style.css">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <script src="http://code.jquery.com/jquery-2.2.1.min.js"></script>
+</head>
+
+<body class="hero" oncontextmenu="return false" onkeydown="return false;" onmousedown="return false;">
+    <div id="preloader" class="preload d-flex">
+        <div class="col-12 m-auto text-center text-white">
+            <div id="aniload" class="load m-auto"></div>
+            <h2 id="status" class="fbk">Load data</h2>
+        </div>
+    </div>
+
+    <div class="shake w-50 mx-auto bg-white rounded-pill text-center fbk">Shake your phone</div>
+
+    <section class="main-bg-home">
+        <div class="mascot"></div>
+        <div class="slogan">
+            <!-- <div class="w-100 d-flex" style="margin-top: 0;">
+                <img src="../assets/img/m/logic-sekai-slogan.png" alt="" class="logo mx-auto">
+            </div> -->
+            <div class="w-100" style="margin-top: 5vh;">
+                <img style="width: 70%;" src="../assets/img/m/logic-sekai-slogan2.png" alt="" class="logo ms-3">
+            </div>
+            <div class="w-100 d-flex" style="margin-top: 0vh">
+                <img src="../assets/img/m/logic-sekai.png" alt="" class="logo mx-auto">
+            </div>
+            <!-- <img src="../assets/img/m/description.png" alt="" class="text"> -->
+            <!-- <div class="bt-sosmed">
+                <div class="w-100 d-flex">
+                    <a class="btn-s" href="https://www.youtube.com/channel/UC14Fir3lBIaVTqzb9y6VBlg" target="_blank">
+                        <img class="btn-icon" src="../assets/img/btn-youtube.png" alt="Youtube">
+                    </a>
+                    <a class="btn-s" href="https://sociabuzz.com/kwaii/shop" target="_blank">
+                        <img class="btn-icon" src="../assets/img/btn-socialbuzz.png" alt="SocialBuzz">
+                    </a>
+                </div>
+            </div> -->
+            <div class="w-100 d-flex"
+                style="width: 100%; margin-top: 10vh; background-image: url('../assets/img/m/weapon.png');">
+                <img src="../assets/img/m/about2.png" alt="" class="logo mx-auto">
+            </div>
+            <div class="w-100 d-flex" style="margin-top: -10px;">
+                <iframe style="margin: auto;" width="90%" height="200" src="https://www.youtube.com/embed/J-nMbr8MC1M"
+                    title="YouTube video player" frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen></iframe>
+            </div>
+        </div>
+    </section>
+
+    <section id="product" class="main-bg-product">
+        <div class="w-100 text-center pt-4">
+            <h2 class="w-50 text-white mx-auto rounded-pill fbk" style="border: #5056b9 solid 2px;">Product</h2>
+        </div>
+        <div style="margin-top: -80px;">
+            <img src="../assets/img/m/product3.png" alt="" class="product">
+            <img src="../assets/img/m/product2.png" alt="" class="product">
+            <img src="../assets/img/m/product1.png" alt="" class="product">
+        </div>
+    </section>
+
+    <section id="gallery" class="main-bg-gallery" style="height: 50vh;">
+        <div class="card m-auto card-custom" style="width: 90%; background: transparent;">
+            <div class="card-header" style="border-bottom: #5056b9 solid 2px;">
+                <h2 class="text-white fbk text-center">GALLERY</h2>
+            </div>
+            <div class="card-body overflow-auto"
+                style="white-space: nowrap;height: 240px;border-bottom: #5056b9 solid 2px;">
+                <!-- <img src="../assets/img/gallery2.png" style="width: 100%" alt=""> -->
+                <div class="bg-white w-100 gallery-img rounded shadow-lg" style="height: 200px;"></div>
+                <div class="bg-white w-100 gallery-img rounded shadow-lg" style="height: 200px;"></div>
+                <div class="bg-white w-100 gallery-img rounded shadow-lg" style="height: 200px;"></div>
+                <div class="bg-white w-100 gallery-img rounded shadow-lg" style="height: 200px;"></div>
+                <div class="bg-white w-100 gallery-img rounded shadow-lg" style="height: 200px;"></div>
+                <div class="bg-white w-100 gallery-img rounded shadow-lg" style="height: 200px;"></div>
+            </div>
+            <div class="" style="height: 40px;"></div>
+        </div>
+    </section>
+
+    <section id="teamwork" class="pt-4" style="height: 100vh; width: 100%;">
+        <div class="w-100 d-flex">
+            <h2 class="fbk text-center w-50 mx-auto rounded-pill text-white" style="border: #5056b9 solid 2px;">Team
+                Work</h2>
+        </div>
+        <div class="wrapper mt-3">
+            <div class="bottom">
+                <!--   images got deleted :'(   -->
+                <!-- <img src="../assets/img/kwaii-char.png" draggable="false" /> -->
+                <div class="img-teamwork teamwork3"></div>
+            </div>
+            <div class="middle">
+                <!-- <img src="../assets/img/oedin-char.png" draggable="false" /> -->
+                <div class="img-teamwork teamwork2"></div>
+            </div>
+            <div class="scroller scroller-middle">
+                <svg class="scroller__thumb" xmlns="http://www.w3.org/2000/svg" width="100" height="100"
+                    viewBox="0 0 100 100">
+                    <polygon points="0 50 37 68 37 32 0 50" style="fill:#5056b9" />
+                    <polygon points="100 50 64 32 64 68 100 50" style="fill:#5056b9" /></svg>
+            </div>
+            <div class="top">
+                <!-- <img src="../assets/img/pochi-char.png" draggable="false" /> -->
+                <div class="img-teamwork teamwork1"></div>
+            </div>
+            <div class="scroller scroller-top">
+                <svg class="scroller__thumb" xmlns="http://www.w3.org/2000/svg" width="100" height="100"
+                    viewBox="0 0 100 100">
+                    <polygon points="0 50 37 68 37 32 0 50" style="fill:#5056b9" />
+                    <polygon points="100 50 64 32 64 68 100 50" style="fill:#5056b9" /></svg>
+            </div>
+        </div>
+    </section>
+
+    <section id="footer">
+        <div class="bg-cr">
+            <div class="cp-rg"></div>
+        </div>
+    </section>
+
+    <!-- Modal -->
+    <div id="showModal" class="modal-box" style="display: none;">
+        <div class="modal-row">
+            <div id="bodyModal" class="py-4 px-3" style="display: none;">
+                <div class="modal-group mb-4">
+                    <h5>Lainnya...</h5>
+                    <div class="form-group mt-2">
+                        <a class="btn btn-md btn-outline-light w-100 my-1"
+                            href="https://drive.google.com/drive/folders/1c6rHlCLGwHCcfmP2fJxPmetttHD72za6?usp=sharing"
+                            target="_blank"><i class="fas fa-star"></i> Testimoni</a>
+                        <a class="btn btn-md btn-outline-light w-100 my-1" href="https://sociabuzz.com/kwaii/tribe"
+                            target="_blank"><i class="fas fa-donate"></i> Donasi</a>
+                        <a class="btn btn-md btn-outline-light w-100 my-1" href="https://sociabuzz.com/kwaii/shop"
+                            target="_blank"><i class="fas fa-store"></i> Store</a>
+                        <a class="btn btn-md btn-outline-light w-100 my-1" href="https://cloudcenter-cc.blogspot.com/"
+                            target="_blank"><i class="fas fa-blog"></i> Blog</a>
+                        <a class="btn btn-md btn-outline-light w-100 my-1"
+                            href="https://www.youtube.com/channel/UC14Fir3lBIaVTqzb9y6VBlg" target="_blank"><i
+                                class="fab fa-youtube"></i> YouTube</a>
+                    </div>
+                </div>
+                <div class="modal-group mb-4">
+                    <h5>Sosial Media</h5>
+                    <div class="form-group mt-2">
+                        <a class="btn btn-md btn-outline-light w-100 my-1" href="https://facebook.com/kwaii.id"
+                            target="_blank"><i class="fab fa-facebook"></i> Facebook</a>
+                        <a class="btn btn-md btn-outline-light w-100 my-1" href="https://www.instagram.com/kwaiichan0/"
+                            target="_blank"><i class="fab fa-instagram"></i>
+                            Instagram 1</a>
+                        <a class="btn btn-md btn-outline-light w-100 my-1" href="https://www.instagram.com/cameliayu112"
+                            target="_blank"><i class="fab fa-instagram"></i>
+                            Instagram 2</a>
+                        <a class="btn btn-md btn-outline-light w-100 my-1" href="mailto:cameliayu112@gmail.com"
+                            target="_blank"><i class="far fa-envelope"></i>
+                            Email</a>
+                    </div>
+                </div>
+                <div class="modal-group mb-4">
+                    <h5>OpenSea(NFT)</h5>
+                    <div class="form-group mt-2">
+                        <a class="btn btn-md btn-outline-light w-100 my-1" href="https://opensea.io/collection/pixsword"
+                            target="_blank"><i class="fas fa-location-arrow"></i>
+                            Pixsword</a>
+                        <a class="btn btn-md btn-outline-light w-100 my-1" href="https://opensea.io/collection/iluboi"
+                            target="_blank"><i class="fas fa-caret-up"></i> Iluboi</a>
+                    </div>
+                </div>
+            </div>
+            <div style="height: 10vh;"></div>
+            <div class="modal-exit w-100 position-fixed">
+                <div class="my-2 d-flex">
+                    <button onclick="modalClose();" class="btn btn-md bg-white mx-auto"
+                        style="width: 50%;">Kembali</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        ;
+        (function () {
+            function id(v) {
+                return document.getElementById(v);
+            }
+
+            function loadbar() {
+                var ovrl = id("aniload"),
+                    stat = id("status"),
+                    prelod = id("preloader"),
+                    img = document.images,
+                    c = 0,
+                    tot = img.length;
+                if (tot == 0) return doneLoading();
+
+                function imgLoaded() {
+                    c += 1;
+                    var perc = ((100 / tot * c) << 0) + "%";
+                    stat.innerHTML = "Load data " + perc;
+                    if (c === tot) return doneLoading();
+                }
+
+                function doneLoading() {
+                    // ovrl.style.opacity = 0;
+                    stat.innerHTML = "System synchronize...";
+                    setTimeout(function () {
+                        // ovrl.style.display = "none";
+                        ovrl.classList.add("fade");
+                        stat.classList.add("fade");
+                        setTimeout(function () {
+                            ovrl.style.display = "none";
+                            stat.style.display = "none";
+                            stat.innerHTML = "Rendering, please wait...";
+                            setTimeout(function () {
+                                stat.classList.remove("fade");
+                                stat.style.display = "block";
+                                stat.classList.add("render");
+                                setTimeout(function () {
+                                    prelod.classList.add("fade");
+                                    setTimeout(function () {
+                                        prelod.classList.add("d-none");
+                                    }, 1000);
+                                }, 2000);
+                            }, 800);
+                        }, 800);
+                    }, 3000);
+                }
+                for (var i = 0; i < tot; i++) {
+                    var tImg = new Image();
+                    tImg.onload = imgLoaded;
+                    tImg.onerror = imgLoaded;
+                    tImg.src = img[i].src;
+                }
+            }
+            document.addEventListener('DOMContentLoaded', loadbar, false);
+        }());
+    </script>
+    <script src="../assets/shake.js-master/shake.js"></script>
+    <script>
+        var boxModal = document.getElementById('showModal');
+        var bodyModal = document.getElementById('bodyModal');
+        var myShakeEvent = new Shake({
+            threshold: 15,
+            timeout: 1000
+        });
+
+        myShakeEvent.start();
+
+        window.addEventListener('shake', shakeEventDidOccur, false);
+
+        function shakeEventDidOccur() {
+            // boxModal.classList.add('d-block');
+            // setTimeout(function () {
+            //     bodyModal.classList.add("d-block");
+            // }, 1500);
+            boxModal.classList.remove('modal-box');
+            if (boxModal.classList == "d-block") {
+                boxModal.classList.remove('d-block');
+                bodyModal.classList.remove("d-block");
+            } else {
+                boxModal.classList.add('modal-box');
+                boxModal.classList.add('d-block');
+                bodyModal.classList.add("d-block");
+            }
+        }
+
+        function modalClose() {
+            boxModal.classList.remove('d-block');
+            bodyModal.classList.remove("d-block");
+        }
+    </script>
+    <script>
+        // team work
+        let scrollerMiddle = document.querySelector('.scroller-middle');
+        let scrollerTop = document.querySelector('.scroller-top');
+
+        scrollerMiddle.addEventListener('mousedown', function () {
+            active = "middle";
+            scrollerMiddle.classList.add('scrolling');
+        });
+        document.body.addEventListener('mouseup', function () {
+            active = false;
+            scrollerMiddle.classList.remove('scrolling');
+        });
+        document.body.addEventListener('mouseleave', function () {
+            active = false;
+            scrollerMiddle.classList.remove('scrolling');
+        });
+        scrollerTop.addEventListener('mousedown', function () {
+            active = "top";
+            scrollerTop.classList.add('scrolling');
+        });
+        document.body.addEventListener('mouseup', function () {
+            active = false;
+            scrollerTop.classList.remove('scrolling');
+        });
+        document.body.addEventListener('mouseleave', function () {
+            active = false;
+            scrollerTop.classList.remove('scrolling');
+        });
+
+        document.body.addEventListener('mousemove', function (e) {
+            if (!active) return;
+            let x = e.pageX;
+            x -= document.querySelector('.wrapper').getBoundingClientRect().left;
+            scrollIt(x);
+        });
+
+        function scrollIt(x) {
+            let transform = Math.max(0, (Math.min(x, document.querySelector('.wrapper').offsetWidth)));
+            if (active === "middle") {
+                document.querySelector('.middle').style.width = transform + "px";
+                scrollerMiddle.style.left = transform - 25 + "px";
+                if (scrollerTop.getBoundingClientRect().left > scrollerMiddle.getBoundingClientRect().left - 5) {
+                    document.querySelector('.top').style.width = transform - 5 + "px";
+                    scrollerTop.style.left = transform - 30 + "px";
+                }
+            }
+            if (active === "top") {
+                document.querySelector('.top').style.width = transform + "px";
+                scrollerTop.style.left = transform - 25 + "px";
+                if (scrollerTop.getBoundingClientRect().left > scrollerMiddle.getBoundingClientRect().left - 5) {
+                    document.querySelector('.middle').style.width = transform + 5 + "px";
+                    scrollerMiddle.style.left = transform - 20 + "px";
+                }
+            }
+        }
+
+        active = "middle";
+        scrollIt(314);
+        active = "top";
+        scrollIt(230);
+        active = false;
+
+
+        scrollerMiddle.addEventListener('touchstart', function () {
+            active = "middle";
+            scrollerMiddle.classList.add('scrolling');
+        });
+        document.body.addEventListener('touchend', function () {
+            active = false;
+            scrollerMiddle.classList.remove('scrolling');
+        });
+        document.body.addEventListener('touchcancel', function () {
+            active = false;
+            scrollerMiddle.classList.remove('scrolling');
+        });
+
+        scrollerTop.addEventListener('touchstart', function () {
+            active = "top";
+            scrollerTop.classList.add('scrolling');
+        });
+        document.body.addEventListener('touchend', function () {
+            active = false;
+            scrollerTop.classList.remove('scrolling');
+        });
+        document.body.addEventListener('touchcancel', function () {
+            active = false;
+            scrollerTop.classList.remove('scrolling');
+        });
+
+        document.querySelector('.wrapper').addEventListener('touchmove', function (e) {
+            if (!active) return;
+            e.preventDefault();
+            let x = e.touches[0].pageX;
+            x -= document.querySelector('.wrapper').getBoundingClientRect().left;
+            scrollIt(x);
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous">
+    </script>
+</body>
+
+</html>

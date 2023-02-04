@@ -1,0 +1,601 @@
+/* Import Fonts */
+@font-face {
+    font-family: FuturaBkBt;
+    src: url(../fonts/FuturaBookfont.ttf);
+}
+
+.effect {
+    position: fixed;
+    top: 0;
+    z-index: 10;
+    transition: right 1s;
+}
+
+.eHome {
+    right: 664px;
+}
+
+.eAbout {
+    right: 540px;
+}
+
+.eProduct {
+    right: 394px;
+}
+
+.eGallery {
+    right: 242px;
+}
+
+.eTeam {
+    right: 84px;
+}
+
+.hero {
+
+    background-image: url('../img/main-background.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+.main-bg {
+    background-image: url('../img/hero-background.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.nb-active {
+    border-bottom: 2px solid #ffffff;
+}
+
+.nb-active .nav-link {
+    color: #ffffff !important;
+}
+
+.fbtb {
+    font-family: FuturaBkBt;
+    font-size: 14pt;
+    color: #d1ceee;
+}
+
+.fbtb .nav-item {
+    margin-left: 55px;
+}
+
+.bg-beranda {
+    background-image: url('../img/hero-background.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    height: 100vh;
+}
+
+.char-hero {
+    /* position: relative; */
+    /* width: 1920px; */
+    height: 100vh;
+    animation: char-animation 1s;
+}
+
+@keyframes char-animation {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+.ornamen {
+    position: absolute;
+    width: 100%;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    animation: ornamen-animation 1s;
+}
+
+@keyframes ornamen-animation {
+    0% {
+        opacity: 0;
+        left: -80px;
+    }
+
+    100% {
+        opacity: 1;
+        left: 0px;
+    }
+}
+
+.home-page {
+    position: absolute;
+    width: 100%;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    animation: homepage-animation 1s;
+}
+
+
+@keyframes homepage-animation {
+    0% {
+        opacity: 0;
+        left: 160px;
+    }
+
+    100% {
+        opacity: 1;
+        left: 0px;
+    }
+}
+
+.sosmed {
+    position: absolute;
+    height: 100vh;
+    /* top: 0; */
+    left: 0;
+    animation: sosmed-animation 1s;
+}
+
+@keyframes sosmed-animation {
+    0% {
+        opacity: 0;
+        left: -80px;
+    }
+
+    100% {
+        opacity: 1;
+        left: 0px;
+    }
+}
+
+.btn-home-social {
+    position: absolute;
+    bottom: 120px;
+    right: 130px;
+    animation: homesos-animation 2s;
+}
+
+@keyframes homesos-animation {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+.btn-icon {
+    width: 214px;
+}
+
+.effect-bg-about {
+    background-image: url('../img/effect-bg-about.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    height: 100vh;
+}
+
+.bg-about {
+    background-image: url('../img/about2.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    height: 100vh;
+    display: flex;
+}
+
+.bg-about .row {
+    width: 50%;
+    height: 100vh;
+}
+
+.btn-more {
+    position: relative;
+    top: 80vh;
+    left: 50%;
+    height: 40px;
+}
+
+.btn-more img {
+    width: 160px;
+}
+
+.yt-embed {
+    width: 600px !important;
+    height: 322px !important;
+    position: relative;
+    top: 30vh;
+    right: -48px;
+}
+
+.bg-effect-product {
+    background-image: url('../img/bg-effect-product.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    height: 100vh;
+}
+
+.bg-effect-product a {
+    cursor: default;
+}
+
+.effect-gallery {
+    opacity: 0.5;
+    width: 100%;
+    height: 100vh;
+}
+
+.gallery {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+}
+
+.bg-gallery {
+    background-image: url('../img/gallery.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    height: 100vh;
+    display: flex;
+}
+
+.product {
+    width: 100%;
+    height: 100vh;
+}
+
+.mySlides {
+    display: none
+}
+
+.myPbtn {
+    display: none
+}
+
+.myPbtnA {
+    display: block
+}
+
+.myTeam {
+    display: none
+}
+
+.myTeamA {
+    display: block
+}
+
+/* Fading animation */
+.faded {
+    -webkit-animation-name: faded;
+    -webkit-animation-duration: 1.5s;
+    animation-name: faded;
+    animation-duration: 1.5s;
+}
+
+@-webkit-keyframes faded {
+    from {
+        opacity: .4
+    }
+
+    to {
+        opacity: 1
+    }
+}
+
+@keyframes faded {
+    from {
+        opacity: .4
+    }
+
+    to {
+        opacity: 1
+    }
+}
+
+
+.hidec {
+    position: absolute;
+    left: 30px;
+    -webkit-animation-name: fadec;
+    -webkit-animation-duration: 1.5s;
+    animation-name: fadec;
+    animation-duration: 1.5s;
+}
+
+@-webkit-keyframes fadec {
+    from {
+        opacity: .4;
+        left: 0px;
+    }
+
+    to {
+        opacity: 1;
+        left: 30px;
+    }
+}
+
+@keyframes fadec {
+    from {
+        opacity: .4;
+        left: 0px;
+    }
+
+    to {
+        opacity: 1;
+        left: 30px;
+    }
+}
+
+
+.hidecc {
+    position: absolute;
+    right: 0px;
+    -webkit-animation-name: fadecc;
+    -webkit-animation-duration: 1.5s;
+    animation-name: fadecc;
+    animation-duration: 1.5s;
+}
+
+@-webkit-keyframes fadecc {
+    from {
+        opacity: .2;
+        right: -30px;
+    }
+
+    to {
+        opacity: 1;
+        right: 0px;
+    }
+}
+
+@keyframes fadecc {
+    from {
+        opacity: .2;
+        right: -30px;
+    }
+
+    to {
+        opacity: 1;
+        right: 0px;
+    }
+}
+
+.hidec_cv {
+    position: absolute;
+    right: 0px;
+    -webkit-animation-name: fade_cv;
+    -webkit-animation-duration: 1.5s;
+    animation-name: fade_cv;
+    animation-duration: 1.5s;
+}
+
+@-webkit-keyframes fade_cv {
+    from {
+        opacity: .2;
+        right: -30px;
+    }
+
+    to {
+        opacity: 1;
+        right: 0px;
+    }
+}
+
+@keyframes fade_cv {
+    from {
+        opacity: .2;
+        right: -30px;
+    }
+
+    to {
+        opacity: 1;
+        right: 0px;
+    }
+}
+
+.row-product {
+    width: 100%;
+    display: flex;
+}
+
+.btn-prevnext {
+    position: relative;
+    top: -68px;
+    margin: auto;
+}
+
+.btn-prevnext img {
+    width: 36px;
+}
+
+.prev img {
+    transform: rotate(180deg);
+}
+
+.prev {
+    margin-right: 160px;
+}
+
+.next {
+    margin-left: 160px;
+}
+
+.prev-next-disabled {
+    opacity: 0.5;
+}
+
+.bgef-team {
+    height: 100vh;
+    background-image: url('../img/bg-effect-team.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    display: flex;
+}
+
+.character {
+    height: 100vh;
+}
+
+.chartext {
+    position: absolute;
+    height: 100vh;
+    right: 0;
+}
+
+
+.char-btn {
+    position: absolute;
+    width: 100%;
+    height: 100vh;
+    background-image: url('../img/light-effect-char.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    display: flex;
+    z-index: 8;
+}
+
+.btn-team img {
+    width: 30px;
+}
+
+.team-prev {
+    margin: 0 auto 0 80px;
+}
+
+.team-prev img {
+    transform: rotate(180deg);
+}
+
+.team-next {
+    margin-left: auto;
+}
+
+.cv {
+    position: absolute;
+    width: 50%;
+    height: 100vh;
+    right: 0;
+    display: flex;
+    z-index: 9;
+}
+
+.cvnone {
+    background: none;
+    margin-top: 84%;
+    color: inherit;
+    border: none;
+    padding: 0;
+    font: inherit;
+    cursor: pointer;
+    outline: inherit;
+}
+
+.cv img {
+    width: 100%;
+}
+
+#footer {
+    height: 100vh;
+    background-image: url('../img/footer.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    display: flex;
+}
+
+.btn-back {
+    height: 100vh;
+    display: flex;
+}
+
+.btn-back .back {
+    position: relative;
+    left: 100px;
+    margin-top: 90vh;
+}
+
+.back img {
+    width: 160px;
+}
+
+.bg-modal {
+    font-family: FuturaBkBt !important;
+    background: rgb(26 26 26) !important;
+    box-shadow: 0 8px 32px 0 rgb(0 0 0 / 37%);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    border-radius: 10px !important;
+    border: 1px solid rgba(255, 255, 255, 0.0) !important;
+}
+
+.btn-cr {
+    position: absolute;
+    display: flex;
+    width: 100%;
+    /* height: 100vh; */
+    top: 490vh;
+    z-index: 10;
+    -webkit-animation-name: updown;
+    -webkit-animation-duration: 1.5s;
+    -webkit-animation-iteration-count: infinite;
+    animation-name: updown;
+    animation-duration: 1.5s;
+    animation-iteration-count: infinite;
+}
+
+@-webkit-keyframes updown {
+    0% {
+        opacity: 1;
+        top: 488vh;
+    }
+
+    49% {
+        top: 490vh;
+    }
+
+    100% {
+        opacity: .5;
+        top: 488vh;
+    }
+}
+
+@keyframes updown {
+    0% {
+        opacity: 1;
+        top: 488vh;
+    }
+
+    49% {
+        top: 490vh;
+    }
+
+    100% {
+        opacity: .5;
+        top: 488vh;
+    }
+}
+
+.btn-cr img {
+    margin: 0 auto;
+}
+
+/* BGM */
+
+.bgm {
+    position: fixed;
+    right: 40px;
+    bottom: 40px;
+    z-index: 99;
+}
