@@ -47,8 +47,11 @@ Welcome to my playground. There are a few things that need to be checked here. A
 ![Powershell](http://img.shields.io/badge/-Powershell-5391FE?style=flat-square&logo=powershell&logoColor=ffffff)
 ![Windows](http://img.shields.io/badge/-Windows-0078D6?style=flat-square&logo=windows&logoColor=ffffff)
 
+<p align="center"><img align="center" src="https://streak-stats.demolab.com?user=LogicSekai&theme=dark&date_format=j%20M%5B%20Y%5D&type=png" alt="logicsekai" /></p>
+
 ## 🌏 Socials
 Talk to you on [Discord!](https://discord.gg/EAFSStRt)
+<p align="center"><a href="https://discord.com/users/478794091078090772" target="_blank" rel="noreferrer"><img align="center" src="https://lanyard.cnrad.dev/api/478794091078090772" alt="naufkia" /></a></p>
 
 ### 🤝🏻 Connect with Me!
 [![Email: cameliayu112@gmail.com](https://img.shields.io/badge/-cameliayu112@gmail.com-D14836?style=flat&logo=Gmail&logoColor=white)](mailto:cameliayu112@gmail.com)
