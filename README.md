@@ -12,10 +12,6 @@ Welcome to my playground. There are a few things that need to be checked here. A
   <tbody>
     <tr valign="top">
       <td width="25%" align="center">
-        <img height="64px" src="https://img.icons8.com/nolan/64/artificial-intelligence.png"><br>
-        <span>Artificial Intelligence</span>
-      </td>
-      <td width="25%" align="center">
         <img height="64px" src="https://img.icons8.com/nolan/64/learning.png"><br/>
         <span>Machine Learning</span>
       </td>
