@@ -5,7 +5,6 @@ export default defineNuxtConfig({
   ssr: false,
   app: {
     baseURL: '/',
-    cdnURL: 'https://cdn.logicsekai.com',
     head: {
       title: 'Logic Sekai', // default fallback title
       htmlAttrs: {
