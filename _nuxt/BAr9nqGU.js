@@ -1,0 +1,1 @@
+import{g as a,c as t,a as o,o as n}from"./C8_oyFXb.js";const d=a({__name:"index",setup(s){return(r,e)=>(n(),t("div",null,e[0]||(e[0]=[o("h1",{class:"text-2xl font-bold"},"Selamat datang di Dashboard!",-1)])))}});export{d as default};
