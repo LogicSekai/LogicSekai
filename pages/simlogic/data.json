@@ -1,0 +1,411 @@
+[{
+    "upgradedArtifact": {
+        "mainStat": "HP",
+        "subStats": ["CRIT DMG", "Energy Recharge", "ATK", "Elemental Mastery"]
+    },
+    "fodderArtifact": {
+        "mainStat": "ATK%",
+        "subStats": ["CRIT DMG", "HP"]
+    },
+    "upgradedSubStat": "CRIT DMG"
+}, {
+    "upgradedArtifact": {
+        "mainStat": "HP",
+        "subStats": ["CRIT DMG", "Energy Recharge", "ATK", "Elemental Mastery"]
+    },
+    "fodderArtifact": {
+        "mainStat": "HP",
+        "subStats": ["Elemental Mastery", "DEF"]
+    },
+    "upgradedSubStat": "Energy Recharge"
+}, {
+    "upgradedArtifact": {
+        "mainStat": "HP",
+        "subStats": ["CRIT DMG", "Energy Recharge", "ATK", "Elemental Mastery"]
+    },
+    "fodderArtifact": {
+        "mainStat": "HP",
+        "subStats": ["ATK", "CRIT DMG", "DEF%"]
+    },
+    "upgradedSubStat": "CRIT DMG"
+}, {
+    "upgradedArtifact": {
+        "mainStat": "Pyro DMG Bonus",
+        "subStats": ["CRIT DMG", "ATK", "ATK%", "Energy Recharge"]
+    },
+    "fodderArtifact": {
+        "mainStat": "Healing Bonus",
+        "subStats": ["CRIT DMG", "DEF%"]
+    },
+    "upgradedSubStat": "CRIT DMG"
+}, {
+    "upgradedArtifact": {
+        "mainStat": "Pyro DMG Bonus",
+        "subStats": ["CRIT DMG", "ATK", "ATK%", "Energy Recharge"]
+    },
+    "fodderArtifact": {
+        "mainStat": "DEF%",
+        "subStats": ["CRIT Rate", "Elemental Mastery"]
+    },
+    "upgradedSubStat": "ATK%"
+}, {
+    "upgradedArtifact": {
+        "mainStat": "Pyro DMG Bonus",
+        "subStats": ["CRIT DMG", "ATK", "ATK%", "Energy Recharge"]
+    },
+    "fodderArtifact": {
+        "mainStat": "Physical DMG Bonus",
+        "subStats": ["CRIT DMG", "DEF"]
+    },
+    "upgradedSubStat": "Energy Recharge"
+}, {
+    "upgradedArtifact": {
+        "mainStat": "Pyro DMG Bonus",
+        "subStats": ["CRIT DMG", "ATK", "ATK%", "Energy Recharge"]
+    },
+    "fodderArtifact": {
+        "mainStat": "ATK%",
+        "subStats": ["Energy Recharge", "CRIT DMG"]
+    },
+    "upgradedSubStat": "CRIT DMG"
+}, {
+    "upgradedArtifact": {
+        "mainStat": "ATK",
+        "subStats": ["CRIT DMG", "DEF", "CRIT Rate", "Energy Recharge"]
+    },
+    "fodderArtifact": {
+        "mainStat": "HP",
+        "subStats": ["DEF%", "Elemental Mastery"]
+    },
+    "upgradedSubStat": "DEF"
+}, {
+    "upgradedArtifact": {
+        "mainStat": "ATK",
+        "subStats": ["CRIT DMG", "DEF", "CRIT Rate", "Energy Recharge"]
+    },
+    "fodderArtifact": {
+        "mainStat": "Elemental Mastery",
+        "subStats": ["HP", "CRIT Rate"]
+    },
+    "upgradedSubStat": "DEF"
+}, {
+    "upgradedArtifact": {
+        "mainStat": "ATK",
+        "subStats": ["CRIT DMG", "HP", "CRIT Rate", "DEF"]
+    },
+    "fodderArtifact": {
+        "mainStat": "ATK",
+        "subStats": ["Elemental Mastery", "CRIT Rate"]
+    },
+    "upgradedSubStat": "CRIT Rate"
+}, {
+    "upgradedArtifact": {
+        "mainStat": "ATK",
+        "subStats": ["CRIT DMG", "HP", "CRIT Rate", "DEF"]
+    },
+    "fodderArtifact": {
+        "mainStat": "ATK",
+        "subStats": ["Energy Recharge", "CRIT Rate"]
+    },
+    "upgradedSubStat": "DEF"
+}, {
+    "upgradedArtifact": {
+        "mainStat": "ATK",
+        "subStats": ["CRIT DMG", "HP", "CRIT Rate", "DEF"]
+    },
+    "fodderArtifact": {
+        "mainStat": "ATK",
+        "subStats": ["ATK%", "CRIT DMG"]
+    },
+    "upgradedSubStat": "CRIT Rate"
+}, {
+    "upgradedArtifact": {
+        "mainStat": "ATK",
+        "subStats": ["CRIT DMG", "HP", "CRIT Rate", "DEF"]
+    },
+    "fodderArtifact": {
+        "mainStat": "HP",
+        "subStats": ["CRIT Rate", "Elemental Mastery"]
+    },
+    "upgradedSubStat": "CRIT Rate"
+}, {
+    "upgradedArtifact": {
+        "mainStat": "ATK",
+        "subStats": ["CRIT DMG", "HP", "CRIT Rate", "DEF"]
+    },
+    "fodderArtifact": {
+        "mainStat": "Pyro DMG Bonus",
+        "subStats": ["HP", "Elemental Mastery"]
+    },
+    "upgradedSubStat": "CRIT DMG"
+}, {
+    "upgradedArtifact": {
+        "mainStat": "ATK%",
+        "subStats": ["ATK", "CRIT DMG", "Energy Recharge", "DEF"]
+    },
+    "fodderArtifact": {
+        "mainStat": "HP",
+        "subStats": ["Elemental Mastery", "CRIT Rate"]
+    },
+    "upgradedSubStat": "Energy Recharge"
+}, {
+    "upgradedArtifact": {
+        "mainStat": "ATK%",
+        "subStats": ["ATK", "CRIT DMG", "Energy Recharge", "DEF"]
+    },
+    "fodderArtifact": {
+        "mainStat": "ATK",
+        "subStats": ["Elemental Mastery", "HP", "CRIT DMG"]
+    },
+    "upgradedSubStat": "Energy Recharge"
+}, {
+    "upgradedArtifact": {
+        "mainStat": "ATK%",
+        "subStats": ["ATK", "CRIT DMG", "Energy Recharge", "DEF"]
+    },
+    "fodderArtifact": {
+        "mainStat": "DEF%",
+        "subStats": ["CRIT Rate", "CRIT DMG"]
+    },
+    "upgradedSubStat": "Energy Recharge"
+}, {
+    "upgradedArtifact": {
+        "mainStat": "HP",
+        "subStats": ["CRIT DMG", "Energy Recharge", "ATK%", "Elemental Mastery"]
+    },
+    "fodderArtifact": {
+        "mainStat": "ATK%",
+        "subStats": ["ATK", "CRIT Rate"]
+    },
+    "upgradedSubStat": "Energy Recharge"
+}, {
+    "upgradedArtifact": {
+        "mainStat": "HP",
+        "subStats": ["ATK", "ATK%", "CRIT DMG", "CRIT Rate"]
+    },
+    "fodderArtifact": {
+        "mainStat": "ATK",
+        "subStats": ["CRIT DMG", "HP", "CRIT Rate"]
+    },
+    "upgradedSubStat": "CRIT DMG"
+}, {
+    "upgradedArtifact": {
+        "mainStat": "Elemental Mastery",
+        "subStats": ["CRIT Rate", "DEF", "CRIT DMG", "Energy Recharge"]
+    },
+    "fodderArtifact": {
+        "mainStat": "ATK%",
+        "subStats": ["ATK", "CRIT DMG"]
+    },
+    "upgradedSubStat": "DEF"
+}, {
+    "upgradedArtifact": {
+        "mainStat": "Elemental Mastery",
+        "subStats": ["CRIT Rate", "DEF", "CRIT DMG", "Energy Recharge"]
+    },
+    "fodderArtifact": {
+        "mainStat": "ATK%",
+        "subStats": ["DEF%", "DEF", "Elemental Mastery"]
+    },
+    "upgradedSubStat": "CRIT DMG"
+}, {
+    "upgradedArtifact": {
+        "mainStat": "Elemental Mastery",
+        "subStats": ["CRIT Rate", "DEF", "CRIT DMG", "Energy Recharge"]
+    },
+    "fodderArtifact": {
+        "mainStat": "HP",
+        "subStats": ["ATK%", "DEF", "DEF%", "CRIT Rate"]
+    },
+    "upgradedSubStat": "Energy Recharge"
+}, {
+    "upgradedArtifact": {
+        "mainStat": "Elemental Mastery",
+        "subStats": ["HP", "HP%", "CRIT DMG", "ATK"]
+    },
+    "fodderArtifact": {
+        "mainStat": "ATK",
+        "subStats": ["Energy Recharge", "CRIT DMG"]
+    },
+    "upgradedSubStat": "CRIT DMG"
+}, {
+    "upgradedArtifact": {
+        "mainStat": "Elemental Mastery",
+        "subStats": ["HP", "HP%", "CRIT DMG", "ATK"]
+    },
+    "fodderArtifact": {
+        "mainStat": "HP",
+        "subStats": ["CRIT DMG", "Energy Recharge", "DEF%"]
+    },
+    "upgradedSubStat": "CRIT DMG"
+}, {
+    "upgradedArtifact": {
+        "mainStat": "Elemental Mastery",
+        "subStats": ["HP", "HP%", "CRIT DMG", "ATK"]
+    },
+    "fodderArtifact": {
+        "mainStat": "HP",
+        "subStats": ["CRIT DMG", "HP%", "DEF"]
+    },
+    "upgradedSubStat": "CRIT DMG"
+}, {
+    "upgradedArtifact": {
+        "mainStat": "Elemental Mastery",
+        "subStats": ["HP", "HP%", "CRIT DMG", "ATK"]
+    },
+    "fodderArtifact": {
+        "mainStat": "HP",
+        "subStats": ["DEF", "CRIT DMG", "DEF%"]
+    },
+    "upgradedSubStat": "HP"
+}, {
+    "upgradedArtifact": {
+        "mainStat": "ATK",
+        "subStats": ["HP%", "ATK%", "Elemental Mastery", "Energy Recharge"]
+    },
+    "fodderArtifact": {
+        "mainStat": "HP",
+        "subStats": ["Elemental Mastery", "ATK%", "ATK"]
+    },
+    "upgradedSubStat": "Elemental Mastery"
+}, {
+    "upgradedArtifact": {
+        "mainStat": "ATK",
+        "subStats": ["HP%", "ATK%", "Elemental Mastery", "Energy Recharge"]
+    },
+    "fodderArtifact": {
+        "mainStat": "Elemental Mastery",
+        "subStats": ["DEF%", "ATK", "DEF"]
+    },
+    "upgradedSubStat": "HP%"
+}, {
+    "upgradedArtifact": {
+        "mainStat": "ATK",
+        "subStats": ["HP%", "ATK%", "Elemental Mastery", "Energy Recharge"]
+    },
+    "fodderArtifact": {
+        "mainStat": "HP",
+        "subStats": ["HP%", "ATK", "ATK%"]
+    },
+    "upgradedSubStat": "Energy Recharge"
+}, {
+    "upgradedArtifact": {
+        "mainStat": "ATK",
+        "subStats": ["HP%", "ATK%", "Elemental Mastery", "Energy Recharge"]
+    },
+    "fodderArtifact": {
+        "mainStat": "DEF%",
+        "subStats": ["ATK%", "Energy Recharge", "ATK"]
+    },
+    "upgradedSubStat": "Energy Recharge"
+}, {
+    "upgradedArtifact": {
+        "mainStat": "HP%",
+        "subStats": ["ATK", "ATK%", "CRIT DMG", "CRIT Rate"]
+    },
+    "fodderArtifact": {
+        "mainStat": "ATK",
+        "subStats": ["Energy Recharge", "HP", "ATK%"]
+    },
+    "upgradedSubStat": "CRIT DMG"
+}, {
+    "upgradedArtifact": {
+        "mainStat": "HP%",
+        "subStats": ["ATK", "ATK%", "CRIT DMG", "CRIT Rate"]
+    },
+    "fodderArtifact": {
+        "mainStat": "ATK%",
+        "subStats": ["Energy Recharge", "DEF", "HP", "ATK"]
+    },
+    "upgradedSubStat": "CRIT Rate"
+}, {
+    "upgradedArtifact": {
+        "mainStat": "Hydro DMG Bonus",
+        "subStats": ["DEF", "CRIT Rate", "CRIT DMG", "HP%"]
+    },
+    "fodderArtifact": {
+        "mainStat": "ATK%",
+        "subStats": ["CRIT DMG", "HP%"]
+    },
+    "upgradedSubStat": "DEF"
+}, {
+    "upgradedArtifact": {
+        "mainStat": "Hydro DMG Bonus",
+        "subStats": ["DEF", "CRIT Rate", "CRIT DMG", "HP%"]
+    },
+    "fodderArtifact": {
+        "mainStat": "Healing Bonus",
+        "subStats": ["Elemental Mastery", "Energy Recharge"]
+    },
+    "upgradedSubStat": "DEF"
+}, {
+    "upgradedArtifact": {
+        "mainStat": "ATK",
+        "subStats": ["CRIT DMG", "DEF%", "CRIT Rate", "HP"]
+    },
+    "fodderArtifact": {
+        "mainStat": "HP",
+        "subStats": ["DEF", "Energy Recharge"]
+    },
+    "upgradedSubStat": "DEF%"
+}, {
+    "upgradedArtifact": {
+        "mainStat": "ATK",
+        "subStats": ["CRIT Rate", "ATK%", "Energy Recharge", "HP%"]
+    },
+    "fodderArtifact": {
+        "mainStat": "ATK",
+        "subStats": ["CRIT DMG", "Elemental Mastery"]
+    },
+    "upgradedSubStat": "HP%"
+}, {
+    "upgradedArtifact": {
+        "mainStat": "ATK",
+        "subStats": ["CRIT Rate", "ATK%", "Energy Recharge", "HP%"]
+    },
+    "fodderArtifact": {
+        "mainStat": "ATK%",
+        "subStats": ["HP%", "HP", "DEF"]
+    },
+    "upgradedSubStat": "HP%"
+}, {
+    "upgradedArtifact": {
+        "mainStat": "HP",
+        "subStats": ["HP%", "CRIT DMG", "DEF", "CRIT Rate"]
+    },
+    "fodderArtifact": {
+        "mainStat": "HP%",
+        "subStats": ["ATK", "DEF", "DEF%"]
+    },
+    "upgradedSubStat": "CRIT Rate"
+}, {
+    "upgradedArtifact": {
+        "mainStat": "ATK%",
+        "subStats": ["DEF%", "Energy Recharge", "ATK", "CRIT Rate"]
+    },
+    "fodderArtifact": {
+        "mainStat": "ATK%",
+        "subStats": ["Elemental Mastery", "HP%", "ATK"]
+    },
+    "upgradedSubStat": "ATK"
+}, {
+    "upgradedArtifact": {
+        "mainStat": "ATK",
+        "subStats": ["Elemental Mastery", "CRIT DMG", "ATK%", "HP"]
+    },
+    "fodderArtifact": {
+        "mainStat": "HP",
+        "subStats": ["HP%", "Energy Recharge", "Elemental Mastery"]
+    },
+    "upgradedSubStat": "ATK%"
+}, {
+    "upgradedArtifact": {
+        "mainStat": "ATK",
+        "subStats": ["HP", "DEF", "CRIT DMG", "ATK%"]
+    },
+    "fodderArtifact": {
+        "mainStat": "Elemental Mastery",
+        "subStats": ["HP%", "ATK%", "Energy Recharge", "CRIT DMG"]
+    },
+    "upgradedSubStat": "CRIT DMG"
+}]
