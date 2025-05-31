@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages
+name: Deploy Nuxt 3 to GitHub Pages
 
 on:
   push:
@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -19,11 +19,11 @@ jobs:
         run: npm install
 
       - name: Generate static files
-        run: npm run generate
+        run: npx nuxi generate # Langsung gunakan nuxi generate (tanpa perlu script di package.json)
 
-      - name: Deploy
+      - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
-          keep_files: true # Mempertahankan CNAME
+          keep_files: false # Pastikan deploy bersih setiap kali
