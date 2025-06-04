@@ -72,7 +72,7 @@ function restoreDatabase() {
     if (selectedFile.value) {
         const reader = new FileReader();
         reader.onload = (event) => {
-            localStorage.setItem('databaseAAA', event.target?.result as string);
+            localStorage.setItem('database', event.target?.result as string);
             const intervalId = setInterval(() => {
                 progressRestore.value = Math.min(progressRestore.value + 1, 100);
                 if (progressRestore.value === 100) {
