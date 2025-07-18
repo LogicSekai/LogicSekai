@@ -11,7 +11,9 @@ export default defineNuxtConfig({
         lang: 'id',
       },
       link: [
+        { rel: 'manifest', href: '/manifest.webmanifest' },
         { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+        { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },
       ]
     }
   },
