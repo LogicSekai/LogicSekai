@@ -10,7 +10,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     const pageMeta = to.meta || {}
     const allowedRoles = pageMeta.roles as string[] | undefined
 
-    const fallbackPublicRoutes = ['/', '/auth', '/auth/register', '/simlogic/**']
+    const fallbackPublicRoutes = ['/', '/auth', '/auth/register', '/simlogic/**', '/products/**', '/blog/**', '/gallery/**']
 
     const isFallbackPublicRoute = (path: string) => {
         return fallbackPublicRoutes.some(publicPath => {

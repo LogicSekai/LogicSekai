@@ -47,10 +47,10 @@ onMounted(() => {
                     <NuxtLink to="/products" class="px-3 py-2 text-base font-medium text-dark dark:text-white hover:text-primary transition-colors">
                         Layanan Produk
                     </NuxtLink>
-                    <NuxtLink to="#" class="px-3 py-2 text-base font-medium text-dark dark:text-white hover:text-primary transition-colors">
+                    <NuxtLink to="/blog" class="px-3 py-2 text-base font-medium text-dark dark:text-white hover:text-primary transition-colors">
                         Artikel
                     </NuxtLink>
-                    <NuxtLink to="#" class="px-3 py-2 text-base font-medium text-dark dark:text-white hover:text-primary transition-colors">
+                    <NuxtLink to="/gallery" class="px-3 py-2 text-base font-medium text-dark dark:text-white hover:text-primary transition-colors">
                         Galeri
                     </NuxtLink>
                     <NuxtLink to="#" class="px-3 py-2 text-base font-medium text-dark dark:text-white hover:text-primary transition-colors">
