@@ -1,132 +1,189 @@
 <script setup lang="ts">
-import { Search, Calendar, Eye, Tag, TrendingUp, ShoppingCart, Download, Star } from 'lucide-vue-next'
+import { Search, Calendar, User, Clock, Tag, TrendingUp, ArrowRight } from 'lucide-vue-next'
 import { Badge } from '@/components/ui/badge'
-import type { Product } from '@/composables/useProducts'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 definePageMeta({
     public: true
 })
 
-const { getProducts, getProductImageUrl } = useProducts()
+// Blog categories
+const categories = [
+    { id: 'all', label: 'Semua Artikel', count: 24 },
+    { id: 'tutorial', label: 'Tutorial', count: 12 },
+    { id: 'tips', label: 'Tips & Tricks', count: 8 },
+    { id: 'news', label: 'Berita', count: 6 },
+    { id: 'review', label: 'Review', count: 4 }
+]
+
+// Sample blog articles
+const allArticles = ref([
+    {
+        id: 1,
+        slug: 'cara-setup-mikrotik-hotspot',
+        title: 'Cara Setup MikroTik Hotspot untuk Pemula',
+        excerpt: 'Panduan lengkap step-by-step untuk mengkonfigurasi hotspot di MikroTik RouterOS. Cocok untuk pemula yang baru mulai belajar.',
+        content: 'Full article content here...',
+        image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&q=80',
+        category: 'tutorial',
+        author: {
+            name: 'Ahmad Fauzi',
+            avatar: '/img/avatar.png',
+            role: 'Network Engineer'
+        },
+        publishedDate: '25 Okt 2024',
+        readTime: '8 menit',
+        views: 1245,
+        tags: ['MikroTik', 'Hotspot', 'Tutorial'],
+        featured: true
+    },
+    {
+        id: 2,
+        slug: 'optimasi-bandwidth-mikrotik',
+        title: 'Tips Optimasi Bandwidth di MikroTik',
+        excerpt: 'Teknik-teknik efektif untuk mengoptimalkan bandwidth dan meningkatkan performa jaringan menggunakan MikroTik.',
+        content: 'Full article content here...',
+        image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&q=80',
+        category: 'tips',
+        author: {
+            name: 'Budi Santoso',
+            avatar: '/img/avatar.png',
+            role: 'System Administrator'
+        },
+        publishedDate: '22 Okt 2024',
+        readTime: '6 menit',
+        views: 892,
+        tags: ['MikroTik', 'Bandwidth', 'Optimasi'],
+        featured: true
+    },
+    {
+        id: 3,
+        slug: 'mikrotik-routeros-7-fitur-baru',
+        title: 'Fitur Baru di MikroTik RouterOS 7',
+        excerpt: 'Kenali fitur-fitur terbaru yang ada di RouterOS 7 dan bagaimana memanfaatkannya untuk meningkatkan jaringan Anda.',
+        content: 'Full article content here...',
+        image: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&q=80',
+        category: 'news',
+        author: {
+            name: 'Siti Nurhaliza',
+            avatar: '/img/avatar.png',
+            role: 'Tech Writer'
+        },
+        publishedDate: '20 Okt 2024',
+        readTime: '10 menit',
+        views: 1567,
+        tags: ['MikroTik', 'RouterOS', 'Update'],
+        featured: false
+    },
+    {
+        id: 4,
+        slug: 'keamanan-jaringan-mikrotik',
+        title: 'Meningkatkan Keamanan Jaringan MikroTik',
+        excerpt: 'Langkah-langkah penting untuk mengamankan router MikroTik dari serangan cyber dan akses tidak sah.',
+        content: 'Full article content here...',
+        image: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&q=80',
+        category: 'tutorial',
+        author: {
+            name: 'Denny Pratama',
+            avatar: '/img/avatar.png',
+            role: 'Security Expert'
+        },
+        publishedDate: '18 Okt 2024',
+        readTime: '12 menit',
+        views: 2103,
+        tags: ['Security', 'MikroTik', 'Firewall'],
+        featured: true
+    },
+    {
+        id: 5,
+        slug: 'review-template-hotspot-terbaik',
+        title: 'Review 5 Template Hotspot Terbaik 2024',
+        excerpt: 'Ulasan mendalam tentang template hotspot terbaik yang bisa Anda gunakan untuk bisnis WiFi Anda.',
+        content: 'Full article content here...',
+        image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80',
+        category: 'review',
+        author: {
+            name: 'Ahmad Fauzi',
+            avatar: '/img/avatar.png',
+            role: 'Network Engineer'
+        },
+        publishedDate: '15 Okt 2024',
+        readTime: '15 menit',
+        views: 1876,
+        tags: ['Template', 'Hotspot', 'Review'],
+        featured: false
+    },
+    {
+        id: 6,
+        slug: 'vpn-server-mikrotik',
+        title: 'Membuat VPN Server di MikroTik',
+        excerpt: 'Tutorial lengkap cara membuat dan mengkonfigurasi VPN server menggunakan MikroTik RouterOS.',
+        content: 'Full article content here...',
+        image: 'https://images.unsplash.com/photo-1614064641938-3bbee52942c7?w=800&q=80',
+        category: 'tutorial',
+        author: {
+            name: 'Budi Santoso',
+            avatar: '/img/avatar.png',
+            role: 'System Administrator'
+        },
+        publishedDate: '12 Okt 2024',
+        readTime: '9 menit',
+        views: 1432,
+        tags: ['VPN', 'MikroTik', 'Security'],
+        featured: false
+    }
+])
 
 // State
-const isLoading = ref(true)
-const products = ref<Product[]>([])
 const selectedCategory = ref('all')
 const searchQuery = ref('')
-const sortBy = ref<'latest' | 'popular' | 'rating'>('latest')
 const currentPage = ref(1)
 const itemsPerPage = 6
 
-// Categories - akan di-update berdasarkan data dari DB
-const categories = ref([
-    { id: 'all', label: 'Semua Produk', count: 0 },
-    { id: 'template', label: 'Template Hotspot', count: 0 },
-    { id: 'tool', label: 'Tools & Utility', count: 0 },
-    { id: 'service', label: 'Service & Support', count: 0 },
-    { id: 'custom', label: 'Custom Development', count: 0 }
-])
+// Computed filtered articles
+const filteredArticles = computed(() => {
+    let articles = allArticles.value
 
-// Fetch products from database (only active products)
-const fetchProducts = async () => {
-    isLoading.value = true
-    try {
-        const result = await getProducts({
-            page: 1,
-            perPage: 100,
-            status: 'active', // ONLY show active products in public page
-            category: selectedCategory.value === 'all' ? undefined : selectedCategory.value,
-            search: searchQuery.value || undefined,
-            sort: sortBy.value === 'latest' ? '-created' : sortBy.value === 'popular' ? '-downloads' : '-rating'
-        })
-
-        products.value = result.items as Product[]
-        updateCategoryCounts()
-    } catch (error: any) {
-        console.error('Error fetching products:', error)
-    } finally {
-        isLoading.value = false
+    // Filter by category
+    if (selectedCategory.value !== 'all') {
+        articles = articles.filter(article => article.category === selectedCategory.value)
     }
-}
 
-// Update category counts based on loaded products
-const updateCategoryCounts = () => {
-    const allProducts = products.value
-    
-    categories.value = [
-        { id: 'all', label: 'Semua Produk', count: allProducts.length },
-        { id: 'template', label: 'Template Hotspot', count: allProducts.filter(p => p.category === 'template').length },
-        { id: 'tool', label: 'Tools & Utility', count: allProducts.filter(p => p.category === 'tool').length },
-        { id: 'service', label: 'Service & Support', count: allProducts.filter(p => p.category === 'service').length },
-        { id: 'custom', label: 'Custom Development', count: allProducts.filter(p => p.category === 'custom').length }
-    ]
-}
+    // Filter by search
+    if (searchQuery.value) {
+        const query = searchQuery.value.toLowerCase()
+        articles = articles.filter(article => 
+            article.title.toLowerCase().includes(query) ||
+            article.excerpt.toLowerCase().includes(query) ||
+            article.tags.some(tag => tag.toLowerCase().includes(query))
+        )
+    }
 
-// Computed
-const filteredProducts = computed(() => products.value)
-
-// Featured products (top 3 by rating or downloads)
-const featuredProducts = computed(() => {
-    return products.value
-        .sort((a, b) => (b.rating || 0) - (a.rating || 0))
-        .slice(0, 3)
+    return articles
 })
 
-// Paginated products
-const paginatedProducts = computed(() => {
+// Featured articles
+const featuredArticles = computed(() => {
+    return allArticles.value.filter(article => article.featured).slice(0, 3)
+})
+
+// Paginated articles
+const paginatedArticles = computed(() => {
     const start = (currentPage.value - 1) * itemsPerPage
     const end = start + itemsPerPage
-    return filteredProducts.value.slice(start, end)
+    return filteredArticles.value.slice(start, end)
 })
 
-const totalPages = computed(() => Math.ceil(filteredProducts.value.length / itemsPerPage))
+const totalPages = computed(() => Math.ceil(filteredArticles.value.length / itemsPerPage))
 
-// Helper functions
-const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        minimumFractionDigits: 0
-    }).format(value)
+// Navigate to article
+const goToArticle = (slug: string) => {
+    navigateTo(`/blog/${slug}`)
 }
 
-const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('id-ID', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric'
-    })
-}
-
-const getProductImage = (product: Product) => {
-    if (product.image) {
-        return getProductImageUrl(product, product.image)
-    }
-    return '/img/default-product.png'
-}
-
-const getTags = (product: Product) => {
-    if (!product.tags) return []
-    if (typeof product.tags === 'string') {
-        return product.tags.split(',').map(t => t.trim())
-    }
-    return []
-}
-
-// Navigate to product detail
-const goToProduct = (slug: string) => {
-    navigateTo(`/products/${slug}`)
-}
-
-// Watch for filter changes
-watch([selectedCategory, searchQuery, sortBy], () => {
+// Watch for filter changes to reset page
+watch([selectedCategory, searchQuery], () => {
     currentPage.value = 1
-    fetchProducts()
-})
-
-// Fetch on mount
-onMounted(() => {
-    fetchProducts()
 })
 </script>
 
@@ -136,74 +193,60 @@ onMounted(() => {
             <!-- Header -->
             <div class="text-center mb-12">
                 <Badge class="mb-4 bg-primary/10 text-primary border-primary/20">
-                    🛍️ Produk & Layanan
+                    📝 Blog & Artikel
                 </Badge>
                 <h1 class="text-4xl md:text-5xl font-bold text-dark dark:text-white mb-4">
-                    Produk & Layanan
+                    Artikel & Tutorial
                 </h1>
                 <p class="text-lg text-body-color dark:text-dark-6 max-w-2xl mx-auto">
-                    Temukan berbagai template hotspot, tools, dan layanan untuk kebutuhan jaringan Anda
+                    Temukan artikel, tutorial, dan tips seputar MikroTik, networking, dan teknologi
                 </p>
             </div>
 
-            <!-- Featured Products -->
+            <!-- Featured Articles -->
             <div v-if="selectedCategory === 'all' && !searchQuery" class="mb-12">
                 <div class="flex items-center gap-2 mb-6">
                     <TrendingUp class="w-5 h-5 text-primary" />
-                    <h2 class="text-2xl font-bold text-dark dark:text-white">Produk Unggulan</h2>
+                    <h2 class="text-2xl font-bold text-dark dark:text-white">Artikel Pilihan</h2>
                 </div>
                 
                 <div class="grid md:grid-cols-3 gap-6">
                     <div 
-                        v-for="product in featuredProducts" 
-                        :key="product.id"
-                        @click="goToProduct(product.slug)"
+                        v-for="article in featuredArticles" 
+                        :key="article.id"
+                        @click="goToArticle(article.slug)"
                         class="group cursor-pointer bg-white dark:bg-dark-2 rounded-2xl overflow-hidden border border-stroke dark:border-dark-3 hover:shadow-xl transition-all duration-300"
                     >
                         <div class="relative overflow-hidden aspect-video">
                             <img 
-                                :src="getProductImage(product)" 
-                                :alt="product.name"
+                                :src="article.image" 
+                                :alt="article.title"
                                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                             />
                             <div class="absolute top-4 left-4">
                                 <Badge class="bg-primary text-white shadow-lg capitalize">
-                                    {{ categories.find(c => c.id === product.category)?.label }}
-                                </Badge>
-                            </div>
-                            <div class="absolute top-4 right-4">
-                                <Badge class="bg-yellow-500 text-white shadow-lg flex items-center gap-1">
-                                    <Star class="w-3 h-3 fill-current" />
-                                    {{ product.rating || 0 }}
+                                    {{ article.category }}
                                 </Badge>
                             </div>
                         </div>
                         
                         <div class="p-6">
                             <h3 class="text-lg font-bold text-dark dark:text-white mb-3 line-clamp-2 group-hover:text-primary transition-colors">
-                                {{ product.name }}
+                                {{ article.title }}
                             </h3>
                             
                             <p class="text-sm text-body-color dark:text-dark-6 mb-4 line-clamp-2">
-                                {{ product.short_description || product.description }}
+                                {{ article.excerpt }}
                             </p>
-
-                            <div class="flex items-center justify-between mb-4">
-                                <span class="text-xl font-bold text-primary">{{ formatCurrency(product.price) }}</span>
-                                <div class="flex items-center gap-1 text-xs text-body-color dark:text-dark-6">
-                                    <Download class="w-3 h-3" />
-                                    <span>{{ product.downloads || 0 }}</span>
-                                </div>
-                            </div>
 
                             <div class="flex items-center justify-between text-xs text-body-color dark:text-dark-6">
                                 <div class="flex items-center gap-1">
-                                    <Calendar class="w-3 h-3" />
-                                    <span>{{ formatDate(product.created) }}</span>
+                                    <Clock class="w-3 h-3" />
+                                    <span>{{ article.readTime }}</span>
                                 </div>
                                 <div class="flex items-center gap-1">
-                                    <Eye class="w-3 h-3" />
-                                    <span>{{ product.views || 0 }}</span>
+                                    <Calendar class="w-3 h-3" />
+                                    <span>{{ article.publishedDate }}</span>
                                 </div>
                             </div>
                         </div>
@@ -218,13 +261,13 @@ onMounted(() => {
                         <!-- Search -->
                         <div class="bg-white dark:bg-dark-2 rounded-2xl p-6 border border-stroke dark:border-dark-3">
                             <h3 class="text-lg font-bold text-dark dark:text-white mb-4">
-                                🔍 Cari Produk
+                                🔍 Cari Artikel
                             </h3>
                             <div class="relative">
                                 <input
                                     v-model="searchQuery"
                                     type="text"
-                                    placeholder="Cari produk..."
+                                    placeholder="Cari artikel..."
                                     class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-stroke dark:border-dark-3 bg-gray-50 dark:bg-dark text-dark dark:text-white placeholder:text-body-color-2 focus:border-primary focus:outline-none"
                                 />
                                 <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-body-color dark:text-dark-6" />
@@ -262,7 +305,7 @@ onMounted(() => {
                             </h3>
                             <div class="flex flex-wrap gap-2">
                                 <Badge 
-                                    v-for="tag in ['Premium', 'Mobile', 'Dashboard', 'Voucher', 'Custom', 'Support']"
+                                    v-for="tag in ['MikroTik', 'Tutorial', 'Hotspot', 'Security', 'Bandwidth', 'VPN']"
                                     :key="tag"
                                     variant="outline"
                                     class="cursor-pointer hover:bg-primary hover:text-white hover:border-primary transition-colors"
@@ -279,10 +322,7 @@ onMounted(() => {
                     <!-- Results Info -->
                     <div class="mb-6 flex items-center justify-between">
                         <p class="text-body-color dark:text-dark-6">
-                            <span v-if="isLoading">Memuat produk...</span>
-                            <span v-else>
-                                Menampilkan <span class="font-semibold text-dark dark:text-white">{{ filteredProducts.length }}</span> produk
-                            </span>
+                            Menampilkan <span class="font-semibold text-dark dark:text-white">{{ filteredArticles.length }}</span> artikel
                         </p>
                         <div v-if="searchQuery || selectedCategory !== 'all'" class="flex gap-2">
                             <button 
@@ -294,100 +334,68 @@ onMounted(() => {
                         </div>
                     </div>
 
-                    <!-- Loading State -->
-                    <div v-if="isLoading" class="space-y-6">
-                        <div v-for="i in 3" :key="i" class="bg-white dark:bg-dark-2 rounded-2xl overflow-hidden border border-stroke dark:border-dark-3 animate-pulse">
-                            <div class="flex flex-col md:flex-row">
-                                <div class="md:w-80 bg-gray-200 dark:bg-gray-800 aspect-video md:aspect-auto md:h-64"></div>
-                                <div class="flex-1 p-6 space-y-4">
-                                    <div class="h-6 bg-gray-200 dark:bg-gray-800 rounded w-3/4"></div>
-                                    <div class="h-4 bg-gray-200 dark:bg-gray-800 rounded w-full"></div>
-                                    <div class="h-4 bg-gray-200 dark:bg-gray-800 rounded w-5/6"></div>
-                                    <div class="h-8 bg-gray-200 dark:bg-gray-800 rounded w-1/4"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Empty State -->
-                    <div v-else-if="!isLoading && paginatedProducts.length === 0" class="text-center py-20">
-                        <div class="text-6xl mb-4">📦</div>
-                        <h3 class="text-xl font-semibold text-dark dark:text-white mb-2">
-                            Tidak ada produk ditemukan
-                        </h3>
-                        <p class="text-body-color dark:text-dark-6 mb-4">
-                            Coba ubah filter atau kata kunci pencarian
-                        </p>
-                        <button 
-                            @click="searchQuery = ''; selectedCategory = 'all'"
-                            class="px-4 py-2 bg-primary text-white rounded-xl hover:bg-primary/90 transition-colors"
-                        >
-                            Reset Filter
-                        </button>
-                    </div>
-
-                    <!-- Products Grid -->
-                    <div v-else class="space-y-6 mb-8">
+                    <!-- Articles Grid -->
+                    <div v-if="paginatedArticles.length > 0" class="space-y-6 mb-8">
                         <div 
-                            v-for="product in paginatedProducts" 
-                            :key="product.id"
-                            @click="goToProduct(product.slug)"
+                            v-for="article in paginatedArticles" 
+                            :key="article.id"
+                            @click="goToArticle(article.slug)"
                             class="group cursor-pointer bg-white dark:bg-dark-2 rounded-2xl overflow-hidden border border-stroke dark:border-dark-3 hover:shadow-xl transition-all duration-300"
                         >
                             <div class="flex flex-col md:flex-row">
                                 <!-- Image -->
                                 <div class="md:w-80 relative overflow-hidden">
                                     <img 
-                                        :src="getProductImage(product)" 
-                                        :alt="product.name"
+                                        :src="article.image" 
+                                        :alt="article.title"
                                         class="w-full h-full aspect-video md:aspect-auto object-cover group-hover:scale-110 transition-transform duration-500"
                                     />
                                     <Badge class="absolute top-4 left-4 bg-primary text-white shadow-lg capitalize">
-                                        {{ categories.find(c => c.id === product.category)?.label }}
-                                    </Badge>
-                                    <Badge class="absolute top-4 right-4 bg-yellow-500 text-white shadow-lg flex items-center gap-1">
-                                        <Star class="w-3 h-3 fill-current" />
-                                        {{ product.rating || 0 }}
+                                        {{ article.category }}
                                     </Badge>
                                 </div>
 
                                 <!-- Content -->
                                 <div class="flex-1 p-6 flex flex-col">
                                     <h2 class="text-xl md:text-2xl font-bold text-dark dark:text-white mb-3 group-hover:text-primary transition-colors line-clamp-2">
-                                        {{ product.name }}
+                                        {{ article.title }}
                                     </h2>
 
                                     <p class="text-body-color dark:text-dark-6 mb-4 line-clamp-3 flex-1">
-                                        {{ product.short_description || product.description }}
+                                        {{ article.excerpt }}
                                     </p>
 
-                                    <!-- Price & Downloads -->
-                                    <div class="flex items-center justify-between mb-4">
-                                        <span class="text-2xl font-bold text-primary">{{ formatCurrency(product.price) }}</span>
-                                        <div class="flex items-center gap-1 text-sm text-body-color dark:text-dark-6">
-                                            <Download class="w-4 h-4" />
-                                            <span>{{ product.downloads || 0 }} downloads</span>
-                                        </div>
-                                    </div>
-
-                                    <!-- Meta Info -->
+                                    <!-- Author & Meta -->
                                     <div class="flex items-center justify-between flex-wrap gap-4">
+                                        <div class="flex items-center gap-3">
+                                            <Avatar class="w-10 h-10 border-2 border-primary/20">
+                                                <AvatarImage :src="article.author.avatar" />
+                                                <AvatarFallback class="bg-primary/10 text-primary">
+                                                    {{ article.author.name.charAt(0) }}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            <div>
+                                                <p class="text-sm font-medium text-dark dark:text-white">{{ article.author.name }}</p>
+                                                <p class="text-xs text-body-color dark:text-dark-6">{{ article.author.role }}</p>
+                                            </div>
+                                        </div>
+
                                         <div class="flex items-center gap-4 text-xs text-body-color dark:text-dark-6">
                                             <div class="flex items-center gap-1">
                                                 <Calendar class="w-3 h-3" />
-                                                <span>{{ formatDate(product.created) }}</span>
+                                                <span>{{ article.publishedDate }}</span>
                                             </div>
                                             <div class="flex items-center gap-1">
-                                                <Eye class="w-3 h-3" />
-                                                <span>{{ product.views || 0 }} views</span>
+                                                <Clock class="w-3 h-3" />
+                                                <span>{{ article.readTime }}</span>
                                             </div>
                                         </div>
                                     </div>
 
                                     <!-- Tags -->
-                                    <div v-if="getTags(product).length > 0" class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-stroke dark:border-dark-3">
+                                    <div class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-stroke dark:border-dark-3">
                                         <Badge 
-                                            v-for="tag in getTags(product)" 
+                                            v-for="tag in article.tags" 
                                             :key="tag"
                                             variant="outline"
                                             class="text-xs"
@@ -398,6 +406,23 @@ onMounted(() => {
                                 </div>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div v-else class="text-center py-20">
+                        <div class="text-6xl mb-4">📝</div>
+                        <h3 class="text-xl font-semibold text-dark dark:text-white mb-2">
+                            Tidak ada artikel ditemukan
+                        </h3>
+                        <p class="text-body-color dark:text-dark-6 mb-4">
+                            Coba ubah filter atau kata kunci pencarian
+                        </p>
+                        <button 
+                            @click="searchQuery = ''; selectedCategory = 'all'"
+                            class="px-4 py-2 bg-primary text-white rounded-xl hover:bg-primary/90 transition-colors"
+                        >
+                            Reset Filter
+                        </button>
                     </div>
 
                     <!-- Pagination -->
