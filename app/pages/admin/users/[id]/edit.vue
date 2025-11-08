@@ -368,6 +368,13 @@
             </div>
         </div>
 
+        <!-- Avatar Upload Dialog -->
+        <AvatarUploadDialog 
+            v-model:open="showAvatarDialog"
+            :user-id="userId"
+            @uploaded="onAvatarUploaded"
+        />
+
         <!-- Success/Error Messages -->
         <div v-if="successMessage" class="fixed bottom-4 right-4 z-50">
             <Card class="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
@@ -403,6 +410,7 @@ import {
 import {
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from '~/components/ui/select'
+import AvatarUploadDialog from '~/components/AvatarUploadDialog.vue'
 
 // Import User Types
 import type { 
@@ -426,6 +434,7 @@ const error = ref<string>('')
 const successMessage = ref<string>('')
 const showPasswordFields = ref<boolean>(false)
 const activities = ref<UserActivity[]>([])
+const showAvatarDialog = ref<boolean>(false)
 
 // Form validation schema
 const editUserSchema = toTypedSchema(z.object({
@@ -512,7 +521,6 @@ const onSubmit = form.handleSubmit(async (values) => {
     try {
         isSubmitting.value = true
         error.value = ''
-        successMessage.value = ''
         
         const updateData: AdminUpdateUserRequest = {
             name: values.name,
@@ -534,13 +542,8 @@ const onSubmit = form.handleSubmit(async (values) => {
         
         if (response.success && response.user) {
             user.value = response.user
-            successMessage.value = 'User updated successfully!'
+            useToaster('success' ,'User updated successfully!')
             showPasswordFields.value = false
-            
-            // Clear success message after 3 seconds
-            setTimeout(() => {
-                successMessage.value = ''
-            }, 3000)
         } else {
             error.value = response.error || 'Failed to update user'
         }
@@ -575,8 +578,19 @@ const viewUser = (): void => {
 }
 
 const uploadAvatar = (): void => {
-    // Implementation for avatar upload
-    console.log('Upload avatar')
+    showAvatarDialog.value = true
+}
+
+const onAvatarUploaded = (avatarUrl: string): void => {
+    if (user.value) {
+        user.value.avatar = avatarUrl
+        successMessage.value = 'Avatar updated successfully!'
+        
+        // Clear success message after 3 seconds
+        setTimeout(() => {
+            successMessage.value = ''
+        }, 3000)
+    }
 }
 
 const suspendUser = (): void => {
