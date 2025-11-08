@@ -132,7 +132,7 @@
                                                 :alt="user.name"
                                                 class="w-10 h-10 rounded-full object-cover"
                                             />
-                                            <User v-else class="h-5 w-5 text-muted-foreground" />
+                                            <UserIcon v-else class="h-5 w-5 text-muted-foreground" />
                                         </div>
                                         <div>
                                             <p class="font-medium text-foreground">{{ user.name }}</p>
@@ -268,40 +268,36 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { 
     UserPlus, Users, Search, X, RefreshCw, Loader2, Eye, Edit, 
     UserCheck, UserX, ChevronLeft, ChevronRight, 
-    CheckCircle, AlertCircle, User
+    CheckCircle, AlertCircle, User as UserIcon
 } from 'lucide-vue-next'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import DeleteUser from '~/components/admin/users/DeleteUser.vue'
 
-// Types
-interface User {
-    id: string
-    username: string
-    name: string
-    email: string
-    avatar: string | null
-    role: 'user' | 'creator' | 'superadmin'
-    verified: boolean
-    created: string
-    updated: string
-}
+// Import User Types
+import type { 
+    User, 
+    UserRole, 
+    UserFilter,
+    UsersResponse,
+    UserTableRow 
+} from '~/types'
 
 // Reactive data
 const users = ref<User[]>([])
-const isLoading = ref(true)
+const isLoading = ref<boolean>(true)
 const updatingUsers = ref<string[]>([])
-const lastUpdated = ref('')
+const lastUpdated = ref<string>('')
 
-// Search and filter state
-const searchQuery = ref('')
-const selectedRole = ref('')
-const selectedVerification = ref('')
+// Search and filter state with proper types
+const searchQuery = ref<string>('')
+const selectedRole = ref<UserRole | ''>('')
+const selectedVerification = ref<'true' | 'false' | ''>('')
 
 // Pagination state
-const currentPage = ref(1)
-const itemsPerPage = 20
+const currentPage = ref<number>(1)
+const itemsPerPage: number = 20
 
 // Debounced search
 const searchDebounceTimer = ref<NodeJS.Timeout | null>(null)
@@ -368,14 +364,14 @@ const visiblePages = computed(() => {
 })
 
 // Methods
-const fetchUsers = async () => {
+const fetchUsers = async (): Promise<void> => {
     try {
         isLoading.value = true
-        const response:any = await $fetch('/api/admin/users', {
+        const response = await $fetch<UsersResponse>('/api/admin/users', {
             method: 'GET'
         })
         
-        if (response.success) {
+        if (response.success && response.users) {
             users.value = response.users
             lastUpdated.value = new Date().toLocaleTimeString()
         } else {
@@ -390,7 +386,7 @@ const fetchUsers = async () => {
     }
 }
 
-const handleSearch = () => {
+const handleSearch = (): void => {
     if (searchDebounceTimer.value) {
         clearTimeout(searchDebounceTimer.value)
     }
@@ -400,36 +396,36 @@ const handleSearch = () => {
     }, 300)
 }
 
-const handleFilter = () => {
+const handleFilter = (): void => {
     currentPage.value = 1 // Reset to first page when filtering
 }
 
-const clearFilters = () => {
+const clearFilters = (): void => {
     searchQuery.value = ''
     selectedRole.value = ''
     selectedVerification.value = ''
     currentPage.value = 1
 }
 
-const goToPage = (page: number) => {
+const goToPage = (page: number): void => {
     if (page >= 1 && page <= totalPages.value) {
         currentPage.value = page
     }
 }
 
-const getRoleBadgeClass = (role: string) => {
+const getRoleBadgeClass = (role: UserRole): string => {
     switch (role) {
         case 'superadmin':
-            return 'bg-red-100 text-red-800'
+            return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
         case 'creator':
-            return 'bg-purple-100 text-purple-800'
+            return 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400'
         case 'user':
         default:
-            return 'bg-gray-100 text-gray-800'
+            return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
     }
 }
 
-const formatDate = (dateString: string) => {
+const formatDate = (dateString: string): string => {
     return new Date(dateString).toLocaleDateString('id-ID', {
         year: 'numeric',
         month: 'short',
@@ -439,23 +435,21 @@ const formatDate = (dateString: string) => {
     })
 }
 
-const viewUser = (user: User) => {
-    // Implementation for viewing user details
-    console.log('View user:', user)
-    // You can add modal or navigate to user detail page
+const viewUser = (user: User): void => {
+    // Navigate to user detail page
+    navigateTo(`/admin/users/${user.id}`)
 }
 
-const editUser = (user: User) => {
-    // Implementation for editing user
-    console.log('Edit user:', user)
-    // You can add modal or navigate to edit page
+const editUser = (user: User): void => {
+    // Navigate to user edit page
+    navigateTo(`/admin/users/${user.id}/edit`)
 }
 
-const toggleVerification = async (user: User) => {
+const toggleVerification = async (user: User): Promise<void> => {
     try {
         updatingUsers.value.push(user.id)
         
-        const response:any = await $fetch(`/api/admin/users/${user.id}/verify`, {
+        const response = await $fetch<{ success: boolean; error?: string }>(`/api/admin/users/${user.id}/verify`, {
             method: 'POST',
             body: {
                 verified: !user.verified
@@ -475,9 +469,9 @@ const toggleVerification = async (user: User) => {
     }
 }
 
-const deleteUser = async (user: User) => {
+const deleteUser = async (user: User): Promise<void> => {
     try {
-        const response:any = await $fetch(`/api/admin/users/${user.id}`, {
+        const response = await $fetch<{ success: boolean; error?: string }>(`/api/admin/users/${user.id}`, {
             method: 'DELETE'
         })
         
