@@ -271,16 +271,13 @@
                     </CardHeader>
                     <CardContent>
                         <div class="text-center space-y-4">
-                            <div class="relative mx-auto w-24 h-24">
-                                <img 
-                                    v-if="user.avatar" 
-                                    :src="user.avatar" 
-                                    :alt="user.name"
-                                    class="w-24 h-24 rounded-full object-cover border-2 border-border"
+                            <div class="relative mx-auto w-fit">
+                                <UserAvatar
+                                    :user="user"
+                                    size="xl"
+                                    show-verification-status
+                                    show-role-badge
                                 />
-                                <div v-else class="w-24 h-24 bg-muted rounded-full flex items-center justify-center border-2 border-border">
-                                    <UserIcon class="h-12 w-12 text-muted-foreground" />
-                                </div>
                                 <Button 
                                     size="sm" 
                                     variant="outline"
@@ -374,18 +371,6 @@
             :user-id="userId"
             @uploaded="onAvatarUploaded"
         />
-
-        <!-- Success/Error Messages -->
-        <div v-if="successMessage" class="fixed bottom-4 right-4 z-50">
-            <Card class="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
-                <CardContent class="p-4">
-                    <div class="flex items-center space-x-2 text-green-800 dark:text-green-400">
-                        <CheckCircle class="h-5 w-5" />
-                        <span>{{ successMessage }}</span>
-                    </div>
-                </CardContent>
-            </Card>
-        </div>
     </div>
 </template>
 
@@ -410,6 +395,7 @@ import {
 import {
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from '~/components/ui/select'
+import UserAvatar from '~/components/UserAvatar.vue'
 import AvatarUploadDialog from '~/components/AvatarUploadDialog.vue'
 
 // Import User Types
@@ -431,7 +417,6 @@ const user = ref<User | null>(null)
 const isLoading = ref<boolean>(true)
 const isSubmitting = ref<boolean>(false)
 const error = ref<string>('')
-const successMessage = ref<string>('')
 const showPasswordFields = ref<boolean>(false)
 const activities = ref<UserActivity[]>([])
 const showAvatarDialog = ref<boolean>(false)
@@ -584,12 +569,7 @@ const uploadAvatar = (): void => {
 const onAvatarUploaded = (avatarUrl: string): void => {
     if (user.value) {
         user.value.avatar = avatarUrl
-        successMessage.value = 'Avatar updated successfully!'
-        
-        // Clear success message after 3 seconds
-        setTimeout(() => {
-            successMessage.value = ''
-        }, 3000)
+        useToaster('success', 'Avatar updated successfully!')
     }
 }
 

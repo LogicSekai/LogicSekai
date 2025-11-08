@@ -125,15 +125,14 @@
                                 <!-- User Info -->
                                 <td class="py-4 px-4">
                                     <div class="flex items-center space-x-3">
-                                        <div class="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
-                                            <img 
-                                                v-if="user.avatar" 
-                                                :src="user.avatar" 
-                                                :alt="user.name"
-                                                class="w-10 h-10 rounded-full object-cover"
-                                            />
-                                            <UserIcon v-else class="h-5 w-5 text-muted-foreground" />
-                                        </div>
+                                        <UserAvatar
+                                            :user="user"
+                                            size="md"
+                                            :clickable="true"
+                                            :show-verification-status="true"
+                                            :show-role-badge="true"
+                                            @click="(clickedUser) => viewUser(clickedUser)"
+                                        />
                                         <div>
                                             <p class="font-medium text-foreground">{{ user.name }}</p>
                                             <p class="text-sm text-muted-foreground">@{{ user.username }}</p>
@@ -273,6 +272,7 @@ import {
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
+import UserAvatar from '~/components/UserAvatar.vue'
 import DeleteUser from '~/components/admin/users/DeleteUser.vue'
 
 // Import User Types
@@ -374,6 +374,8 @@ const fetchUsers = async (): Promise<void> => {
         if (response.success && response.users) {
             users.value = response.users
             lastUpdated.value = new Date().toLocaleTimeString()
+            console.log('Fetched users:', response.users.length, 'users')
+            console.log('Sample user:', response.users[0])
         } else {
             console.error('Failed to fetch users:', response.error)
             // You can add toast notification here

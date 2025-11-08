@@ -80,34 +80,32 @@
                 <div v-if="selectedImage && !croppedImage" class="space-y-4">
                     <Label>Crop Avatar</Label>
                     <div class="relative">
-                        <div 
-                            ref="cropperContainer"
-                            class="relative border border-border rounded-lg overflow-hidden bg-muted/30 select-none"
-                            style="height: 300px;"
-                        >
-                            <img
-                                ref="cropImageRef"
+                        <div class="border border-border rounded-lg overflow-hidden bg-background">
+                            <Cropper
+                                ref="cropperRef"
                                 :src="selectedImage"
-                                class="max-w-full max-h-full object-contain select-none pointer-events-none"
-                                @load="initializeCropper"
-                                draggable="false"
+                                :stencil-component="CircleStencil"
+                                :stencil-props="{
+                                    aspectRatio: 1,
+                                    resizable: true,
+                                    movable: true
+                                }"
+                                :canvas="{
+                                    maxWidth: 400,
+                                    maxHeight: 400,
+                                    minWidth: 100,
+                                    minHeight: 100
+                                }"
+                                :default-size="{
+                                    width: 300,
+                                    height: 300
+                                }"
+                                class="cropper-custom-theme"
+                                style="height: 300px;"
+                                background-class="cropper-background"
                             />
-                            <!-- Crop overlay -->
-                            <div 
-                                v-if="cropBox"
-                                class="absolute border-2 border-primary bg-primary/10 cursor-move transition-all duration-75 select-none"
-                                :style="cropBoxStyle"
-                                @mousedown="startDrag"
-                                @selectstart.prevent
-                            >
-                                <!-- Resize handles -->
-                                <div class="absolute -top-1 -left-1 w-3 h-3 bg-primary border-2 border-background rounded-full cursor-nw-resize hover:scale-110 transition-transform" @mousedown.stop="(e) => startResize('nw', e)"></div>
-                                <div class="absolute -top-1 -right-1 w-3 h-3 bg-primary border-2 border-background rounded-full cursor-ne-resize hover:scale-110 transition-transform" @mousedown.stop="(e) => startResize('ne', e)"></div>
-                                <div class="absolute -bottom-1 -left-1 w-3 h-3 bg-primary border-2 border-background rounded-full cursor-sw-resize hover:scale-110 transition-transform" @mousedown.stop="(e) => startResize('sw', e)"></div>
-                                <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-primary border-2 border-background rounded-full cursor-se-resize hover:scale-110 transition-transform" @mousedown.stop="(e) => startResize('se', e)"></div>
-                            </div>
                         </div>
-                        <div class="flex justify-between mt-2">
+                        <div class="flex justify-between mt-4">
                             <Button variant="outline" @click="resetCrop">
                                 <RotateCcw class="h-4 w-4 mr-2" />
                                 Reset
@@ -173,11 +171,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, nextTick, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { Upload, RotateCcw, Crop, ArrowLeft, Loader2, X } from 'lucide-vue-next'
 import { Button } from '~/components/ui/button'
-import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
+import { Cropper, CircleStencil } from 'vue-advanced-cropper'
+import 'vue-advanced-cropper/dist/style.css'
 // Dialog functionality is implemented using Teleport and custom modal
 
 // Props & Emits
@@ -196,39 +195,14 @@ const emit = defineEmits<Emits>()
 
 // Reactive data
 const fileInput = ref<HTMLInputElement>()
-const cropperContainer = ref<HTMLDivElement>()
-const cropImageRef = ref<HTMLImageElement>()
+const cropperRef = ref()
 const selectedImage = ref<string>('')
 const croppedImage = ref<string>('')
 const isUploading = ref<boolean>(false)
 const isDragOver = ref<boolean>(false)
 const dropZone = ref<HTMLDivElement>()
 
-// Crop functionality
-const cropBox = ref<{
-    x: number
-    y: number
-    width: number
-    height: number
-} | null>(null)
-
-const isDragging = ref<boolean>(false)
-const isResizing = ref<boolean>(false)
-const resizeHandle = ref<string>('')
-const dragStart = ref<{ x: number, y: number }>({ x: 0, y: 0 })
-const imageSize = ref<{ width: number, height: number }>({ width: 0, height: 0 })
-
-// Computed
-const cropBoxStyle = computed(() => {
-    if (!cropBox.value) return {}
-    
-    return {
-        left: `${cropBox.value.x}px`,
-        top: `${cropBox.value.y}px`,
-        width: `${cropBox.value.width}px`,
-        height: `${cropBox.value.height}px`,
-    }
-})
+// Computed properties (if needed)
 
 // Methods
 const triggerFileSelect = (): void => {
@@ -261,7 +235,6 @@ const processFile = (file: File): void => {
     reader.onload = (e) => {
         selectedImage.value = e.target?.result as string
         croppedImage.value = ''
-        cropBox.value = null
     }
     reader.readAsDataURL(file)
 }
@@ -307,224 +280,19 @@ const handleDragLeave = (event: DragEvent): void => {
     }
 }
 
-const initializeCropper = async (): Promise<void> => {
-    await nextTick()
-    
-    // Wait a bit more for layout to settle
-    setTimeout(() => {
-        if (!cropImageRef.value || !cropperContainer.value) return
-        
-        const img = cropImageRef.value
-        const container = cropperContainer.value
-        
-        // Get image dimensions
-        imageSize.value = {
-            width: img.naturalWidth,
-            height: img.naturalHeight
-        }
-        
-        // Calculate crop box (square in center) based on container dimensions
-        const containerRect = container.getBoundingClientRect()
-        const imgRect = img.getBoundingClientRect()
-        
-        // Calculate the actual image display size within the container
-        const imageDisplayWidth = imgRect.width
-        const imageDisplayHeight = imgRect.height
-        
-        // Calculate crop size (80% of the smaller dimension)
-        const size = Math.min(imageDisplayWidth, imageDisplayHeight) * 0.7
-        
-        // Center the crop box relative to the container
-        const x = (containerRect.width - size) / 2
-        const y = (containerRect.height - size) / 2
-        
-        cropBox.value = {
-            x: Math.max(0, x),
-            y: Math.max(0, y),
-            width: size,
-            height: size
-        }
-    }, 100)
-}
-
-const startDrag = (event: MouseEvent): void => {
-    event.preventDefault()
-    isDragging.value = true
-    dragStart.value = { x: event.clientX, y: event.clientY }
-    
-    document.addEventListener('mousemove', onDrag, { passive: false })
-    document.addEventListener('mouseup', stopDrag)
-    document.addEventListener('selectstart', preventDefault)
-    document.body.style.userSelect = 'none'
-}
-
-const preventDefault = (e: Event) => e.preventDefault()
-
-const onDrag = (event: MouseEvent): void => {
-    if (!isDragging.value || !cropBox.value || !cropperContainer.value) return
-    
-    event.preventDefault()
-    
-    const deltaX = event.clientX - dragStart.value.x
-    const deltaY = event.clientY - dragStart.value.y
-    
-    const container = cropperContainer.value.getBoundingClientRect()
-    const newX = Math.max(0, Math.min(container.width - cropBox.value.width, cropBox.value.x + deltaX))
-    const newY = Math.max(0, Math.min(container.height - cropBox.value.height, cropBox.value.y + deltaY))
-    
-    cropBox.value.x = newX
-    cropBox.value.y = newY
-    
-    dragStart.value = { x: event.clientX, y: event.clientY }
-}
-
-const stopDrag = (): void => {
-    isDragging.value = false
-    isResizing.value = false
-    
-    document.removeEventListener('mousemove', onDrag)
-    document.removeEventListener('mousemove', onResize)
-    document.removeEventListener('mouseup', stopDrag)
-    document.removeEventListener('mouseup', stopResize)
-    document.removeEventListener('selectstart', preventDefault)
-    document.body.style.userSelect = ''
-}
-
-const startResize = (handle: string, event: MouseEvent): void => {
-    event.preventDefault()
-    event.stopPropagation()
-    isResizing.value = true
-    resizeHandle.value = handle
-    
-    document.addEventListener('mousemove', onResize, { passive: false })
-    document.addEventListener('mouseup', stopResize)
-    document.addEventListener('selectstart', preventDefault)
-    document.body.style.userSelect = 'none'
-}
-
-const onResize = (event: MouseEvent): void => {
-    if (!isResizing.value || !cropBox.value || !cropperContainer.value) return
-    
-    event.preventDefault()
-    
-    const container = cropperContainer.value.getBoundingClientRect()
-    const rect = cropperContainer.value.getBoundingClientRect()
-    
-    const x = event.clientX - rect.left
-    const y = event.clientY - rect.top
-    
-    // Keep square aspect ratio
-    let newWidth = cropBox.value.width
-    let newHeight = cropBox.value.height
-    let newX = cropBox.value.x
-    let newY = cropBox.value.y
-    
-    if (resizeHandle.value.includes('e')) {
-        newWidth = x - cropBox.value.x
-    }
-    if (resizeHandle.value.includes('w')) {
-        newWidth = cropBox.value.x + cropBox.value.width - x
-        newX = x
-    }
-    if (resizeHandle.value.includes('s')) {
-        newHeight = y - cropBox.value.y
-    }
-    if (resizeHandle.value.includes('n')) {
-        newHeight = cropBox.value.y + cropBox.value.height - y
-        newY = y
-    }
-    
-    // Make it square
-    const size = Math.min(newWidth, newHeight)
-    newWidth = size
-    newHeight = size
-    
-    // Constrain to container
-    if (newX < 0) {
-        newX = 0
-    }
-    if (newY < 0) {
-        newY = 0
-    }
-    if (newX + newWidth > container.width) {
-        newWidth = container.width - newX
-        newHeight = newWidth
-    }
-    if (newY + newHeight > container.height) {
-        newHeight = container.height - newY
-        newWidth = newHeight
-    }
-    
-    // Minimum size
-    if (newWidth < 50 || newHeight < 50) {
-        return
-    }
-    
-    cropBox.value = {
-        x: newX,
-        y: newY,
-        width: newWidth,
-        height: newHeight
-    }
-}
-
-const stopResize = (): void => {
-    isResizing.value = false
-    
-    document.removeEventListener('mousemove', onResize)
-    document.removeEventListener('mouseup', stopResize)
-    document.removeEventListener('selectstart', preventDefault)
-    document.body.style.userSelect = ''
-}
-
 const resetCrop = (): void => {
-    initializeCropper()
-}
-
-const cropImageData = (): void => {
-    if (!cropBox.value || !cropImageRef.value || !selectedImage.value) return
-    
-    const canvas = document.createElement('canvas')
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-    
-    // Set canvas size to desired output size
-    const outputSize = 200
-    canvas.width = outputSize
-    canvas.height = outputSize
-    
-    const img = new Image()
-    img.onload = () => {
-        const cropperRect = cropperContainer.value?.getBoundingClientRect()
-        const imgRect = cropImageRef.value?.getBoundingClientRect()
-        
-        if (!cropperRect || !imgRect) return
-        
-        // Calculate scaling factors
-        const scaleX = img.naturalWidth / imgRect.width
-        const scaleY = img.naturalHeight / imgRect.height
-        
-        // Calculate crop area in original image coordinates
-        const cropX = cropBox.value!.x * scaleX
-        const cropY = cropBox.value!.y * scaleY
-        const cropWidth = cropBox.value!.width * scaleX
-        const cropHeight = cropBox.value!.height * scaleY
-        
-        // Draw cropped image
-        ctx.drawImage(
-            img,
-            cropX, cropY, cropWidth, cropHeight,
-            0, 0, outputSize, outputSize
-        )
-        
-        croppedImage.value = canvas.toDataURL('image/jpeg', 0.9)
+    if (cropperRef.value) {
+        cropperRef.value.reset()
     }
-    
-    img.src = selectedImage.value
 }
 
 const cropImage = (): void => {
-    cropImageData()
+    if (!cropperRef.value) return
+    
+    const { canvas } = cropperRef.value.getResult()
+    if (canvas) {
+        croppedImage.value = canvas.toDataURL('image/jpeg', 0.9)
+    }
 }
 
 const goBack = (): void => {
@@ -534,7 +302,6 @@ const goBack = (): void => {
 const resetAll = (): void => {
     selectedImage.value = ''
     croppedImage.value = ''
-    cropBox.value = null
     isDragOver.value = false
     
     // Reset file input
@@ -589,3 +356,73 @@ watch(() => props.open, (isOpen) => {
     }
 })
 </script>
+
+<style>
+/* Vue Advanced Cropper Theme Customization */
+.cropper-custom-theme {
+    --cropper-background-color: hsl(var(--muted));
+    --cropper-foreground-color: hsl(var(--foreground));
+}
+
+.cropper-background {
+    background-color: hsl(var(--background));
+}
+
+/* Stencil styling */
+.vue-advanced-cropper__stencil {
+    border: 2px solid hsl(var(--primary));
+    box-shadow: 0 0 0 1px hsl(var(--background));
+}
+
+/* Handle styling */
+.vue-advanced-cropper__handle {
+    background: hsl(var(--primary));
+    border: 2px solid hsl(var(--background));
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.vue-advanced-cropper__handle:hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Line styling */
+.vue-advanced-cropper__line {
+    background: hsl(var(--primary) / 0.3);
+}
+
+/* Grid lines */
+.vue-advanced-cropper__grid-line {
+    border-color: hsl(var(--primary) / 0.2);
+}
+
+/* Background overlay */
+.vue-advanced-cropper__background {
+    background: hsl(var(--background));
+}
+
+.vue-advanced-cropper__image {
+    opacity: 1;
+}
+
+.vue-advanced-cropper__area {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+    .vue-advanced-cropper__area {
+        background: rgba(0, 0, 0, 0.7);
+    }
+}
+
+/* Custom theme for dark/light mode */
+.dark .vue-advanced-cropper__area {
+    background: rgba(0, 0, 0, 0.7);
+}
+
+.dark .vue-advanced-cropper__stencil {
+    box-shadow: 0 0 0 1px hsl(var(--background));
+}
+</style>

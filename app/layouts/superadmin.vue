@@ -109,9 +109,13 @@
                         <!-- User dropdown -->
                         <div class="relative">
                             <Button variant="ghost" size="sm" @click="showUserMenu = !showUserMenu" class="flex items-center space-x-2 text-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
-                                <div class="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
-                                    <User class="h-4 w-4 text-muted-foreground" />
-                                </div>
+                                <Avatar
+                                    :src="user?.avatar"
+                                    :name="user?.name || 'Admin'"
+                                    size="sm"
+                                    shape="circle"
+                                    :show-status="false"
+                                />
                                 <span class="hidden md:block">{{ user?.name || 'Admin' }}</span>
                                 <ChevronDown class="h-4 w-4" />
                             </Button>
@@ -151,6 +155,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { Button } from '~/components/ui/button'
+import Avatar from '~/components/Avatar.vue'
 import {
     Breadcrumb,
     BreadcrumbItem,
