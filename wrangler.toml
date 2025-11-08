@@ -1,0 +1,12 @@
+name = "logic-sekai"
+main = ".output/server/index.mjs"
+compatibility_date = "2023-12-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "logic-sekai-db"
+database_id = ""
+
+[vars]
+BETTER_AUTH_SECRET = "your-super-secret-key-here"
+BETTER_AUTH_URL = "https://logic-sekai.pages.dev"
