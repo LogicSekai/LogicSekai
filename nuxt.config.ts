@@ -6,6 +6,30 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   css: ['@/assets/css/main.css'],
 
+  app: {
+    head: {
+      script: [
+        {
+          innerHTML: `
+            // Prevent FOUC (Flash of Unstyled Content) for dark mode
+            (function() {
+              const stored = localStorage.getItem('darkMode');
+              const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+              const shouldBeDark = stored !== null ? JSON.parse(stored) : prefersDark;
+              
+              if (shouldBeDark) {
+                document.documentElement.classList.add('dark');
+              } else {
+                document.documentElement.classList.remove('dark');
+              }
+            })();
+          `,
+          type: 'text/javascript'
+        }
+      ]
+    }
+  },
+
   vite: {
     plugins: [
       tailwindcss(),

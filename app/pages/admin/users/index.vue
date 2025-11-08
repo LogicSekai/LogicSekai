@@ -2,10 +2,10 @@
     <div class="space-y-6">
         <div class="flex items-center justify-between">
             <div>
-                <h1 class="text-2xl font-bold text-gray-900">All Users</h1>
-                <p class="text-gray-600 mt-1">Manage all users in the system</p>
+                <h1 class="text-2xl font-bold text-foreground">All Users</h1>
+                <p class="text-muted-foreground mt-1">Manage all users in the system</p>
             </div>
-            <Button @click="$router.push('/admin/users/create')">
+            <Button @click="$router.push('/admin/users/create')" class="bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
                 <UserPlus class="h-4 w-4 mr-2" />
                 Add New User
             </Button>
@@ -18,8 +18,8 @@
                     <!-- Search Input -->
                     <div class="flex-1">
                         <div class="relative">
-                            <Search class="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                            <Input v-model="searchQuery" placeholder="Search by name, username, or email..." class="pl-10" @input="handleSearch"/>
+                            <Search class="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+                            <Input v-model="searchQuery" placeholder="Search by name, username, or email..." class="pl-10 bg-background border-border text-foreground placeholder-muted-foreground focus:ring-ring transition-colors" @input="handleSearch"/>
                         </div>
                     </div>
                     
@@ -28,7 +28,7 @@
                         <select 
                             v-model="selectedRole" 
                             @change="handleFilter"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            class="w-full px-3 py-2 border border-border bg-background text-foreground rounded-md shadow-sm focus:outline-none focus:ring-ring focus:border-ring transition-colors"
                         >
                             <option value="">All Roles</option>
                             <option value="superadmin">Superadmin</option>
@@ -42,7 +42,7 @@
                         <select 
                             v-model="selectedVerification" 
                             @change="handleFilter"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            class="w-full px-3 py-2 border border-border bg-background text-foreground rounded-md shadow-sm focus:outline-none focus:ring-ring focus:border-ring transition-colors"
                         >
                             <option value="">All Status</option>
                             <option value="true">Verified</option>
@@ -55,6 +55,7 @@
                         variant="outline" 
                         @click="clearFilters"
                         v-if="searchQuery || selectedRole || selectedVerification"
+                        class="border-border text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
                     >
                         <X class="h-4 w-4 mr-2" />
                         Clear
@@ -72,9 +73,9 @@
                         {{ totalUsers }} total users ({{ filteredUsers.length }} shown)
                     </CardDescription>
                 </div>
-                <div class="flex items-center space-x-2 text-sm text-gray-500">
+                <div class="flex items-center space-x-2 text-sm text-muted-foreground">
                     <RefreshCw 
-                        class="h-4 w-4 cursor-pointer hover:text-gray-700" 
+                        class="h-4 w-4 cursor-pointer hover:text-foreground transition-colors" 
                         :class="{ 'animate-spin': isLoading }"
                         @click="fetchUsers"
                     />
@@ -85,16 +86,16 @@
                 <!-- Loading State -->
                 <div v-if="isLoading" class="flex items-center justify-center py-12">
                     <div class="flex items-center space-x-2">
-                        <Loader2 class="h-6 w-6 animate-spin text-blue-500" />
-                        <span class="text-gray-600">Loading users...</span>
+                        <Loader2 class="h-6 w-6 animate-spin text-primary" />
+                        <span class="text-muted-foreground">Loading users...</span>
                     </div>
                 </div>
 
                 <!-- Empty State -->
                 <div v-else-if="paginatedUsers.length === 0" class="text-center py-12">
-                    <Users class="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h3 class="text-lg font-medium text-gray-900 mb-2">No users found</h3>
-                    <p class="text-gray-500">
+                    <Users class="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 class="text-lg font-medium text-foreground mb-2">No users found</h3>
+                    <p class="text-muted-foreground">
                         {{ searchQuery || selectedRole || selectedVerification 
                             ? 'Try adjusting your search or filters' 
                             : 'No users have been created yet' 
@@ -106,43 +107,43 @@
                 <div v-else class="overflow-x-auto">
                     <table class="w-full">
                         <thead>
-                            <tr class="border-b border-gray-200">
-                                <th class="text-left py-3 px-4 font-medium text-gray-900">User</th>
-                                <th class="text-left py-3 px-4 font-medium text-gray-900">Email</th>
-                                <th class="text-left py-3 px-4 font-medium text-gray-900">Role</th>
-                                <th class="text-left py-3 px-4 font-medium text-gray-900">Status</th>
-                                <th class="text-left py-3 px-4 font-medium text-gray-900">Created</th>
-                                <th class="text-right py-3 px-4 font-medium text-gray-900">Actions</th>
+                            <tr class="border-b border-border">
+                                <th class="text-left py-3 px-4 font-medium text-foreground">User</th>
+                                <th class="text-left py-3 px-4 font-medium text-foreground">Email</th>
+                                <th class="text-left py-3 px-4 font-medium text-foreground">Role</th>
+                                <th class="text-left py-3 px-4 font-medium text-foreground">Status</th>
+                                <th class="text-left py-3 px-4 font-medium text-foreground">Created</th>
+                                <th class="text-right py-3 px-4 font-medium text-foreground">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr 
                                 v-for="user in paginatedUsers" 
                                 :key="user.id"
-                                class="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                                class="border-b border-border hover:bg-muted/50 transition-colors"
                             >
                                 <!-- User Info -->
                                 <td class="py-4 px-4">
                                     <div class="flex items-center space-x-3">
-                                        <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                                        <div class="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
                                             <img 
                                                 v-if="user.avatar" 
                                                 :src="user.avatar" 
                                                 :alt="user.name"
                                                 class="w-10 h-10 rounded-full object-cover"
                                             />
-                                            <User v-else class="h-5 w-5 text-gray-500" />
+                                            <User v-else class="h-5 w-5 text-muted-foreground" />
                                         </div>
                                         <div>
-                                            <p class="font-medium text-gray-900">{{ user.name }}</p>
-                                            <p class="text-sm text-gray-500">@{{ user.username }}</p>
+                                            <p class="font-medium text-foreground">{{ user.name }}</p>
+                                            <p class="text-sm text-muted-foreground">@{{ user.username }}</p>
                                         </div>
                                     </div>
                                 </td>
                                 
                                 <!-- Email -->
                                 <td class="py-4 px-4">
-                                    <span class="text-gray-900">{{ user.email }}</span>
+                                    <span class="text-foreground">{{ user.email }}</span>
                                 </td>
                                 
                                 <!-- Role -->
@@ -173,7 +174,7 @@
                                 
                                 <!-- Created Date -->
                                 <td class="py-4 px-4">
-                                    <span class="text-gray-600">
+                                    <span class="text-muted-foreground">
                                         {{ formatDate(user.created) }}
                                     </span>
                                 </td>
@@ -214,8 +215,8 @@
                 </div>
 
                 <!-- Pagination -->
-                <div v-if="totalPages > 1" class="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
-                    <div class="text-sm text-gray-700">
+                <div v-if="totalPages > 1" class="flex items-center justify-between mt-6 pt-6 border-t border-border">
+                    <div class="text-sm text-muted-foreground">
                         Showing {{ ((currentPage - 1) * itemsPerPage) + 1 }} to {{ Math.min(currentPage * itemsPerPage, filteredUsers.length) }} of {{ filteredUsers.length }} results
                     </div>
                     
@@ -225,6 +226,7 @@
                             size="sm"
                             @click="goToPage(currentPage - 1)"
                             :disabled="currentPage === 1"
+                            class="border-border text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
                         >
                             <ChevronLeft class="h-4 w-4" />
                             Previous
@@ -236,7 +238,8 @@
                                 :key="page"
                                 variant="outline"
                                 size="sm"
-                                :class="page === currentPage ? 'bg-blue-600 text-white border-blue-600' : ''"
+                                :class="page === currentPage ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-foreground hover:bg-accent hover:text-accent-foreground'"
+                                class="transition-colors"
                                 @click="goToPage(page)"
                             >
                                 {{ page }}
@@ -248,6 +251,7 @@
                             size="sm"
                             @click="goToPage(currentPage + 1)"
                             :disabled="currentPage === totalPages"
+                            class="border-border text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
                         >
                             Next
                             <ChevronRight class="h-4 w-4" />

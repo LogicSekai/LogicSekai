@@ -1,368 +1,196 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
+    <div class="min-h-screen bg-background transition-colors">
     <!-- Sidebar -->
-    <div 
-      class="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out"
-      :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
-    >
-      <!-- Logo/Brand -->
-      <div class="flex items-center justify-between h-16 px-4 border-b border-gray-200">
-        <div class="flex items-center space-x-2">
-          <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-            <span class="text-white font-bold text-sm">LS</span>
-          </div>
-          <span class="text-xl font-bold text-gray-900">Logic Sekai</span>
-        </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          class="lg:hidden"
-          @click="sidebarOpen = false"
-        >
-          <X class="h-5 w-5" />
-        </Button>
-      </div>
-
-      <!-- Navigation Menu -->
-      <nav class="mt-4 px-2">
-        <div class="space-y-1">
-          <!-- Dashboard -->
-          <NuxtLink
-            to="/admin"
-            class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors"
-            :class="$route.path === '/admin' ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700' : 'text-gray-700 hover:bg-gray-100'"
-          >
-            <LayoutDashboard class="h-5 w-5 mr-3" />
-            Dashboard
-          </NuxtLink>
-
-          <!-- User Management -->
-          <div class="space-y-1">
-            <button
-              @click="toggleSubmenu('users')"
-              class="w-full flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg transition-colors text-gray-700 hover:bg-gray-100"
-              :class="activeSubmenu === 'users' ? 'bg-gray-100' : ''"
-            >
-              <div class="flex items-center">
-                <Users class="h-5 w-5 mr-3" />
-                User Management
-              </div>
-              <ChevronDown 
-                class="h-4 w-4 transform transition-transform"
-                :class="activeSubmenu === 'users' ? 'rotate-180' : ''"
-              />
-            </button>
-            
-            <div v-show="activeSubmenu === 'users'" class="ml-8 space-y-1">
-              <NuxtLink
-                to="/admin/users"
-                class="flex items-center px-4 py-2 text-sm rounded-lg transition-colors"
-                :class="$route.path === '/admin/users' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'"
-              >
-                <UserCheck class="h-4 w-4 mr-2" />
-                All Users
-              </NuxtLink>
-              <NuxtLink
-                to="/admin/users/roles"
-                class="flex items-center px-4 py-2 text-sm rounded-lg transition-colors"
-                :class="$route.path === '/admin/users/roles' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'"
-              >
-                <Shield class="h-4 w-4 mr-2" />
-                User Roles
-              </NuxtLink>
-              <NuxtLink
-                to="/admin/users/activity"
-                class="flex items-center px-4 py-2 text-sm rounded-lg transition-colors"
-                :class="$route.path === '/admin/users/activity' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'"
-              >
-                <Activity class="h-4 w-4 mr-2" />
-                User Activity
-              </NuxtLink>
-            </div>
-          </div>
-
-          <!-- Content Management -->
-          <div class="space-y-1">
-            <button
-              @click="toggleSubmenu('content')"
-              class="w-full flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg transition-colors text-gray-700 hover:bg-gray-100"
-              :class="activeSubmenu === 'content' ? 'bg-gray-100' : ''"
-            >
-              <div class="flex items-center">
-                <FileText class="h-5 w-5 mr-3" />
-                Content Management
-              </div>
-              <ChevronDown 
-                class="h-4 w-4 transform transition-transform"
-                :class="activeSubmenu === 'content' ? 'rotate-180' : ''"
-              />
-            </button>
-            
-            <div v-show="activeSubmenu === 'content'" class="ml-8 space-y-1">
-              <NuxtLink
-                to="/admin/content/posts"
-                class="flex items-center px-4 py-2 text-sm rounded-lg transition-colors"
-                :class="$route.path === '/admin/content/posts' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'"
-              >
-                <Edit class="h-4 w-4 mr-2" />
-                Posts
-              </NuxtLink>
-              <NuxtLink
-                to="/admin/content/categories"
-                class="flex items-center px-4 py-2 text-sm rounded-lg transition-colors"
-                :class="$route.path === '/admin/content/categories' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'"
-              >
-                <Folder class="h-4 w-4 mr-2" />
-                Categories
-              </NuxtLink>
-              <NuxtLink
-                to="/admin/content/media"
-                class="flex items-center px-4 py-2 text-sm rounded-lg transition-colors"
-                :class="$route.path === '/admin/content/media' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'"
-              >
-                <Image class="h-4 w-4 mr-2" />
-                Media Library
-              </NuxtLink>
-            </div>
-          </div>
-
-          <!-- Analytics & Reports -->
-          <div class="space-y-1">
-            <button
-              @click="toggleSubmenu('analytics')"
-              class="w-full flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg transition-colors text-gray-700 hover:bg-gray-100"
-              :class="activeSubmenu === 'analytics' ? 'bg-gray-100' : ''"
-            >
-              <div class="flex items-center">
-                <BarChart3 class="h-5 w-5 mr-3" />
-                Analytics & Reports
-              </div>
-              <ChevronDown 
-                class="h-4 w-4 transform transition-transform"
-                :class="activeSubmenu === 'analytics' ? 'rotate-180' : ''"
-              />
-            </button>
-            
-            <div v-show="activeSubmenu === 'analytics'" class="ml-8 space-y-1">
-              <NuxtLink
-                to="/admin/analytics/overview"
-                class="flex items-center px-4 py-2 text-sm rounded-lg transition-colors"
-                :class="$route.path === '/admin/analytics/overview' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'"
-              >
-                <TrendingUp class="h-4 w-4 mr-2" />
-                Overview
-              </NuxtLink>
-              <NuxtLink
-                to="/admin/analytics/traffic"
-                class="flex items-center px-4 py-2 text-sm rounded-lg transition-colors"
-                :class="$route.path === '/admin/analytics/traffic' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'"
-              >
-                <Globe class="h-4 w-4 mr-2" />
-                Traffic Analysis
-              </NuxtLink>
-              <NuxtLink
-                to="/admin/analytics/performance"
-                class="flex items-center px-4 py-2 text-sm rounded-lg transition-colors"
-                :class="$route.path === '/admin/analytics/performance' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'"
-              >
-                <Zap class="h-4 w-4 mr-2" />
-                Performance
-              </NuxtLink>
-            </div>
-          </div>
-
-          <!-- System Settings -->
-          <div class="space-y-1">
-            <button
-              @click="toggleSubmenu('settings')"
-              class="w-full flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg transition-colors text-gray-700 hover:bg-gray-100"
-              :class="activeSubmenu === 'settings' ? 'bg-gray-100' : ''"
-            >
-              <div class="flex items-center">
-                <Settings class="h-5 w-5 mr-3" />
-                System Settings
-              </div>
-              <ChevronDown 
-                class="h-4 w-4 transform transition-transform"
-                :class="activeSubmenu === 'settings' ? 'rotate-180' : ''"
-              />
-            </button>
-            
-            <div v-show="activeSubmenu === 'settings'" class="ml-8 space-y-1">
-              <NuxtLink
-                to="/admin/settings/general"
-                class="flex items-center px-4 py-2 text-sm rounded-lg transition-colors"
-                :class="$route.path === '/admin/settings/general' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'"
-              >
-                <Cog class="h-4 w-4 mr-2" />
-                General
-              </NuxtLink>
-              <NuxtLink
-                to="/admin/settings/security"
-                class="flex items-center px-4 py-2 text-sm rounded-lg transition-colors"
-                :class="$route.path === '/admin/settings/security' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'"
-              >
-                <Lock class="h-4 w-4 mr-2" />
-                Security
-              </NuxtLink>
-              <NuxtLink
-                to="/admin/settings/backup"
-                class="flex items-center px-4 py-2 text-sm rounded-lg transition-colors"
-                :class="$route.path === '/admin/settings/backup' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'"
-              >
-                <Database class="h-4 w-4 mr-2" />
-                Backup & Restore
-              </NuxtLink>
-            </div>
-          </div>
-
-          <!-- Support & Help -->
-          <NuxtLink
-            to="/admin/support"
-            class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors"
-            :class="$route.path === '/admin/support' ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700' : 'text-gray-700 hover:bg-gray-100'"
-          >
-            <HelpCircle class="h-5 w-5 mr-3" />
-            Support & Help
-          </NuxtLink>
-        </div>
-      </nav>
-    </div>
-
-    <!-- Main Content -->
-    <div class="lg:ml-64">
-      <!-- Top Navigation Bar -->
-      <header class="bg-white shadow-sm border-b border-gray-200">
-        <div class="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
-          <!-- Mobile menu button -->
-          <Button
-            variant="ghost"
-            size="sm"
-            class="lg:hidden"
-            @click="sidebarOpen = true"
-          >
-            <Menu class="h-5 w-5" />
-          </Button>
-
-          <!-- Breadcrumb -->
-          <nav class="flex items-center space-x-2 text-sm text-gray-500">
-            <span>Admin</span>
-            <ChevronRight class="h-4 w-4" />
-            <span class="text-gray-900 font-medium">{{ currentPageTitle }}</span>
-          </nav>
-
-          <!-- User menu -->
-          <div class="flex items-center space-x-4">
-            <!-- Notifications -->
-            <Button variant="ghost" size="sm">
-              <Bell class="h-5 w-5" />
-            </Button>
-
-            <!-- User dropdown -->
-            <div class="relative">
-              <Button
-                variant="ghost"
-                size="sm"
-                @click="showUserMenu = !showUserMenu"
-                class="flex items-center space-x-2"
-              >
-                <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                  <User class="h-4 w-4" />
+        <div class="fixed inset-y-0 left-0 z-50 w-64 bg-sidebar shadow-md transform transition-all duration-300 ease-in-out"
+        :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
+            <!-- Logo/Brand -->
+            <div class="flex items-center justify-between h-16 px-4 border-b border-sidebar-border">
+                <div class="flex items-center space-x-2">
+                    <!-- <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                        <span class="text-white font-bold text-sm">LS</span>
+                    </div>
+                    <span class="text-xl font-bold text-gray-900">Logic Sekai</span> -->
+                    <div class="p-4">
+                        <img src="/img/logic_sekai.svg" alt="logo" class="dark:filter dark:brightness-0 dark:invert"/>
+                    </div>
                 </div>
-                <span class="hidden md:block">{{ user?.name || 'Admin' }}</span>
-                <ChevronDown class="h-4 w-4" />
-              </Button>
-
-              <!-- Dropdown menu -->
-              <div
-                v-show="showUserMenu"
-                class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50"
-              >
-                <NuxtLink
-                  to="/admin/profile"
-                  class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  @click="showUserMenu = false"
-                >
-                  <User class="h-4 w-4 mr-2" />
-                  Profile
-                </NuxtLink>
-                <NuxtLink
-                  to="/admin/settings/account"
-                  class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  @click="showUserMenu = false"
-                >
-                  <Settings class="h-4 w-4 mr-2" />
-                  Account Settings
-                </NuxtLink>
-                <hr class="my-1 border-gray-200" />
-                <button
-                  @click="handleLogout"
-                  class="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                >
-                  <LogOut class="h-4 w-4 mr-2" />
-                  Logout
-                </button>
-              </div>
+                <Button variant="ghost" size="sm" class="lg:hidden text-sidebar-foreground" @click="sidebarOpen = false">
+                    <X class="h-5 w-5" />
+                </Button>
             </div>
-          </div>
+
+            <!-- Navigation Menu -->
+            <nav class="mt-4 px-2">
+                <div class="space-y-1">
+                <!-- Dynamic Menu Items -->
+                    <template v-for="menuItem in filteredMenuItems" :key="menuItem.id">
+                        <!-- Menu with children -->
+                        <div v-if="menuItem.child?.length" class="space-y-1">
+                            <button @click="toggleSubmenu(menuItem.id)"
+                            class="w-full flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg transition-colors text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                            :class="activeSubmenu === menuItem.id ? 'bg-sidebar-accent text-sidebar-accent-foreground' : ''">
+                                <div class="flex items-center">
+                                    <component :is="menuItem.icon" class="h-5 w-5 mr-3" />
+                                    {{ menuItem.name }}
+                                </div>
+                                <ChevronDown class="h-4 w-4 transform transition-transform"
+                                :class="activeSubmenu === menuItem.id ? 'rotate-180' : ''"/>
+                            </button>
+                        
+                            <div v-show="activeSubmenu === menuItem.id" class="ml-8 space-y-1">
+                                <NuxtLink
+                                v-for="childItem in menuItem.child"
+                                :key="childItem.id"
+                                :to="childItem.url"
+                                class="flex items-center px-4 py-2 text-sm rounded-lg transition-colors"
+                                :class="$route.path === childItem.url ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'">
+                                    <component :is="childItem.icon" class="h-4 w-4 mr-2" />
+                                    {{ childItem.name }}
+                                </NuxtLink>
+                            </div>
+                        </div>
+
+                        <!-- Single Menu Item -->
+                        <NuxtLink
+                        v-else
+                        :to="menuItem.url"
+                        class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors"
+                        :class="$route.path === menuItem.url ? 'bg-sidebar-primary text-sidebar-primary-foreground border-r-2 border-sidebar-primary' : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'">
+                            <component :is="menuItem.icon" class="h-5 w-5 mr-3" />
+                            {{ menuItem.name }}
+                        </NuxtLink>
+                    </template>
+                </div>
+            </nav>
         </div>
-      </header>
 
-      <!-- Page Content -->
-      <main class="p-4 sm:p-6 lg:p-8">
-        <slot />
-      </main>
+        <!-- Main Content -->
+        <div class="lg:ml-64">
+            <!-- Top Navigation Bar -->
+            <header class="bg-card border-b border-border transition-colors">
+                <div class="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
+                    <!-- Mobile menu button -->
+                    <Button
+                    variant="ghost"
+                    size="sm"
+                    class="lg:hidden text-foreground"
+                    @click="sidebarOpen = true">
+                        <Menu class="h-5 w-5" />
+                    </Button>
+
+                    <!-- Breadcrumb -->
+                    <Breadcrumb class="text-foreground">
+                        <BreadcrumbList>
+                            <BreadcrumbItem>
+                                <BreadcrumbLink href="/admin" class="text-muted-foreground hover:text-foreground transition-colors">
+                                    Admin
+                                </BreadcrumbLink>
+                            </BreadcrumbItem>
+                        <BreadcrumbSeparator class="text-muted-foreground" />
+                            <BreadcrumbItem>
+                                <BreadcrumbPage class="text-foreground">{{ currentPageTitle }}</BreadcrumbPage>
+                            </BreadcrumbItem>
+                        </BreadcrumbList>
+                    </Breadcrumb>
+
+                    <!-- User menu -->
+                    <div class="flex items-center space-x-4">
+                        <!-- Dark Mode Toggle -->
+                        <Button variant="ghost" size="sm" @click="toggleDarkMode" :title="darkModeText" class="text-muted-foreground hover:text-foreground transition-colors">
+                            <Sun v-if="isDarkMode" class="h-5 w-5" />
+                            <Moon v-else class="h-5 w-5" />
+                        </Button>
+
+                        <!-- Notifications -->
+                        <Button variant="ghost" size="sm" class="text-muted-foreground hover:text-foreground transition-colors">
+                            <Bell class="h-5 w-5" />
+                        </Button>
+
+                        <!-- User dropdown -->
+                        <div class="relative">
+                            <Button variant="ghost" size="sm" @click="showUserMenu = !showUserMenu" class="flex items-center space-x-2 text-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+                                <div class="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+                                    <User class="h-4 w-4 text-muted-foreground" />
+                                </div>
+                                <span class="hidden md:block">{{ user?.name || 'Admin' }}</span>
+                                <ChevronDown class="h-4 w-4" />
+                            </Button>
+
+                            <!-- Dropdown menu -->
+                            <div v-show="showUserMenu" class="absolute right-0 mt-2 w-48 bg-popover rounded-lg border border-border py-2 z-50 shadow-lg">
+                                <NuxtLink to="/admin/profile" class="flex items-center px-4 py-2 text-sm text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors" @click="showUserMenu = false">
+                                    <User class="h-4 w-4 mr-2" />
+                                    Profil
+                                </NuxtLink>
+                                <NuxtLink to="/admin/settings/account" class="flex items-center px-4 py-2 text-sm text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors" @click="showUserMenu = false">
+                                    <Settings class="h-4 w-4 mr-2" />
+                                    Pengaturan Akun
+                                </NuxtLink>
+                                <hr class="my-1 border-border" />
+                                <button @click="handleLogout" class="w-full flex items-center px-4 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors">
+                                    <LogOut class="h-4 w-4 mr-2" />
+                                    Keluar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <main class="p-4 sm:p-6 lg:p-8 bg-background min-h-screen transition-colors">
+                <slot />
+            </main>
+        </div>
+
+        <!-- Overlay for mobile sidebar -->
+        <div v-show="sidebarOpen" class="fixed inset-0 bg-black/50 z-40 lg:hidden transition-opacity" @click="sidebarOpen = false"></div>
     </div>
-
-    <!-- Overlay for mobile sidebar -->
-    <div
-      v-show="sidebarOpen"
-      class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-      @click="sidebarOpen = false"
-    ></div>
-  </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { Button } from '~/components/ui/button'
+import {
+    Breadcrumb,
+    BreadcrumbItem,
+    BreadcrumbLink,
+    BreadcrumbList,
+    BreadcrumbPage,
+    BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
 import { 
     Menu, 
-    X, 
-    LayoutDashboard, 
-    Users, 
-    UserCheck, 
-    Shield, 
-    Activity,
-    FileText, 
-    Edit, 
-    Folder, 
-    Image,
-    BarChart3, 
-    TrendingUp, 
-    Globe, 
-    Zap,
-    Settings, 
-    Cog, 
-    Lock, 
-    Database,
-    HelpCircle,
+    X,
     ChevronDown, 
     ChevronRight,
     Bell, 
     User, 
-    LogOut 
+    LogOut,
+    Settings,
+    Sun,
+    Moon
 } from 'lucide-vue-next'
-
 // Composables
 const { user, logout } = useAuth()
 const route = useRoute()
 const router = useRouter()
+const { adminMenuItems, getFilteredMenuItems } = useAdminMenu()
+const { isDarkMode, toggleDarkMode, darkModeText, syncWithDocument } = useDarkMode()
 
 // Reactive state
 const sidebarOpen = ref(false)
 const showUserMenu = ref(false)
 const activeSubmenu = ref(null)
+
+// Computed properties untuk menu yang difilter berdasarkan role dan permission user
+const filteredMenuItems = computed(() => {
+  return getFilteredMenuItems(
+    adminMenuItems,
+    user.value?.role,
+    user.value?.permissions || []
+  )
+})
 
 // Computed properties
 const currentPageTitle = computed(() => {
@@ -390,21 +218,23 @@ const handleClickOutside = (event) => {
     }
 }
 
+// Helper function untuk menentukan active submenu berdasarkan path
+const getActiveSubmenu = (path) => {
+    const menuItem = adminMenuItems.find(item => 
+        item.child?.some(child => child.url && path.startsWith(child.url))
+    )
+    return menuItem?.id || null
+}
+
 // Lifecycle
 onMounted(() => {
     document.addEventListener('click', handleClickOutside)
     
+    // Sync dengan class yang sudah ada dari script inline
+    syncWithDocument()
+    
     // Set default active submenu based on current route
-    const path = route.path
-    if (path.includes('/admin/users')) {
-        activeSubmenu.value = 'users'
-    } else if (path.includes('/admin/content')) {
-        activeSubmenu.value = 'content'
-    } else if (path.includes('/admin/analytics')) {
-        activeSubmenu.value = 'analytics'
-    } else if (path.includes('/admin/settings')) {
-        activeSubmenu.value = 'settings'
-    }
+    activeSubmenu.value = getActiveSubmenu(route.path)
 })
 
 onUnmounted(() => {
@@ -413,17 +243,7 @@ onUnmounted(() => {
 
 // Watch for route changes to update active submenu
 watch(() => route.path, (newPath) => {
-    if (newPath.includes('/admin/users')) {
-        activeSubmenu.value = 'users'
-    } else if (newPath.includes('/admin/content')) {
-        activeSubmenu.value = 'content'
-    } else if (newPath.includes('/admin/analytics')) {
-        activeSubmenu.value = 'analytics'
-    } else if (newPath.includes('/admin/settings')) {
-        activeSubmenu.value = 'settings'
-    } else {
-        activeSubmenu.value = null
-    }
+    activeSubmenu.value = getActiveSubmenu(newPath)
 })
 
 // Auto-close sidebar on mobile when clicking nav links

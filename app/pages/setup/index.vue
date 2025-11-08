@@ -1,110 +1,125 @@
 <template>
-    <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-md w-full space-y-8">
-        <Card>
-            <CardHeader class="text-center">
-            <CardTitle class="text-2xl font-bold">
-                Setup Superadmin
-            </CardTitle>
-            <CardDescription>
-                Buat akun superadmin untuk mengakses admin panel
-            </CardDescription>
-            </CardHeader>
-            
-            <CardContent>
-            <form @submit="onSubmit" class="space-y-4">
-                <FormField v-slot="{ componentField }" name="email">
-                <FormItem>
-                    <FormLabel>Email Superadmin</FormLabel>
-                    <FormControl>
-                    <Input
-                        type="email"
-                        placeholder="superadmin@example.com"
-                        v-bind="componentField"
-                    />
-                    </FormControl>
-                    <FormMessage />
-                </FormItem>
-                </FormField>
+    <section class="bg-background py-20 lg:py-[120px] min-h-screen flex items-center transition-colors">
+        <div class="container mx-auto">
+            <div class="flex flex-wrap -mx-4">
+                <div class="w-full px-4">
+                    <div class="relative mx-auto max-w-[525px] overflow-hidden rounded-lg bg-card py-16 px-10 text-center sm:px-12 md:px-[60px] transition-colors">
 
-                <FormField v-slot="{ componentField }" name="password">
-                <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                    <Input
-                        type="password"
-                        placeholder="Password yang kuat"
-                        v-bind="componentField"
-                    />
-                    </FormControl>
-                    <FormMessage />
-                </FormItem>
-                </FormField>
+                        <div class="mb-10 text-center md:mb-16">
+                            <NuxtLink href="/" class="mx-auto inline-block max-w-[220px]">
+                                <img src="/img/logic_sekai.svg" alt="logo" class="dark:filter dark:brightness-0 dark:invert transition-all"/>
+                            </NuxtLink>
+                        </div>
 
-                <FormField v-slot="{ componentField }" name="confirmPassword">
-                <FormItem>
-                    <FormLabel>Konfirmasi Password</FormLabel>
-                    <FormControl>
-                    <Input
-                        type="password"
-                        placeholder="Ulangi password"
-                        v-bind="componentField"
-                    />
-                    </FormControl>
-                    <FormMessage />
-                </FormItem>
-                </FormField>
+                        <Card class="bg-transparent border-0 shadow-none">
+                            <CardHeader class="text-center">
+                                <CardTitle class="text-2xl font-bold text-card-foreground">
+                                    Setup Superadmin
+                                </CardTitle>
+                                <CardDescription class="text-muted-foreground">
+                                    Buat akun superadmin untuk mengakses admin panel
+                                </CardDescription>
+                            </CardHeader>
+                            
+                            <CardContent>
+                                <form @submit="onSubmit" class="space-y-4">
+                                    <FormField v-slot="{ componentField }" name="email">
+                                    <FormItem>
+                                        <FormLabel class="text-card-foreground">Email Superadmin</FormLabel>
+                                        <FormControl>
+                                        <Input
+                                            type="email"
+                                            placeholder="superadmin@example.com"
+                                            v-bind="componentField"
+                                            class="bg-background border-border text-foreground placeholder-muted-foreground focus:ring-ring transition-colors"
+                                        />
+                                        </FormControl>
+                                        <FormMessage class="text-left" />
+                                    </FormItem>
+                                    </FormField>
 
-                <FormField v-slot="{ componentField }" name="secret">
-                <FormItem>
-                    <FormLabel>Secret Key</FormLabel>
-                    <FormControl>
-                    <Input
-                        type="password"
-                        placeholder="Secret key untuk setup"
-                        v-bind="componentField"
-                    />
-                    </FormControl>
-                    <FormDescription class="text-xs">
-                    Hubungi administrator untuk mendapatkan secret key
-                    </FormDescription>
-                    <FormMessage />
-                </FormItem>
-                </FormField>
+                                    <FormField v-slot="{ componentField }" name="password">
+                                    <FormItem>
+                                        <FormLabel class="text-card-foreground">Password</FormLabel>
+                                        <FormControl>
+                                        <Input
+                                            type="password"
+                                            placeholder="Password yang kuat"
+                                            v-bind="componentField"
+                                            class="bg-background border-border text-foreground placeholder-muted-foreground focus:ring-ring transition-colors"
+                                        />
+                                        </FormControl>
+                                        <FormMessage class="text-left" />
+                                    </FormItem>
+                                    </FormField>
 
-                <Button
-                type="submit"
-                class="w-full"
-                :disabled="isSubmitting"
-                >
-                <Loader2 v-if="isSubmitting" class="mr-2 h-4 w-4 animate-spin" />
-                Buat Superadmin
-                </Button>
-            </form>
+                                    <FormField v-slot="{ componentField }" name="confirmPassword">
+                                    <FormItem>
+                                        <FormLabel class="text-card-foreground">Konfirmasi Password</FormLabel>
+                                        <FormControl>
+                                        <Input
+                                            type="password"
+                                            placeholder="Ulangi password"
+                                            v-bind="componentField"
+                                            class="bg-background border-border text-foreground placeholder-muted-foreground focus:ring-ring transition-colors"
+                                        />
+                                        </FormControl>
+                                        <FormMessage class="text-left" />
+                                    </FormItem>
+                                    </FormField>
 
-            <div v-if="error" class="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-                {{ error }}
+                                    <FormField v-slot="{ componentField }" name="secret">
+                                    <FormItem>
+                                        <FormLabel class="text-card-foreground">Secret Key</FormLabel>
+                                        <FormControl>
+                                        <Input
+                                            type="password"
+                                            placeholder="Secret key untuk setup"
+                                            v-bind="componentField"
+                                            class="bg-background border-border text-foreground placeholder-muted-foreground focus:ring-ring transition-colors"
+                                        />
+                                        </FormControl>
+                                        <FormDescription class="text-xs text-muted-foreground">
+                                        Hubungi administrator untuk mendapatkan secret key
+                                        </FormDescription>
+                                        <FormMessage class="text-left" />
+                                    </FormItem>
+                                    </FormField>
+
+                                    <Button
+                                    type="submit"
+                                    class="w-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                                    :disabled="isSubmitting"
+                                    >
+                                    <Loader2 v-if="isSubmitting" class="mr-2 h-4 w-4 animate-spin" />
+                                    Buat Superadmin
+                                    </Button>
+                                </form>
+
+                                <div v-if="error" class="mt-4 p-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg">
+                                    {{ error }}
+                                </div>
+
+                                <div v-if="success" class="mt-4 p-3 bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 rounded-lg">
+                                    {{ success }}
+                                </div>
+                            </CardContent>
+
+                            <CardFooter class="flex justify-center">
+                                <p class="text-sm text-muted-foreground">
+                                    Sudah ada akun superadmin?
+                                    <NuxtLink to="/auth/login"
+                                    class="font-medium text-primary hover:text-primary/80 transition-colors">
+                                        Login sekarang
+                                    </NuxtLink>
+                                </p>
+                            </CardFooter>
+                        </Card>
+                    </div>
+                </div>
             </div>
-
-            <div v-if="success" class="mt-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
-                {{ success }}
-            </div>
-            </CardContent>
-
-            <CardFooter class="flex justify-center">
-            <p class="text-sm text-gray-600">
-                Sudah ada akun superadmin?
-                <NuxtLink
-                to="/auth/login"
-                class="font-medium text-blue-600 hover:text-blue-500"
-                >
-                Login sekarang
-                </NuxtLink>
-            </p>
-            </CardFooter>
-        </Card>
         </div>
-    </div>
+    </section>
 </template>
 
 <script setup lang="ts">

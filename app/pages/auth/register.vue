@@ -1,23 +1,25 @@
 <template>
-  <section class="bg-gray-1 dark:bg-dark py-20 lg:py-[120px]">
+    <section class="bg-background py-20 min-h-screen flex items-center transition-colors">
         <div class="container mx-auto">
-            <div class="flex flex-wrap -mx-4">
+            <div class="flex flex-wrap">
                 <div class="w-full px-4">
-                    <div class="relative mx-auto max-w-[525px] overflow-hidden rounded-lg bg-white py-16 px-10 text-center sm:px-12 md:px-[60px] dark:bg-dark-2">
+                    <div class="relative mx-auto max-w-[525px] overflow-hidden rounded-lg bg-card py-16 px-10 text-center sm:px-12 md:px-[60px] transition-colors">
+
                         <div class="mb-10 text-center md:mb-16">
                             <NuxtLink href="/" class="mx-auto inline-block max-w-[220px]">
-                                <img src="/img/logic_sekai.svg" alt="logo"/>
+                                <img src="/img/logic_sekai.svg" alt="logo" class="dark:filter dark:brightness-0 dark:invert transition-all"/>
                             </NuxtLink>
                         </div>
                         <form @submit="onSubmit" class="space-y-6">
                             <FormField v-slot="{ componentField }" name="name">
                                 <FormItem>
-                                    <FormLabel>Nama Lengkap</FormLabel>
+                                    <FormLabel class="text-card-foreground">Nama Lengkap</FormLabel>
                                     <FormControl>
                                         <Input
                                             type="text"
                                             placeholder="Masukkan nama lengkap"
                                             v-bind="componentField"
+                                            class="bg-background border-border text-foreground placeholder-muted-foreground focus:ring-ring transition-colors"
                                         />
                                     </FormControl>
                                     <FormMessage class="text-left" />
@@ -26,12 +28,13 @@
 
                             <FormField v-slot="{ componentField }" name="username">
                                 <FormItem>
-                                    <FormLabel>Username</FormLabel>
+                                    <FormLabel class="text-card-foreground">Username</FormLabel>
                                     <FormControl>
                                         <Input
                                             type="text"
                                             placeholder="Masukkan username"
                                             v-bind="componentField"
+                                            class="bg-background border-border text-foreground placeholder-muted-foreground focus:ring-ring transition-colors"
                                         />
                                     </FormControl>
                                     <FormMessage class="text-left" />
@@ -40,12 +43,13 @@
 
                             <FormField v-slot="{ componentField }" name="email">
                                 <FormItem>
-                                    <FormLabel>Email</FormLabel>
+                                    <FormLabel class="text-card-foreground">Email</FormLabel>
                                     <FormControl>
                                         <Input
                                             type="email"
                                             placeholder="nama@email.com"
                                             v-bind="componentField"
+                                            class="bg-background border-border text-foreground placeholder-muted-foreground focus:ring-ring transition-colors"
                                         />
                                     </FormControl>
                                     <FormMessage class="text-left" />
@@ -54,12 +58,13 @@
 
                             <FormField v-slot="{ componentField }" name="password">
                                 <FormItem>
-                                    <FormLabel>Password</FormLabel>
+                                    <FormLabel class="text-card-foreground">Password</FormLabel>
                                     <FormControl>
                                         <Input
                                             type="password"
                                             placeholder="Masukkan password"
                                             v-bind="componentField"
+                                            class="bg-background border-border text-foreground placeholder-muted-foreground focus:ring-ring transition-colors"
                                         />
                                     </FormControl>
                                     <FormMessage class="text-left" />
@@ -68,12 +73,13 @@
 
                             <FormField v-slot="{ componentField }" name="confirmPassword">
                                 <FormItem>
-                                    <FormLabel>Konfirmasi Password</FormLabel>
+                                    <FormLabel class="text-card-foreground">Konfirmasi Password</FormLabel>
                                     <FormControl>
                                         <Input
                                             type="password"
                                             placeholder="Konfirmasi password"
                                             v-bind="componentField"
+                                            class="bg-background border-border text-foreground placeholder-muted-foreground focus:ring-ring transition-colors"
                                         />
                                     </FormControl>
                                     <FormMessage class="text-left" />
@@ -81,23 +87,23 @@
                             </FormField>
 
                             
-                            <div v-if="error" class="mt-4 p-2 bg-red-100 border border-red-400 text-red-700 rounded">
+                            <div v-if="error" class="mt-4 p-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg">
                                 {{ error }}
                             </div>
 
-                            <div v-if="success" class="mt-4 p-2 bg-green-100 border border-green-400 text-green-700 rounded">
+                            <div v-if="success" class="mt-4 p-3 bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 rounded-lg">
                                 {{ success }}
                             </div>
 
-                            <Button type="submit" class="w-full" :disabled="isSubmitting">
+                            <Button type="submit" class="w-full bg-primary text-primary-foreground hover:bg-primary/90" :disabled="isSubmitting">
                                 <Loader2 v-if="isSubmitting" class="mr-2 h-4 w-4 animate-spin" />
                                 Daftar
                             </Button>
                         </form>
 
-                        <p class="mt-3 text-base text-body-color dark:text-dark-6">
+                        <p class="mt-4 text-base text-muted-foreground">
                             <span class="pr-0.5">Sudah punya akun?</span>
-                            <NuxtLink to="/auth" class="text-indigo-700 hover:underline"> Masuk sekarang </NuxtLink>
+                            <NuxtLink to="/auth/login" class="text-primary hover:text-primary/80 hover:underline transition-colors"> Masuk sekarang </NuxtLink>
                         </p>
 
                         <Ornament />
