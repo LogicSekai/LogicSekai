@@ -13,18 +13,13 @@
 
         <!-- Search and Filter Controls -->
         <Card>
-            <CardContent class="pt-6">
+            <CardContent>
                 <div class="flex flex-col sm:flex-row gap-4">
                     <!-- Search Input -->
                     <div class="flex-1">
                         <div class="relative">
                             <Search class="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                            <Input
-                                v-model="searchQuery"
-                                placeholder="Search by name, username, or email..."
-                                class="pl-10"
-                                @input="handleSearch"
-                            />
+                            <Input v-model="searchQuery" placeholder="Search by name, username, or email..." class="pl-10" @input="handleSearch"/>
                         </div>
                     </div>
                     
@@ -210,14 +205,7 @@
                                             <UserCheck v-else-if="!user.verified" class="h-4 w-4" />
                                             <UserX v-else class="h-4 w-4" />
                                         </Button>
-                                        <Button 
-                                            variant="ghost" 
-                                            size="sm"
-                                            @click="deleteUser(user)"
-                                            class="text-red-600 hover:text-red-800"
-                                        >
-                                            <Trash2 class="h-4 w-4" />
-                                        </Button>
+                                        <DeleteUser :user="user" :delete="deleteUser" />
                                     </div>
                                 </td>
                             </tr>
@@ -275,12 +263,13 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { 
     UserPlus, Users, Search, X, RefreshCw, Loader2, Eye, Edit, 
-    UserCheck, UserX, Trash2, ChevronLeft, ChevronRight, 
+    UserCheck, UserX, ChevronLeft, ChevronRight, 
     CheckCircle, AlertCircle, User
 } from 'lucide-vue-next'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
+import DeleteUser from '~/components/admin/users/DeleteUser.vue'
 
 // Types
 interface User {
@@ -483,26 +472,27 @@ const toggleVerification = async (user: User) => {
 }
 
 const deleteUser = async (user: User) => {
-    if (confirm(`Are you sure you want to delete user ${user.name}? This action cannot be undone.`)) {
-        try {
-            const response:any = await $fetch(`/api/admin/users/${user.id}`, {
-                method: 'DELETE'
-            })
+    try {
+        const response:any = await $fetch(`/api/admin/users/${user.id}`, {
+            method: 'DELETE'
+        })
+        
+        if (response.success) {
+            useToaster('success', 'User deleted successfully')
+            users.value = users.value.filter(u => u.id !== user.id)
+            lastUpdated.value = new Date().toLocaleTimeString()
             
-            if (response.success) {
-                users.value = users.value.filter(u => u.id !== user.id)
-                lastUpdated.value = new Date().toLocaleTimeString()
-                
-                // Adjust pagination if necessary
-                if (paginatedUsers.value.length === 0 && currentPage.value > 1) {
-                    currentPage.value = currentPage.value - 1
-                }
-            } else {
-                console.error('Failed to delete user:', response.error)
+            // Adjust pagination if necessary
+            if (paginatedUsers.value.length === 0 && currentPage.value > 1) {
+                currentPage.value = currentPage.value - 1
             }
-        } catch (error) {
-            console.error('Error deleting user:', error)
+        } else {
+            useToaster('error', response.error || 'Failed to delete user')
+            console.error('Failed to delete user:', response.error)
         }
+    } catch (error) {
+        useToaster('error', 'Failed to delete user')
+        console.error('Error deleting user:', error)
     }
 }
 
