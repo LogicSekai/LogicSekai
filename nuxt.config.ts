@@ -28,6 +28,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     betterAuthSecret: process.env.BETTER_AUTH_SECRET || 'dev-secret',
     betterAuthUrl: process.env.BETTER_AUTH_URL || 'http://localhost:3000',
+    superadminSetupSecret: process.env.SUPERADMIN_SETUP_SECRET || 'create-superadmin-2024',
     cloudflareAccountId: process.env.CLOUDFLARE_ACCOUNT_ID,
     cloudflareDatabaseId: process.env.CLOUDFLARE_DATABASE_ID,
     cloudflareApiToken: process.env.CLOUDFLARE_API_TOKEN,

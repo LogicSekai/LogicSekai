@@ -29,26 +29,14 @@ Platform untuk berbagi logic dan pengetahuan programming dengan sistem autentika
 bun install
 ```
 
-### 2. Environment Configuration
+### Testing Session Persistence
 
-Salin file `.env.example` ke `.env`:
-
-```bash
-cp .env.example .env
-```
-
-Update variabel environment di file `.env`:
-
-```env
-# Database Configuration
-CLOUDFLARE_ACCOUNT_ID=your_account_id
-CLOUDFLARE_DATABASE_ID=your_database_id  
-CLOUDFLARE_API_TOKEN=your_api_token
-
-# Authentication
-BETTER_AUTH_SECRET=your-super-secret-key-here
-BETTER_AUTH_URL=http://localhost:3000
-```
+1. Make sure to set `SUPERADMIN_SETUP_SECRET` in your `.env` file
+2. Navigate to `/admin` - should redirect to login if not authenticated
+3. Login with superadmin credentials 
+4. Navigate to `/admin/` - should show dashboard
+5. Refresh the page - should remain on dashboard (not redirect to login)
+6. Open new tab and navigate to `/admin/` - should show dashboard
 
 ### 3. Database Setup
 

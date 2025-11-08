@@ -38,9 +38,11 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  // Simple secret key check for creating superadmin
+  // Check secret key from environment variable
   const { secret } = body;
-  if (secret !== 'create-superadmin-2024') {
+  const config = useRuntimeConfig();
+  
+  if (secret !== config.superadminSetupSecret) {
     throw createError({
       statusCode: 403,
       statusMessage: 'Invalid secret key'
