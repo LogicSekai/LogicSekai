@@ -180,33 +180,14 @@
                                 
                                 <!-- Actions -->
                                 <td class="py-4 px-4 text-right">
-                                    <div class="flex items-center justify-end space-x-2">
-                                        <Button 
-                                            variant="ghost" 
-                                            size="sm"
-                                            @click="viewUser(user)"
-                                        >
-                                            <Eye class="h-4 w-4" />
-                                        </Button>
-                                        <Button 
-                                            variant="ghost" 
-                                            size="sm"
-                                            @click="editUser(user)"
-                                        >
-                                            <Edit class="h-4 w-4" />
-                                        </Button>
-                                        <Button 
-                                            variant="ghost" 
-                                            size="sm"
-                                            @click="toggleVerification(user)"
-                                            :disabled="updatingUsers.includes(user.id)"
-                                        >
-                                            <Loader2 v-if="updatingUsers.includes(user.id)" class="h-4 w-4 animate-spin" />
-                                            <UserCheck v-else-if="!user.verified" class="h-4 w-4" />
-                                            <UserX v-else class="h-4 w-4" />
-                                        </Button>
-                                        <DeleteUser :user="user" :delete="deleteUser" />
-                                    </div>
+                                    <ActionList 
+                                        :user="user" 
+                                        :view="viewUser" 
+                                        :edit="editUser" 
+                                        :toggle-verification="toggleVerification" 
+                                        :deleting-users="updatingUsers"
+                                        :delete="deleteUser"
+                                    />
                                 </td>
                             </tr>
                         </tbody>
@@ -265,15 +246,14 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { 
-    UserPlus, Users, Search, X, RefreshCw, Loader2, Eye, Edit, 
-    UserCheck, UserX, ChevronLeft, ChevronRight, 
-    CheckCircle, AlertCircle, User as UserIcon
+    UserPlus, Users, Search, X, RefreshCw, Loader2, ChevronLeft, ChevronRight, 
+    CheckCircle, AlertCircle
 } from 'lucide-vue-next'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import UserAvatar from '~/components/UserAvatar.vue'
-import DeleteUser from '~/components/admin/users/DeleteUser.vue'
+import ActionList from '~/components/admin/users/ActionList.vue'
 
 // Import User Types
 import type { 
