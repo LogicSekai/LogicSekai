@@ -139,7 +139,7 @@
                                 <div class="w-2 h-2 bg-purple-500 rounded-full"></div>
                                 <div>
                                     <p class="text-sm font-medium text-foreground">Email Verified</p>
-                                    <p class="text-xs text-muted-foreground">{{ formatDate(user.updated) }}</p>
+                                    <p class="text-xs text-muted-foreground">{{ formatDate(user.verified) }}</p>
                                 </div>
                             </div>
                         </div>
@@ -415,15 +415,19 @@ const toggleVerification = async (): Promise<void> => {
     try {
         updatingUser.value = true
         
+        const currentlyVerified = user.value.verified !== null && user.value.verified !== undefined
+        const shouldVerify = !currentlyVerified
+        
         const response = await $fetch<{ success: boolean; error?: string }>(`/api/admin/users/${userId}/verify`, {
             method: 'POST',
             body: {
-                verified: !user.value.verified
+                verified: shouldVerify
             }
         })
         
         if (response.success) {
-            user.value.verified = !user.value.verified
+            // If verifying, set current date; if unverifying, set null
+            user.value.verified = shouldVerify ? new Date().toISOString() : null
         } else {
             console.error('Failed to toggle verification:', response.error)
         }

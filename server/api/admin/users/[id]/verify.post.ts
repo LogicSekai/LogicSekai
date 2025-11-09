@@ -23,9 +23,12 @@ export default defineEventHandler(async (event) => {
     try {
       const db = getDatabase();
       
+      // If verifying, set current timestamp; if unverifying, set null
+      const verificationValue = verified ? new Date() : null;
+      
       await db.update(users)
         .set({ 
-          verified: verified,
+          verified: verificationValue,
           updated: new Date()
         })
         .where(eq(users.id, userId!));

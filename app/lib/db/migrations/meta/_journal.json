@@ -8,6 +8,20 @@
       "when": 1762604586316,
       "tag": "0000_polite_mesmero",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1762641318938,
+      "tag": "0001_lyrical_inertia",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1762642157855,
+      "tag": "0002_cool_annihilus",
+      "breakpoints": true
     }
   ]
 }

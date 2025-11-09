@@ -15,10 +15,10 @@
         
         <!-- Verification Badge -->
         <div 
-            v-if="showVerificationStatus && user?.verified"
+            v-if="showVerificationStatus && isUserVerified"
             class="absolute -bottom-0.5 -right-0.5 bg-green-500 text-white rounded-full flex items-center justify-center border-2 border-background"
             :class="verificationBadgeClasses"
-            title="Verified User"
+            :title="`Verified on ${verificationDateText}`"
         >
             <CheckCircle :class="verificationIconClasses" />
         </div>
@@ -40,6 +40,7 @@ import { computed } from 'vue'
 import { CheckCircle } from 'lucide-vue-next'
 import Avatar from '~/components/Avatar.vue'
 import type { User, UserRole } from '~/types'
+import { isVerified, formatVerificationDate as formatDate } from '~/utils/verification'
 
 // Props definition
 interface Props {
@@ -68,6 +69,14 @@ const props = withDefaults(defineProps<Props>(), {
 // Computed properties
 const onlineStatus = computed(() => {
     return props.isOnline ? 'online' : 'offline'
+})
+
+const isUserVerified = computed(() => {
+    return props.user?.verified ? isVerified(props.user.verified) : false
+})
+
+const verificationDateText = computed(() => {
+    return props.user?.verified ? formatDate(props.user.verified) : ''
 })
 
 const verificationBadgeClasses = computed(() => {

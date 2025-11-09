@@ -6,8 +6,8 @@
 // Base User Role Types
 export type UserRole = 'user' | 'creator' | 'superadmin'
 
-// User Verification Status
-export type VerificationStatus = boolean
+// User Verification Status - null means not verified, string date means verified
+export type VerificationStatus = string | null
 
 // Base User Interface
 export interface User {
@@ -18,6 +18,8 @@ export interface User {
     avatar: string | null
     role: UserRole
     verified: VerificationStatus
+    suspended?: string | null // timestamp untuk suspend
+    deleted?: string | null // timestamp untuk soft delete
     created: string
     updated: string
 }

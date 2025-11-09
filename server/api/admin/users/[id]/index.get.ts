@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/better-sqlite3'
 import Database from 'better-sqlite3'
-import { users } from '../../../../../app/lib/db/schema'
+import { users } from '~/lib/db/schema'
 
 function getDatabase() {
     if (process.env.NODE_ENV === 'development') {
@@ -104,7 +104,9 @@ export default defineEventHandler(async (event) => {
             role: users.role,
             verified: users.verified,
             created: users.created,
-            updated: users.updated
+            updated: users.updated,
+            suspended: users.suspended,
+            deleted: users.deleted,
         }).from(users)
             .where(eq(users.id, userId))
             .limit(1)
@@ -121,8 +123,11 @@ export default defineEventHandler(async (event) => {
         // Convert timestamps to ISO strings for frontend
         const userResponse = {
             ...user,
+            verified: user.verified ? (user.verified instanceof Date ? user.verified.toISOString() : new Date(user.verified).toISOString()) : null,
             created: user.created instanceof Date ? user.created.toISOString() : new Date(user.created).toISOString(),
-            updated: user.updated instanceof Date ? user.updated.toISOString() : new Date(user.updated).toISOString()
+            updated: user.updated instanceof Date ? user.updated.toISOString() : new Date(user.updated).toISOString(),
+            suspended: user.suspended ? (user.suspended instanceof Date ? user.suspended.toISOString() : new Date(user.suspended).toISOString()) : null,
+            deleted: user.deleted ? (user.deleted instanceof Date ? user.deleted.toISOString() : new Date(user.deleted).toISOString()) : null,
         }
 
         return {

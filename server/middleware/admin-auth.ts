@@ -54,7 +54,7 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Verify user still exists in database
+    // Verify user still exists in database and is not deleted/suspended
     const db = getDatabase()
     const user = await db.select()
       .from(users)
@@ -65,6 +65,22 @@ export default defineEventHandler(async (event) => {
       throw createError({
         statusCode: 401,
         statusMessage: 'User not found. Session invalid.'
+      })
+    }
+
+    // Check if user is soft deleted
+    if (user[0].deleted) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: 'Account has been deleted. Access denied.'
+      })
+    }
+
+    // Check if user is suspended
+    if (user[0].suspended) {
+      throw createError({
+        statusCode: 403,
+        statusMessage: 'Account has been suspended. Access denied.'
       })
     }
 

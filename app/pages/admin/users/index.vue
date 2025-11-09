@@ -11,6 +11,81 @@
             </Button>
         </div>
 
+        <!-- User Status Statistics -->
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+            <Card 
+                class="border-green-200 bg-green-50/50 dark:bg-green-950/20 cursor-pointer hover:shadow-md transition-shadow"
+                :class="{ 'ring-2 ring-green-500': selectedAccountStatus === 'active' }"
+                @click="filterByStatus('active')"
+            >
+                <CardContent class="p-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="p-2 bg-green-100 dark:bg-green-900/50 rounded-full">
+                            <CheckCircle class="h-5 w-5 text-green-600 dark:text-green-400" />
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-green-700 dark:text-green-400">Active Users</p>
+                            <p class="text-2xl font-bold text-green-900 dark:text-green-300">{{ userStats.active }}</p>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+            
+            <Card 
+                class="border-orange-200 bg-orange-50/50 dark:bg-orange-950/20 cursor-pointer hover:shadow-md transition-shadow"
+                :class="{ 'ring-2 ring-orange-500': selectedAccountStatus === 'suspended' }"
+                @click="filterByStatus('suspended')"
+            >
+                <CardContent class="p-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="p-2 bg-orange-100 dark:bg-orange-900/50 rounded-full">
+                            <AlertTriangle class="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-orange-700 dark:text-orange-400">Suspended</p>
+                            <p class="text-2xl font-bold text-orange-900 dark:text-orange-300">{{ userStats.suspended }}</p>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+            
+            <Card 
+                class="border-red-200 bg-red-50/50 dark:bg-red-950/20 cursor-pointer hover:shadow-md transition-shadow"
+                :class="{ 'ring-2 ring-red-500': selectedAccountStatus === 'deleted' }"
+                @click="filterByStatus('deleted')"
+            >
+                <CardContent class="p-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="p-2 bg-red-100 dark:bg-red-900/50 rounded-full">
+                            <Trash2 class="h-5 w-5 text-red-600 dark:text-red-400" />
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-red-700 dark:text-red-400">Deleted</p>
+                            <p class="text-2xl font-bold text-red-900 dark:text-red-300">{{ userStats.deleted }}</p>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+            
+            <Card 
+                class="border-gray-200 bg-gray-50/50 dark:bg-gray-950/20 cursor-pointer hover:shadow-md transition-shadow"
+                :class="{ 'ring-2 ring-gray-500': !selectedAccountStatus }"
+                @click="filterByStatus('')"
+            >
+                <CardContent class="p-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="p-2 bg-gray-100 dark:bg-gray-900/50 rounded-full">
+                            <Users class="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-700 dark:text-gray-400">Total Users</p>
+                            <p class="text-2xl font-bold text-gray-900 dark:text-gray-300">{{ totalUsers }}</p>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
+
         <!-- Search and Filter Controls -->
         <Card>
             <CardContent>
@@ -44,9 +119,23 @@
                             @change="handleFilter"
                             class="w-full px-3 py-2 border border-border bg-background text-foreground rounded-md shadow-sm focus:outline-none focus:ring-ring focus:border-ring transition-colors"
                         >
-                            <option value="">All Status</option>
+                            <option value="">Verification Status</option>
                             <option value="true">Verified</option>
                             <option value="false">Unverified</option>
+                        </select>
+                    </div>
+
+                    <!-- Account Status Filter -->
+                    <div class="w-full sm:w-48">
+                        <select 
+                            v-model="selectedAccountStatus" 
+                            @change="handleFilter"
+                            class="w-full px-3 py-2 border border-border bg-background text-foreground rounded-md shadow-sm focus:outline-none focus:ring-ring focus:border-ring transition-colors"
+                        >
+                            <option value="">Account Status</option>
+                            <option value="active">Active</option>
+                            <option value="suspended">Suspended</option>
+                            <option value="deleted">Deleted</option>
                         </select>
                     </div>
                     
@@ -54,7 +143,7 @@
                     <Button 
                         variant="outline" 
                         @click="clearFilters"
-                        v-if="searchQuery || selectedRole || selectedVerification"
+                        v-if="searchQuery || selectedRole || selectedVerification || selectedAccountStatus"
                         class="border-border text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
                     >
                         <X class="h-4 w-4 mr-2" />
@@ -71,6 +160,9 @@
                     <CardTitle>User Management</CardTitle>
                     <CardDescription>
                         {{ totalUsers }} total users ({{ filteredUsers.length }} shown)
+                        <span v-if="selectedAccountStatus" class="ml-2 text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-800">
+                            Filter: {{ selectedAccountStatus.charAt(0).toUpperCase() + selectedAccountStatus.slice(1) }}
+                        </span>
                     </CardDescription>
                 </div>
                 <div class="flex items-center space-x-2 text-sm text-muted-foreground">
@@ -111,7 +203,8 @@
                                 <th class="text-left py-3 px-4 font-medium text-foreground">User</th>
                                 <th class="text-left py-3 px-4 font-medium text-foreground">Email</th>
                                 <th class="text-left py-3 px-4 font-medium text-foreground">Role</th>
-                                <th class="text-left py-3 px-4 font-medium text-foreground">Status</th>
+                                <th class="text-left py-3 px-4 font-medium text-foreground">Verification</th>
+                                <th class="text-left py-3 px-4 font-medium text-foreground">Account Status</th>
                                 <th class="text-left py-3 px-4 font-medium text-foreground">Created</th>
                                 <th class="text-right py-3 px-4 font-medium text-foreground">Actions</th>
                             </tr>
@@ -121,20 +214,50 @@
                                 v-for="user in paginatedUsers" 
                                 :key="user.id"
                                 class="border-b border-border hover:bg-muted/50 transition-colors"
+                                :class="{
+                                    'bg-red-50/50 dark:bg-red-950/20': isDeleted(user),
+                                    'bg-orange-50/50 dark:bg-orange-950/20': isSuspended(user) && !isDeleted(user),
+                                    'opacity-75': isDeleted(user) || isSuspended(user)
+                                }"
                             >
                                 <!-- User Info -->
                                 <td class="py-4 px-4">
                                     <div class="flex items-center space-x-3">
-                                        <UserAvatar
-                                            :user="user"
-                                            size="md"
-                                            :clickable="true"
-                                            :show-verification-status="true"
-                                            :show-role-badge="true"
-                                            @click="(clickedUser) => viewUser(clickedUser)"
-                                        />
+                                        <div class="relative">
+                                            <UserAvatar
+                                                :user="user"
+                                                size="md"
+                                                :clickable="true"
+                                                :show-verification-status="true"
+                                                :show-role-badge="true"
+                                                @click="(clickedUser) => viewUser(clickedUser)"
+                                                :class="{
+                                                    'opacity-60': isDeleted(user) || isSuspended(user),
+                                                    'grayscale': isDeleted(user)
+                                                }"
+                                            />
+                                            <!-- Status Overlay Icons -->
+                                            <div v-if="isDeleted(user)" class="absolute -top-1 -right-1 bg-red-500 rounded-full p-1">
+                                                <Trash2 class="h-3 w-3 text-white" />
+                                            </div>
+                                            <div v-else-if="isSuspended(user)" class="absolute -top-1 -right-1 bg-orange-500 rounded-full p-1">
+                                                <AlertTriangle class="h-3 w-3 text-white" />
+                                            </div>
+                                        </div>
                                         <div>
-                                            <p class="font-medium text-foreground">{{ user.name }}</p>
+                                            <div class="flex items-center space-x-2">
+                                                <p 
+                                                    class="font-medium text-foreground"
+                                                    :class="{
+                                                        'line-through text-red-600': isDeleted(user),
+                                                        'text-orange-600': isSuspended(user) && !isDeleted(user)
+                                                    }"
+                                                >
+                                                    {{ user.name }}
+                                                </p>
+                                                <span v-if="isDeleted(user)" class="text-xs text-red-500 font-medium">(DELETED)</span>
+                                                <span v-else-if="isSuspended(user)" class="text-xs text-orange-500 font-medium">(SUSPENDED)</span>
+                                            </div>
                                             <p class="text-sm text-muted-foreground">@{{ user.username }}</p>
                                         </div>
                                     </div>
@@ -157,18 +280,25 @@
                                 
                                 <!-- Verification Status -->
                                 <td class="py-4 px-4">
-                                    <div class="flex items-center space-x-2">
+                                    <div class="flex flex-col space-y-1">
                                         <span 
-                                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                                            :class="user.verified 
-                                                ? 'bg-green-100 text-green-800' 
-                                                : 'bg-yellow-100 text-yellow-800'"
+                                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium w-fit"
+                                            :class="getVerificationBadgeInfo(user.verified).badgeClass"
+                                            :title="getVerificationBadgeInfo(user.verified).tooltip"
                                         >
-                                            <CheckCircle v-if="user.verified" class="h-3 w-3 mr-1" />
+                                            <CheckCircle v-if="isVerified(user.verified)" class="h-3 w-3 mr-1" />
                                             <AlertCircle v-else class="h-3 w-3 mr-1" />
-                                            {{ user.verified ? 'Verified' : 'Unverified' }}
+                                            {{ getVerificationBadgeInfo(user.verified).text }}
+                                        </span>
+                                        <span v-if="getVerificationBadgeInfo(user.verified).date" class="text-xs text-muted-foreground">
+                                            {{ getVerificationBadgeInfo(user.verified).date }}
                                         </span>
                                     </div>
+                                </td>
+
+                                <!-- Account Status -->
+                                <td class="py-4 px-4">
+                                    <AccountStatusBadge :user="user" />
                                 </td>
                                 
                                 <!-- Created Date -->
@@ -185,6 +315,9 @@
                                         :view="viewUser" 
                                         :edit="editUser" 
                                         :toggle-verification="toggleVerification" 
+                                        :suspend="suspendUser"
+                                        :reactivate="reactivateUser"
+                                        :recover="recoverUser"
                                         :deleting-users="updatingUsers"
                                         :delete="deleteUser"
                                     />
@@ -247,13 +380,16 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { 
     UserPlus, Users, Search, X, RefreshCw, Loader2, ChevronLeft, ChevronRight, 
-    CheckCircle, AlertCircle
+    CheckCircle, AlertCircle, Trash2, AlertTriangle
 } from 'lucide-vue-next'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import UserAvatar from '~/components/UserAvatar.vue'
 import ActionList from '~/components/admin/users/ActionList.vue'
+import AccountStatusBadge from '~/components/admin/users/AccountStatusBadge.vue'
+import { isVerified, getVerificationBadgeInfo, createVerificationDate } from '~/utils/verification'
+import { getUserStatusInfo, isDeleted, isSuspended } from '~/utils/user-management'
 
 // Import User Types
 import type { 
@@ -274,6 +410,7 @@ const lastUpdated = ref<string>('')
 const searchQuery = ref<string>('')
 const selectedRole = ref<UserRole | ''>('')
 const selectedVerification = ref<'true' | 'false' | ''>('')
+const selectedAccountStatus = ref<'active' | 'suspended' | 'deleted' | ''>('')
 
 // Pagination state
 const currentPage = ref<number>(1)
@@ -303,8 +440,18 @@ const filteredUsers = computed(() => {
 
     // Apply verification filter
     if (selectedVerification.value) {
-        const isVerified = selectedVerification.value === 'true'
-        filtered = filtered.filter(user => user.verified === isVerified)
+        const shouldShowVerified = selectedVerification.value === 'true'
+        filtered = filtered.filter(user => {
+            return isVerified(user.verified) === shouldShowVerified
+        })
+    }
+
+    // Apply account status filter
+    if (selectedAccountStatus.value) {
+        filtered = filtered.filter(user => {
+            const userStatus = getUserStatusInfo(user)
+            return userStatus.status === selectedAccountStatus.value
+        })
     }
 
     return filtered
@@ -341,6 +488,28 @@ const visiblePages = computed(() => {
     }
 
     return pages
+})
+
+const userStats = computed(() => {
+    const stats = {
+        active: 0,
+        suspended: 0,
+        deleted: 0,
+        total: users.value.length
+    }
+    
+    users.value.forEach(user => {
+        const status = getUserStatusInfo(user).status
+        if (status === 'active') {
+            stats.active++
+        } else if (status === 'suspended') {
+            stats.suspended++
+        } else if (status === 'deleted') {
+            stats.deleted++
+        }
+    })
+    
+    return stats
 })
 
 // Methods
@@ -386,6 +555,7 @@ const clearFilters = (): void => {
     searchQuery.value = ''
     selectedRole.value = ''
     selectedVerification.value = ''
+    selectedAccountStatus.value = ''
     currentPage.value = 1
 }
 
@@ -393,6 +563,11 @@ const goToPage = (page: number): void => {
     if (page >= 1 && page <= totalPages.value) {
         currentPage.value = page
     }
+}
+
+const filterByStatus = (status: 'active' | 'suspended' | 'deleted' | ''): void => {
+    selectedAccountStatus.value = status
+    currentPage.value = 1
 }
 
 const getRoleBadgeClass = (role: UserRole): string => {
@@ -431,15 +606,19 @@ const toggleVerification = async (user: User): Promise<void> => {
     try {
         updatingUsers.value.push(user.id)
         
+        const currentlyVerified = isVerified(user.verified)
+        const shouldVerify = !currentlyVerified
+        
         const response = await $fetch<{ success: boolean; error?: string }>(`/api/admin/users/${user.id}/verify`, {
             method: 'POST',
             body: {
-                verified: !user.verified
+                verified: shouldVerify
             }
         })
         
         if (response.success) {
-            user.verified = !user.verified
+            // If verifying, set current date; if unverifying, set null
+            user.verified = shouldVerify ? createVerificationDate() : null
             lastUpdated.value = new Date().toLocaleTimeString()
         } else {
             console.error('Failed to toggle verification:', response.error)
@@ -476,8 +655,93 @@ const deleteUser = async (user: User): Promise<void> => {
     }
 }
 
+const suspendUser = async (user: User, reason?: string): Promise<void> => {
+    try {
+        updatingUsers.value.push(user.id)
+        
+        const response = await $fetch<{ success: boolean; error?: string; user?: User }>(`/api/admin/users/${user.id}/suspend`, {
+            method: 'POST',
+            body: { reason }
+        })
+        
+        if (response.success && response.user) {
+            // Update the user in the local array
+            const userIndex = users.value.findIndex(u => u.id === user.id)
+            if (userIndex !== -1) {
+                users.value[userIndex] = response.user
+            }
+            lastUpdated.value = new Date().toLocaleTimeString()
+            useToaster('success', `User ${user.name} suspended successfully`)
+        } else {
+            useToaster('error', response.error || 'Failed to suspend user')
+            console.error('Failed to suspend user:', response.error)
+        }
+    } catch (error) {
+        useToaster('error', 'Failed to suspend user')
+        console.error('Error suspending user:', error)
+    } finally {
+        updatingUsers.value = updatingUsers.value.filter(id => id !== user.id)
+    }
+}
+
+const reactivateUser = async (user: User): Promise<void> => {
+    try {
+        updatingUsers.value.push(user.id)
+        
+        const response = await $fetch<{ success: boolean; error?: string; user?: User }>(`/api/admin/users/${user.id}/reactivate`, {
+            method: 'POST'
+        })
+        
+        if (response.success && response.user) {
+            // Update the user in the local array
+            const userIndex = users.value.findIndex(u => u.id === user.id)
+            if (userIndex !== -1) {
+                users.value[userIndex] = response.user
+            }
+            lastUpdated.value = new Date().toLocaleTimeString()
+            useToaster('success', `User ${user.name} reactivated successfully`)
+        } else {
+            useToaster('error', response.error || 'Failed to reactivate user')
+            console.error('Failed to reactivate user:', response.error)
+        }
+    } catch (error) {
+        useToaster('error', 'Failed to reactivate user')
+        console.error('Error reactivating user:', error)
+    } finally {
+        updatingUsers.value = updatingUsers.value.filter(id => id !== user.id)
+    }
+}
+
+const recoverUser = async (user: User): Promise<void> => {
+    try {
+        updatingUsers.value.push(user.id)
+        
+        const response = await $fetch<{ success: boolean; error?: string; user?: User }>(`/api/admin/users/${user.id}/recover`, {
+            method: 'POST'
+        })
+        
+        if (response.success && response.user) {
+            // Update the user in the local array
+            const userIndex = users.value.findIndex(u => u.id === user.id)
+            if (userIndex !== -1) {
+                users.value[userIndex] = response.user
+            }
+            lastUpdated.value = new Date().toLocaleTimeString()
+            useToaster('success', `User ${user.name} recovered successfully`)
+        } else {
+            useToaster('error', response.error || 'Failed to recover user')
+            console.error('Failed to recover user:', response.error)
+        }
+    } catch (error) {
+        useToaster('error', 'Failed to recover user')
+        console.error('Error recovering user:', error)
+    } finally {
+        updatingUsers.value = updatingUsers.value.filter(id => id !== user.id)
+    }
+}
+
 // Watch for filter changes to reset pagination
-watch([searchQuery, selectedRole, selectedVerification], () => {
+watch([searchQuery, selectedRole, selectedVerification, selectedAccountStatus], () => {
     currentPage.value = 1
 })
 

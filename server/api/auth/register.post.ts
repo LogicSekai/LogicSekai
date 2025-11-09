@@ -61,7 +61,7 @@ export default defineEventHandler(async (event) => {
             email,
             password: hashedPassword,
             role: 'user',
-            verified: false,
+            verified: null, // New users are not verified by default
         }).returning();
 
         return {

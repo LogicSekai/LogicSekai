@@ -31,6 +31,8 @@ export default defineEventHandler(async (event) => {
             avatar: users.avatar,
             role: users.role,
             verified: users.verified,
+            suspended: users.suspended,
+            deleted: users.deleted,
             created: users.created,
             updated: users.updated,
         }).from(users);
@@ -38,8 +40,11 @@ export default defineEventHandler(async (event) => {
         // Convert timestamps to ISO strings for frontend
         const usersWithFormattedDates = allUsers.map(user => ({
             ...user,
-            created: user.created instanceof Date ? user.created.toISOString() : new Date(user.created).toISOString(),
-            updated: user.updated instanceof Date ? user.updated.toISOString() : new Date(user.updated).toISOString()
+            verified: user.verified ? new Date(user.verified as any).toISOString() : null,
+            suspended: user.suspended ? new Date(user.suspended as any).toISOString() : null,
+            deleted: user.deleted ? new Date(user.deleted as any).toISOString() : null,
+            created: new Date(user.created as any).toISOString(),
+            updated: new Date(user.updated as any).toISOString()
         }));
 
         return {

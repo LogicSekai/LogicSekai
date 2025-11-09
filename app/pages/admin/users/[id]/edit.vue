@@ -301,11 +301,11 @@
                                 </span>
                                 <span 
                                     class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
-                                    :class="user.verified 
+                                    :class="isVerified(user.verified) 
                                         ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' 
                                         : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'"
                                 >
-                                    {{ user.verified ? 'Verified' : 'Unverified' }}
+                                    {{ isVerified(user.verified) ? 'Verified' : 'Unverified' }}
                                 </span>
                             </div>
                         </div>
@@ -328,9 +328,21 @@
                         </div>
                         <div class="flex items-center justify-between">
                             <span class="text-sm text-muted-foreground">Status</span>
-                            <Badge variant="outline" class="text-xs">
-                                Active
+                            <Badge 
+                                variant="outline" 
+                                class="text-xs"
+                                :class="`text-${userStatus.color}-600 border-${userStatus.color}-200`"
+                            >
+                                {{ userStatus.label }}
                             </Badge>
+                        </div>
+                        <div v-if="userStatus.isDeleted" class="flex items-center justify-between">
+                            <span class="text-sm text-muted-foreground">Deleted At</span>
+                            <span class="text-sm text-red-600">{{ userStatus.deletedDate }}</span>
+                        </div>
+                        <div v-if="userStatus.isSuspended" class="flex items-center justify-between">
+                            <span class="text-sm text-muted-foreground">Suspended At</span>
+                            <span class="text-sm text-orange-600">{{ userStatus.suspendedDate }}</span>
                         </div>
                     </CardContent>
                 </Card>
@@ -338,27 +350,56 @@
                 <!-- Danger Zone -->
                 <Card class="border-destructive/20">
                     <CardHeader>
-                        <CardTitle class="text-destructive">Danger Zone</CardTitle>
-                        <CardDescription>Irreversible actions</CardDescription>
+                        <CardTitle class="text-destructive">User Management</CardTitle>
+                        <CardDescription>User account management actions</CardDescription>
                     </CardHeader>
                     <CardContent class="space-y-3">
+                        <!-- Recovery Button for Deleted Users -->
                         <Button 
+                            v-if="userStatus.isDeleted"
                             variant="outline" 
-                            class="w-full border-destructive text-destructive hover:bg-destructive hover:text-accent transition-colors"
+                            class="w-full border-green-500 text-green-600 hover:bg-green-500 hover:text-white transition-colors"
+                            @click="recoverUser"
+                            :disabled="isSubmitting"
+                        >
+                            <RotateCcw class="h-4 w-4 mr-2" />
+                            Recover Deleted Account
+                        </Button>
+
+                        <!-- Reactivate Button for Suspended Users -->
+                        <Button 
+                            v-if="userStatus.isSuspended"
+                            variant="outline" 
+                            class="w-full border-green-500 text-green-600 hover:bg-green-500 hover:text-white transition-colors"
+                            @click="reactivateUser"
+                            :disabled="isSubmitting"
+                        >
+                            <UserCheck class="h-4 w-4 mr-2" />
+                            Reactivate Suspended User
+                        </Button>
+
+                        <!-- Suspend Button (only show if user is active) -->
+                        <Button 
+                            v-if="userStatus.status === 'active'"
+                            variant="outline" 
+                            class="w-full border-orange-500 text-orange-600 hover:bg-orange-500 hover:text-white transition-colors"
                             @click="suspendUser"
                             :disabled="isSubmitting"
                         >
                             <UserX class="h-4 w-4 mr-2" />
                             Suspend User
                         </Button>
+
+                        <!-- Delete Button (only show if user is not deleted) -->
                         <Button 
+                            v-if="!userStatus.isDeleted"
                             variant="outline" 
                             class="w-full border-destructive text-destructive hover:bg-destructive hover:text-accent transition-colors"
                             @click="deleteUser"
                             :disabled="isSubmitting"
                         >
                             <Trash2 class="h-4 w-4 mr-2" />
-                            Delete User
+                            Delete User (Soft)
                         </Button>
                     </CardContent>
                 </Card>
@@ -371,6 +412,35 @@
             :user-id="userId"
             @uploaded="onAvatarUploaded"
         />
+
+        <!-- Delete User Dialog -->
+        <DeleteUserDialog
+            v-model:open="showDeleteDialog"
+            :user="user"
+            @deleted="onUserDeleted"
+        />
+
+        <!-- Suspend User Dialog -->
+        <SuspendUserDialog
+            v-model:open="showSuspendDialog"
+            :user="user"
+            @suspended="onUserSuspended"
+            @reactivated="onUserReactivated"
+        />
+
+        <!-- Recover User Dialog -->
+        <RecoverUserDialog
+            v-model:open="showRecoverDialog"
+            :user="user"
+            @recover="onUserRecovered"
+        />
+
+        <!-- Reactivate User Dialog -->
+        <ReactivateUserDialog
+            v-model:open="showReactivateDialog"
+            :user="user"
+            @reactivated="onUserReactivated"
+        />
     </div>
 </template>
 
@@ -381,7 +451,7 @@ import { toTypedSchema } from '@vee-validate/zod'
 import { z } from 'zod'
 import { 
     ArrowLeft, Eye, Loader2, AlertCircle, RefreshCw, UserIcon, Camera,
-    Clock, CheckCircle, UserX, Trash2
+    Clock, CheckCircle, UserX, UserCheck, Trash2, RotateCcw
 } from 'lucide-vue-next'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
@@ -397,6 +467,12 @@ import {
 } from '~/components/ui/select'
 import UserAvatar from '~/components/UserAvatar.vue'
 import AvatarUploadDialog from '~/components/AvatarUploadDialog.vue'
+import DeleteUserDialog from '@/components/admin/users/DeleteUserDialog.vue'
+import SuspendUserDialog from '@/components/admin/users/SuspendUserDialog.vue'
+import RecoverUserDialog from '@/components/admin/users/RecoverUserDialog.vue'
+import ReactivateUserDialog from '@/components/admin/users/ReactivateUserDialog.vue'
+import { isVerified, formatVerificationDate, getVerificationBadgeInfo, createVerificationDate } from '@/utils/verification'
+import { getUserStatusInfo } from '@/utils/user-management'
 
 // Import User Types
 import type { 
@@ -420,6 +496,10 @@ const error = ref<string>('')
 const showPasswordFields = ref<boolean>(false)
 const activities = ref<UserActivity[]>([])
 const showAvatarDialog = ref<boolean>(false)
+const showDeleteDialog = ref<boolean>(false)
+const showSuspendDialog = ref<boolean>(false)
+const showRecoverDialog = ref<boolean>(false)
+const showReactivateDialog = ref<boolean>(false)
 
 // Form validation schema
 const editUserSchema = toTypedSchema(z.object({
@@ -429,7 +509,7 @@ const editUserSchema = toTypedSchema(z.object({
         .regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores'),
     email: z.string().min(1, 'Email is required').email('Invalid email address'),
     role: z.enum(['user', 'creator', 'superadmin'] as const),
-    verified: z.boolean(),
+    verified: z.boolean(), // We'll convert this internally for API calls
     password: z.string().optional(),
     confirmPassword: z.string().optional(),
 }).refine((data) => {
@@ -475,7 +555,7 @@ const fetchUser = async (): Promise<void> => {
                 username: response.user.username,
                 email: response.user.email,
                 role: response.user.role,
-                verified: response.user.verified,
+                verified: response.user.verified !== null && response.user.verified !== undefined,
             })
             
             // Fetch user activities (mock data for now)
@@ -512,7 +592,7 @@ const onSubmit = form.handleSubmit(async (values) => {
             username: values.username,
             email: values.email,
             role: values.role,
-            verified: values.verified,
+            verified: values.verified ? new Date().toISOString() : null,
         }
         
         // Add password if provided
@@ -546,7 +626,7 @@ const resetForm = (): void => {
             username: user.value.username,
             email: user.value.email,
             role: user.value.role,
-            verified: user.value.verified,
+            verified: user.value.verified !== null && user.value.verified !== undefined,
             password: '',
             confirmPassword: '',
         })
@@ -574,13 +654,32 @@ const onAvatarUploaded = (avatarUrl: string): void => {
 }
 
 const suspendUser = (): void => {
-    // Implementation for suspending user
-    console.log('Suspend user')
+    showSuspendDialog.value = true
+}
+
+const onUserSuspended = (suspendedUser: User, reason?: string): void => {
+    if (user.value) {
+        // Update user data with the updated user from API
+        user.value.suspended = suspendedUser.suspended
+        user.value.updated = suspendedUser.updated
+    }
+}
+
+const onUserReactivated = (reactivatedUser: User): void => {
+    if (user.value) {
+        // Update user data with the updated user from API
+        user.value.suspended = reactivatedUser.suspended
+        user.value.updated = reactivatedUser.updated
+    }
 }
 
 const deleteUser = (): void => {
-    // Implementation for deleting user
-    console.log('Delete user')
+    showDeleteDialog.value = true
+}
+
+const onUserDeleted = (deletedUser: User): void => {
+    // Redirect to users list after successful deletion
+    router.push('/admin/users')
 }
 
 const getRoleBadgeClass = (role: UserRole): string => {
@@ -595,6 +694,22 @@ const getRoleBadgeClass = (role: UserRole): string => {
     }
 }
 
+const recoverUser = (): void => {
+    showRecoverDialog.value = true
+}
+
+const reactivateUser = (): void => {
+    showReactivateDialog.value = true
+}
+
+const onUserRecovered = (recoveredUser: User): void => {
+    if (user.value) {
+        // Update user data with the recovered user from API
+        user.value.deleted = recoveredUser.deleted
+        user.value.updated = recoveredUser.updated
+    }
+}
+
 const formatDate = (dateString: string): string => {
     return new Date(dateString).toLocaleDateString('id-ID', {
         year: 'numeric',
@@ -604,6 +719,11 @@ const formatDate = (dateString: string): string => {
         minute: '2-digit'
     })
 }
+
+// Get user status for UI
+const userStatus = computed(() => {
+    return getUserStatusInfo(user.value)
+})
 
 // Lifecycle
 onMounted(() => {

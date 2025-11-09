@@ -9,7 +9,9 @@ export const users = sqliteTable('users', {
     password: text('password').notNull(),
     avatar: text('avatar'),
     role: text('role', { enum: ['user', 'creator', 'superadmin'] }).notNull().default('user'),
-    verified: integer('verified', { mode: 'boolean' }).notNull().default(false),
+    verified: integer('verified', { mode: 'timestamp' }), // null = not verified, timestamp = verified date
+    suspended: integer('suspended', { mode: 'timestamp' }), // 0 = active, 1 = suspended
+    deleted: integer('deleted', { mode: 'timestamp' }), // null = active, timestamp = soft deleted
     created: integer('created', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
     updated: integer('updated', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
 });

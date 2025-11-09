@@ -7,8 +7,10 @@ CREATE TABLE `users` (
 	`avatar` text,
 	`role` text DEFAULT 'user' NOT NULL,
 	`verified` integer DEFAULT false NOT NULL,
+	`suspended` integer DEFAULT false NOT NULL,
 	`created` integer NOT NULL,
-	`updated` integer NOT NULL
+	`updated` integer NOT NULL,
+	`deleted` integer DEFAULT false NOT NULL
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `users_username_unique` ON `users` (`username`);--> statement-breakpoint

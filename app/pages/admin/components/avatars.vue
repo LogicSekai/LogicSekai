@@ -90,7 +90,7 @@
                                     email: 'admin@example.com',
                                     avatar: '/api/placeholder/50/50',
                                     role: 'superadmin',
-                                    verified: true,
+                                    verified: '2024-01-01T00:00:00.000Z',
                                     created: new Date().toISOString(),
                                     updated: new Date().toISOString()
                                 }"
@@ -111,7 +111,7 @@
                                     email: 'creator@example.com',
                                     avatar: '/api/placeholder/50/50',
                                     role: 'creator',
-                                    verified: true,
+                                    verified: '2024-06-15T10:30:00.000Z',
                                     created: new Date().toISOString(),
                                     updated: new Date().toISOString()
                                 }"
@@ -132,7 +132,7 @@
                                     email: 'user@example.com',
                                     avatar: null,
                                     role: 'user',
-                                    verified: false,
+                                    verified: null,
                                     created: new Date().toISOString(),
                                     updated: new Date().toISOString()
                                 }"
@@ -153,7 +153,7 @@
                                     email: 'online@example.com',
                                     avatar: '/api/placeholder/50/50',
                                     role: 'user',
-                                    verified: true,
+                                    verified: '2024-11-01T15:45:00.000Z',
                                     created: new Date().toISOString(),
                                     updated: new Date().toISOString()
                                 }"
@@ -291,7 +291,7 @@ const exampleUsers = computed<User[]>(() => [
         email: 'alice@example.com',
         avatar: '/api/placeholder/50/50',
         role: 'superadmin',
-        verified: true,
+        verified: '2024-01-15T09:00:00.000Z',
         created: new Date().toISOString(),
         updated: new Date().toISOString()
     },
@@ -302,7 +302,7 @@ const exampleUsers = computed<User[]>(() => [
         email: 'bob@example.com',
         avatar: '/api/placeholder/50/50',
         role: 'creator',
-        verified: true,
+        verified: '2024-03-20T14:30:00.000Z',
         created: new Date().toISOString(),
         updated: new Date().toISOString()
     },
@@ -313,7 +313,7 @@ const exampleUsers = computed<User[]>(() => [
         email: 'carol@example.com',
         avatar: null,
         role: 'user',
-        verified: false,
+        verified: null,
         created: new Date().toISOString(),
         updated: new Date().toISOString()
     },
@@ -324,7 +324,7 @@ const exampleUsers = computed<User[]>(() => [
         email: 'david@example.com',
         avatar: '/api/placeholder/50/50',
         role: 'user',
-        verified: true,
+        verified: '2024-05-10T11:15:00.000Z',
         created: new Date().toISOString(),
         updated: new Date().toISOString()
     },
@@ -335,7 +335,7 @@ const exampleUsers = computed<User[]>(() => [
         email: 'eva@example.com',
         avatar: '/api/placeholder/50/50',
         role: 'creator',
-        verified: true,
+        verified: '2024-07-25T16:20:00.000Z',
         created: new Date().toISOString(),
         updated: new Date().toISOString()
     },
@@ -346,7 +346,7 @@ const exampleUsers = computed<User[]>(() => [
         email: 'frank@example.com',
         avatar: null,
         role: 'user',
-        verified: false,
+        verified: null,
         created: new Date().toISOString(),
         updated: new Date().toISOString()
     }

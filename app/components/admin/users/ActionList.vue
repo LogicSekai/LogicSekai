@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Eye, Edit, UserCheck, UserX, Trash2, MoreVertical } from "lucide-vue-next"
+import { Eye, Edit, UserCheck, UserX, Trash2, MoreVertical, AlertTriangle, RotateCcw } from "lucide-vue-next"
 import { Button } from "@/components/ui/button"
 import {
     DropdownMenu,
@@ -21,12 +21,16 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import type { User } from '~/types'
+import { isSuspended, isDeleted } from '~/utils/user-management'
 
 const props = defineProps<{
     user: User
     view: (user: User) => void
     edit: (user: User) => void
     toggleVerification: (user: User) => Promise<void>
+    suspend?: (user: User, reason?: string) => Promise<void>
+    reactivate?: (user: User) => Promise<void>
+    recover?: (user: User) => Promise<void>
     deletingUsers: string[]
     delete: (user: User) => Promise<void>
 }>()
@@ -65,6 +69,37 @@ const handleDelete = () => {
                     <DropdownMenuShortcut>
                         <UserCheck v-if="!props.user.verified" class="w-4 h-4" />
                         <UserX v-else class="w-4 h-4" />
+                    </DropdownMenuShortcut>
+                </DropdownMenuItem>
+                
+                <!-- Suspend/Reactivate Actions -->
+                <DropdownMenuItem 
+                    v-if="!isDeleted(props.user) && props.suspend && !isSuspended(props.user)"
+                    @click="props.suspend(props.user)"
+                >
+                    <span class="text-orange-600">Suspend</span>
+                    <DropdownMenuShortcut>
+                        <AlertTriangle class="w-4 h-4 text-orange-600" />
+                    </DropdownMenuShortcut>
+                </DropdownMenuItem>
+                
+                <DropdownMenuItem 
+                    v-if="!isDeleted(props.user) && props.reactivate && isSuspended(props.user)"
+                    @click="props.reactivate(props.user)"
+                >
+                    <span class="text-green-600">Reactivate</span>
+                    <DropdownMenuShortcut>
+                        <RotateCcw class="w-4 h-4 text-green-600" />
+                    </DropdownMenuShortcut>
+                </DropdownMenuItem>
+                
+                <DropdownMenuItem 
+                    v-if="isDeleted(props.user) && props.recover"
+                    @click="props.recover(props.user)"
+                >
+                    <span class="text-blue-600">Recover</span>
+                    <DropdownMenuShortcut>
+                        <RotateCcw class="w-4 h-4 text-blue-600" />
                     </DropdownMenuShortcut>
                 </DropdownMenuItem>
                 <DropdownMenuItem @click="showDialogDelete = true">
