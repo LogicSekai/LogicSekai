@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/better-sqlite3'
 import Database from 'better-sqlite3'
-import { users } from '../../../../../app/lib/db/schema'
+import { users } from '~/lib/db/schema'
 import bcrypt from 'bcryptjs'
 
 function getDatabase() {

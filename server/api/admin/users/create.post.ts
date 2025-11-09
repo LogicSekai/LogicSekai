@@ -82,7 +82,7 @@ export default defineEventHandler(async (event) => {
         }
 
         // Initialize database
-        const sqlite = new Database('./dev.db')
+        const sqlite = new Database('dev.db')
         const db = drizzle(sqlite, { schema: { users } })
 
         // Check if username or email already exists
@@ -111,16 +111,18 @@ export default defineEventHandler(async (event) => {
 
         // Create user
         const newUser = {
-        id: createId(),
-        name,
-        username,
-        email,
-        password: hashedPassword,
-        avatar: null,
-        role: role as 'user' | 'creator' | 'superadmin',
-        verified: verified || false,
-        created: new Date(),
-        updated: new Date()
+            id: createId(),
+            name,
+            username,
+            email,
+            password: hashedPassword,
+            avatar: null,
+            role: role as 'user' | 'creator' | 'superadmin',
+            verified: verified ? new Date() : null, // timestamp if verified, null if not
+            suspended: null, // not suspended by default
+            deleted: null, // not deleted by default
+            created: new Date(),
+            updated: new Date()
         }
 
         const result = await db
