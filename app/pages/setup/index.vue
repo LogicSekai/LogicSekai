@@ -128,6 +128,12 @@ import { toTypedSchema } from '@vee-validate/zod'
 import { z } from 'zod'
 import { Loader2 } from 'lucide-vue-next'
 
+definePageMeta({
+    title: 'Setup Superadmin - Logic Sekai',
+    description: 'Halaman setup superadmin untuk mengakses admin panel Logic Sekai',
+    layout: false
+})
+
 const setupFormSchema = toTypedSchema(z.object({
     email: z.string().min(1, 'Email harus diisi').email('Email tidak valid'),
     password: z.string().min(1, 'Password harus diisi').min(8, 'Password minimal 8 karakter'),

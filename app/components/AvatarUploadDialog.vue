@@ -183,6 +183,8 @@ import 'vue-advanced-cropper/dist/style.css'
 interface Props {
     open: boolean
     userId: string
+    uploadEndpoint?: string // Optional custom endpoint
+    isAdminContext?: boolean // If true, uses admin API endpoints
 }
 
 interface Emits {
@@ -190,7 +192,10 @@ interface Emits {
     (e: 'uploaded', avatarUrl: string): void
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+    uploadEndpoint: '',
+    isAdminContext: false
+})
 const emit = defineEmits<Emits>()
 
 // Reactive data
@@ -324,14 +329,18 @@ const uploadImage = async (): Promise<void> => {
         const formData = new FormData()
         formData.append('avatar', blob, 'avatar.jpg')
         
-        // Upload to server
-        const uploadResponse = await $fetch<{ success: boolean, avatarUrl?: string, error?: string }>(`/api/admin/users/${userId}/avatar`, {
+        // Upload to server - determine endpoint based on context
+        const endpoint = props.uploadEndpoint || 
+                        (props.isAdminContext ? `/api/admin/users/${userId}/avatar` : '/api/auth/avatar')
+        
+        const uploadResponse = await $fetch<{ success: boolean, avatarUrl?: string, avatar?: string, error?: string }>(endpoint, {
             method: 'POST',
             body: formData
         })
         
-        if (uploadResponse.success && uploadResponse.avatarUrl) {
-            emit('uploaded', uploadResponse.avatarUrl)
+        if (uploadResponse.success) {
+            const avatarUrl = uploadResponse.avatarUrl || uploadResponse.avatar || ''
+            emit('uploaded', avatarUrl)
             emit('update:open', false)
             resetAll()
         } else {

@@ -126,7 +126,7 @@
                                     <User class="h-4 w-4 mr-2" />
                                     Profil
                                 </NuxtLink>
-                                <NuxtLink to="/admin/settings/account" class="flex items-center px-4 py-2 text-sm text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors" @click="showUserMenu = false">
+                                <NuxtLink to="/settings" class="flex items-center px-4 py-2 text-sm text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors" @click="showUserMenu = false">
                                     <Settings class="h-4 w-4 mr-2" />
                                     Pengaturan Akun
                                 </NuxtLink>

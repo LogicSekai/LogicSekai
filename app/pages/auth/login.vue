@@ -72,6 +72,12 @@ import { toTypedSchema } from '@vee-validate/zod'
 import { z } from 'zod'
 import { Loader2 } from 'lucide-vue-next'
 
+definePageMeta({
+    title: 'Login - Logic Sekai',
+    description: 'Halaman login untuk pengguna Logic Sekai',
+    layout: false
+})
+
 const loginFormSchema = toTypedSchema(z.object({
     email: z.string().min(1, 'Email harus diisi').email('Email tidak valid'),
     password: z.string().min(1, 'Password harus diisi').min(6, 'Password minimal 6 karakter'),

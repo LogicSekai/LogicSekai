@@ -410,6 +410,7 @@
         <AvatarUploadDialog 
             v-model:open="showAvatarDialog"
             :user-id="userId"
+            :is-admin-context="true"
             @uploaded="onAvatarUploaded"
         />
 

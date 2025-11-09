@@ -121,6 +121,12 @@ import { toTypedSchema } from '@vee-validate/zod'
 import { z } from 'zod'
 import { Loader2 } from 'lucide-vue-next'
 
+definePageMeta({
+    title: 'Register - Logic Sekai',
+    description: 'Halaman pendaftaran untuk pengguna baru Logic Sekai',
+    layout: false
+})
+
 const registerFormSchema = toTypedSchema(z.object({
     name: z.string().min(1, 'Nama harus diisi').min(2, 'Nama minimal 2 karakter'),
     username: z.string().min(1, 'Username harus diisi').min(3, 'Username minimal 3 karakter')
