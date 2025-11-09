@@ -6,7 +6,7 @@
                 <!-- Logo/Brand -->
                 <div class="flex items-center space-x-2">
                     <NuxtLink to="/" class="flex items-center space-x-2 hover:opacity-80 transition-opacity">
-                        <img src="/img/logic_sekai.svg" alt="Logic Sekai" class="h-8 w-auto dark:filter dark:brightness-0 dark:invert"/>
+                        <img src="/img/logic_sekai.svg" alt="Logic Sekai" class="h-7 w-auto dark:filter dark:brightness-0 dark:invert"/>
                     </NuxtLink>
                 </div>
 
@@ -71,7 +71,7 @@
                     <Button
                         variant="ghost"
                         size="sm"
-                        @click="toggleTheme"
+                        @click="toggleDarkMode"
                         class="w-9 px-0"
                     >
                         <Sun class="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
@@ -79,60 +79,7 @@
                         <span class="sr-only">Toggle theme</span>
                     </Button>
 
-                    <!-- User Dropdown -->
-                    <DropdownMenu v-if="user">
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" class="relative h-8 w-8 rounded-full">
-                                <Avatar class="h-8 w-8">
-                                    <AvatarImage 
-                                        :src="user.avatar || ''" 
-                                        :alt="user.name || 'User'" 
-                                    />
-                                    <AvatarFallback class="bg-primary text-primary-foreground">
-                                        {{ user.name?.[0]?.toUpperCase() || 'U' }}
-                                    </AvatarFallback>
-                                </Avatar>
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent class="w-56" align="end" :sideOffset="5">
-                            <DropdownMenuLabel class="font-normal">
-                                <div class="flex flex-col space-y-1">
-                                    <p class="text-sm font-medium leading-none">{{ user.name }}</p>
-                                    <p class="text-xs leading-none text-muted-foreground">{{ user.email }}</p>
-                                </div>
-                            </DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuGroup>
-                                <DropdownMenuItem @click="$router.push('/profile')">
-                                    <User class="mr-2 h-4 w-4" />
-                                    <span>Profile</span>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem @click="$router.push('/settings')">
-                                    <Settings class="mr-2 h-4 w-4" />
-                                    <span>Settings</span>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem v-if="user.role === 'superadmin'" @click="$router.push('/admin/users')">
-                                    <Shield class="mr-2 h-4 w-4" />
-                                    <span>Admin Panel</span>
-                                </DropdownMenuItem>
-                            </DropdownMenuGroup>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem @click="logout" class="text-destructive focus:text-destructive">
-                                <LogOut class="mr-2 h-4 w-4" />
-                                <span>Log out</span>
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-
-                    <!-- Login Button (if not authenticated) -->
-                    <div v-else class="flex items-center space-x-2">
-                        <Button variant="ghost" @click="$router.push('/auth/login')">
-                            Log in
-                        </Button>
-                        <Button @click="$router.push('/auth/register')">
-                            Sign up
-                        </Button>
-                    </div>
+                    <UserMenu />
                 </div>
             </div>
         </div>
@@ -196,29 +143,16 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { 
-    User, 
-    Settings, 
-    Shield, 
-    LogOut, 
+import {
     Sun, 
     Moon,
-    Menu 
+    Menu,
 } from 'lucide-vue-next'
 import { Button } from '~/components/ui/button'
-import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuGroup,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from '~/components/ui/dropdown-menu'
+import UserMenu from './UserMenu.vue'
 
-// Auth state
-const { user, isLoggedIn, logout } = useAuth()
+// Dark mode composable
+const { isDarkMode, toggleDarkMode, initializeDarkMode } = useDarkMode()
 
 // Scroll state
 const scrolledFromTop = ref(false)
@@ -239,32 +173,8 @@ const closeMobileMenu = () => {
     mobileMenuOpen.value = false
 }
 
-// Theme handling
-const isDark = ref(false)
-
-const toggleTheme = () => {
-    isDark.value = !isDark.value
-    // Apply theme to document
-    if (isDark.value) {
-        document.documentElement.classList.add('dark')
-    } else {
-        document.documentElement.classList.remove('dark')
-    }
-    // Save preference to localStorage
-    localStorage.setItem('theme', isDark.value ? 'dark' : 'light')
-}
-
-// Initialize theme and handle outside clicks
+// Initialize and handle outside clicks
 onMounted(() => {
-    // Check for saved theme preference or default to system preference
-    const savedTheme = localStorage.getItem('theme')
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-    
-    if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
-        isDark.value = true
-        document.documentElement.classList.add('dark')
-    }
-
     // Close mobile menu when clicking outside
     document.addEventListener('click', (e) => {
         const target = e.target as Element

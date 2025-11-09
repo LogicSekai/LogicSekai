@@ -1,12 +1,35 @@
 name = "logic-sekai"
 main = ".output/server/index.mjs"
-compatibility_date = "2023-12-01"
+compatibility_date = "2024-11-09"
+compatibility_flags = ["nodejs_compat"]
+
+[build]
+command = "npm run build"
 
 [[d1_databases]]
-binding = "DB"
+binding = "DB" 
 database_name = "logic-sekai-db"
-database_id = ""
+database_id = "" # Add your database ID here
+migrations_dir = "./app/lib/db/migrations"
 
 [vars]
-BETTER_AUTH_SECRET = "your-super-secret-key-here"
 BETTER_AUTH_URL = "https://logic-sekai.pages.dev"
+NODE_ENV = "production"
+
+# Production environment
+[env.production]
+name = "logic-sekai"
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "logic-sekai-db"
+database_id = "" # Add your production database ID
+
+# Preview environment  
+[env.preview]
+name = "logic-sekai-preview"
+
+[[env.preview.d1_databases]]
+binding = "DB"
+database_name = "logic-sekai-db-preview"
+database_id = "" # Add your preview database ID

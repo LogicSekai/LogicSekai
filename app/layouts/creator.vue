@@ -129,6 +129,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import UserMenu from '~/components/layout/UserMenu.vue'
 import { Button } from '~/components/ui/button'
+import Avatar from '~/components/Avatar.vue'
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -140,8 +141,12 @@ import {
 import { 
     Menu, 
     X,
-    ChevronDown,
-    Bell,
+    ChevronDown, 
+    ChevronRight,
+    Bell, 
+    User, 
+    LogOut,
+    Settings,
     Sun,
     Moon
 } from 'lucide-vue-next'
@@ -149,7 +154,7 @@ import {
 const { user, logout } = useAuth()
 const route = useRoute()
 const router = useRouter()
-const { adminMenuItems, getFilteredMenuItems } = useAdminMenu()
+const { creatorMenuItems, getCreatorFilteredMenuItems } = useCreatorMenu()
 const { isDarkMode, toggleDarkMode, darkModeText, syncWithDocument } = useDarkMode()
 
 // Reactive state
@@ -159,8 +164,8 @@ const activeSubmenu = ref(null)
 
 // Computed properties untuk menu yang difilter berdasarkan role dan permission user
 const filteredMenuItems = computed(() => {
-    return getFilteredMenuItems(
-        adminMenuItems,
+    return getCreatorFilteredMenuItems(
+        creatorMenuItems,
         user.value?.role,
         user.value?.permissions || []
     )
@@ -180,6 +185,11 @@ const toggleSubmenu = (menu) => {
     activeSubmenu.value = activeSubmenu.value === menu ? null : menu
 }
 
+const handleLogout = async () => {
+    await logout()
+    await router.push('/auth/login')
+}
+
 // Handle clicks outside user menu
 const handleClickOutside = (event) => {
     if (!event.target.closest('.relative')) {
@@ -189,7 +199,7 @@ const handleClickOutside = (event) => {
 
 // Helper function untuk menentukan active submenu berdasarkan path
 const getActiveSubmenu = (path) => {
-    const menuItem = adminMenuItems.find(item => 
+    const menuItem = creatorMenuItems.find(item => 
         item.child?.some(child => child.url && path.startsWith(child.url))
     )
     return menuItem?.id || null
