@@ -164,7 +164,7 @@ export default defineEventHandler(async (event) => {
             username: body.username,
             email: body.email,
             role: body.role,
-            verified: Boolean(body.verified),
+            // verified: Boolean(body.verified),
             updated: new Date()
         }
 

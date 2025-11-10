@@ -1,4 +1,5 @@
 import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
+import { relations } from 'drizzle-orm';
 import { createId } from '@paralleldrive/cuid2';
 
 export const users = sqliteTable('users', {
@@ -15,3 +16,5 @@ export const users = sqliteTable('users', {
     created: integer('created', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
     updated: integer('updated', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
 });
+
+// Relations akan didefinisikan di index.ts untuk menghindari circular imports

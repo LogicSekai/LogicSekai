@@ -112,6 +112,9 @@
                                     <span class="text-xs text-muted-foreground">
                                         Dibuat: {{ formatDate(category.created) }}
                                     </span>
+                                    <span v-if="category.user" class="text-xs text-muted-foreground">
+                                        • Oleh: {{ category.user.name }}
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -192,7 +195,7 @@ const stats = computed(() => {
     return { total, active, inactive, deleted }
 })
 
-const filteredCategories = computed(() => {
+const filteredCategories:any = computed(() => {
     let filtered = [...categories.value]
     
     // Filter by search query
@@ -293,6 +296,6 @@ onMounted(() => {
 // Meta
 definePageMeta({
     layout: 'superadmin',
-    middleware: ['auth']
+    middleware: 'superadmin'
 })
 </script>

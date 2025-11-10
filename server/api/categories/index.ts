@@ -1,5 +1,6 @@
 import { initializeDB, type ProductCategory, type NewProductCategory } from '~/lib/db/connection';
 import { productCategories } from '~/lib/db/schema/product-categories';
+import { users } from '~/lib/db/schema/users';
 import { eq, and, isNull, asc } from 'drizzle-orm';
 
 export default defineEventHandler(async (event) => {
@@ -48,8 +49,26 @@ async function getCategories(db: any, event: any) {
     }
 
     const categories = await db
-      .select()
+      .select({
+        id: productCategories.id,
+        name: productCategories.name,
+        slug: productCategories.slug,
+        description: productCategories.description,
+        parentId: productCategories.parentId,
+        image: productCategories.image,
+        userId: productCategories.userId,
+        isActive: productCategories.isActive,
+        sortOrder: productCategories.sortOrder,
+        created: productCategories.created,
+        updated: productCategories.updated,
+        user: {
+          id: users.id,
+          name: users.name,
+          username: users.username,
+        }
+      })
       .from(productCategories)
+      .leftJoin(users, eq(productCategories.userId, users.id))
       .where(whereConditions.length > 0 ? and(...whereConditions) : undefined)
       .orderBy(asc(productCategories.sortOrder), asc(productCategories.name));
 
@@ -75,6 +94,19 @@ async function createCategory(db: any, event: any) {
         statusCode: 400,
         statusMessage: 'Name is required'
       });
+    }
+
+    // Get user from session
+    const userSession = getCookie(event, 'user-session');
+    let userId = null;
+    
+    if (userSession) {
+      try {
+        const sessionData = typeof userSession === 'string' ? JSON.parse(userSession) : userSession;
+        userId = sessionData?.id;
+      } catch (e) {
+        // If session parsing fails, use null userId
+      }
     }
 
     // Generate slug from name if not provided
@@ -105,6 +137,7 @@ async function createCategory(db: any, event: any) {
       description,
       parentId: parentId || null,
       image,
+      userId: userId, // Add userId from session
       isActive,
       sortOrder,
       created: new Date(),

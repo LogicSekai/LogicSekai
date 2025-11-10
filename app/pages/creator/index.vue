@@ -27,6 +27,7 @@ import Progress from '~/components/ui/progress.vue'
 definePageMeta({
     title: 'Creator Overview - Logic Sekai',
     layout: 'creator',
+    middleware: 'creator'
 })
 
 // Mock data for dashboard

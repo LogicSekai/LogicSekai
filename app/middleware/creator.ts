@@ -23,10 +23,10 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     }
 
     // Check if user has superadmin role
-    if (sessionData.role !== 'superadmin') {
+    if (sessionData.role !== 'superadmin' && sessionData.role !== 'creator') {
         throw createError({
-            statusCode: 403,
-            statusMessage: 'Access denied. Superadmin role required.'
+            statusCode: 404,
+            statusMessage: 'Page not found.'
         })
     }
 })

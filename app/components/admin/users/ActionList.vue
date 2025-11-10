@@ -64,7 +64,7 @@ const handleDelete = () => {
                         <Edit class="w-4 h-4" />
                     </DropdownMenuShortcut>
                 </DropdownMenuItem>
-                <DropdownMenuItem v-if="!isDeleted(props.user) && !props.recover" @click="props.toggleVerification(props.user)">
+                <DropdownMenuItem v-if="!isDeleted(props.user) && props.suspend && !isSuspended(props.user)" @click="props.toggleVerification(props.user)">
                     <span>{{ props.user.verified ? 'Unverify' : 'Verify' }}</span>
                     <DropdownMenuShortcut>
                         <UserCheck v-if="!props.user.verified" class="w-4 h-4" />
