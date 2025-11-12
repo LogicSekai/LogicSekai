@@ -355,7 +355,7 @@ const toggleCategoryStatus = async (category: any) => {
     
     // Update local state
     const index = categories.value.findIndex(c => c.id === category.id)
-    if (index > -1) {
+    if (index > -1 && categories.value[index]) {
       categories.value[index].isActive = !categories.value[index].isActive
     }
   } catch (error) {
