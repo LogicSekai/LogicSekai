@@ -1,58 +1,64 @@
+import tailwindcss from "@tailwindcss/vite"
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  compatibilityDate: '2024-11-01',
-  devtools: { enabled: false },
+  compatibilityDate: '2025-07-15',
+  devtools: { enabled: true },
   ssr: false,
+  css: ['@/assets/css/main.css'],
+
   app: {
-    baseURL: '/',
     head: {
-      title: 'Logic Sekai', // default fallback title
-      htmlAttrs: {
-        lang: 'id',
-      },
-      link: [
-        { rel: 'manifest', href: '/manifest.webmanifest' },
-        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
-        { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },
+      script: [
+        {
+          innerHTML: `
+            // Prevent FOUC (Flash of Unstyled Content) for dark mode
+            (function() {
+              const stored = localStorage.getItem('darkMode');
+              const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+              const shouldBeDark = stored !== null ? JSON.parse(stored) : prefersDark;
+              
+              if (shouldBeDark) {
+                document.documentElement.classList.add('dark');
+              } else {
+                document.documentElement.classList.remove('dark');
+              }
+            })();
+          `,
+          type: 'text/javascript'
+        }
       ]
     }
   },
-  nitro: {
-    prerender: {
-      crawlLinks: true,
-      routes: ['/']
-    }
-  },
+
   vite: {
-    build: {
-      assetsInlineLimit: 0, // memastikan file kecil seperti CNAME tidak di-inline
+    plugins: [
+      tailwindcss(),
+    ],
+  },
+
+  modules: ['shadcn-nuxt'],
+  shadcn: {
+    prefix: '',
+    componentDir: './app/components/ui',
+  },
+
+  nitro: {
+    preset: 'cloudflare-pages',
+    experimental: {
+      wasm: true
     }
   },
 
-  modules: [
-    '@nuxt/content',
-    '@nuxt/fonts',
-    '@nuxt/icon',
-    '@nuxt/image',
-    '@nuxt/scripts',
-    '@nuxtjs/tailwindcss',
-    'shadcn-nuxt',
-    '@pinia/nuxt'
-  ],
   runtimeConfig: {
+    betterAuthSecret: process.env.BETTER_AUTH_SECRET || 'dev-secret',
+    betterAuthUrl: process.env.BETTER_AUTH_URL || 'http://localhost:3000',
+    superadminSetupSecret: process.env.SUPERADMIN_SETUP_SECRET || 'create-superadmin-2024',
+    cloudflareAccountId: process.env.CLOUDFLARE_ACCOUNT_ID,
+    cloudflareDatabaseId: process.env.CLOUDFLARE_DATABASE_ID,
+    cloudflareApiToken: process.env.CLOUDFLARE_API_TOKEN,
     public: {
-      pocketbaseUrl: 'http://localhost:8090'
+      baseUrl: process.env.BETTER_AUTH_URL || 'http://localhost:3000'
     }
-  },
-  shadcn: {
-    /**
-     * Prefix for all the imported component
-     */
-    prefix: '',
-    /**
-     * Directory that the component lives in.
-     * @default "./components/ui"
-     */
-    componentDir: './components/ui'
   }
 })

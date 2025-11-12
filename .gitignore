@@ -23,4 +23,7 @@ logs
 .env.*
 !.env.example
 
-PROJECT_FLOW
+
+# Product Workflow
+documents
+dev.db
