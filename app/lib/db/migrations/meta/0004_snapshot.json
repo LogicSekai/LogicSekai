@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "a8dec505-c324-4cd3-97b1-0f00d7ee7f0f",
-  "prevId": "04ece935-adbb-4279-a58f-846b6984b875",
+  "id": "7f7a9c71-8280-4614-a98d-9830b6ac2b59",
+  "prevId": "a8dec505-c324-4cd3-97b1-0f00d7ee7f0f",
   "tables": {
     "product_categories": {
       "name": "product_categories",
@@ -168,6 +168,79 @@
           "tableTo": "product_categories",
           "columnsFrom": [
             "category_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "product_contributors": {
+      "name": "product_contributors",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "product_id": {
+          "name": "product_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "'contributor'"
+        },
+        "added_at": {
+          "name": "added_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "product_contributors_product_id_products_id_fk": {
+          "name": "product_contributors_product_id_products_id_fk",
+          "tableFrom": "product_contributors",
+          "tableTo": "products",
+          "columnsFrom": [
+            "product_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "product_contributors_user_id_users_id_fk": {
+          "name": "product_contributors_user_id_users_id_fk",
+          "tableFrom": "product_contributors",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
           ],
           "columnsTo": [
             "id"

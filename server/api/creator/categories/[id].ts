@@ -14,26 +14,42 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  // Get user from session
-  const userSession = getCookie(event, 'user-session');
-  let currentUserId = null;
+  // Get user from session (enhanced handling like in index.ts)
+  let userSession = getCookie(event, 'user-session');
   
-  if (userSession) {
-    try {
-      const sessionData = typeof userSession === 'string' ? JSON.parse(userSession) : userSession;
-      currentUserId = sessionData?.id;
-    } catch (e) {
-      throw createError({
-        statusCode: 401,
-        statusMessage: 'Invalid session'
-      });
+  // If no cookie, try to get from header (for server-side requests)
+  if (!userSession) {
+    const cookieHeader = getHeader(event, 'cookie');
+    if (cookieHeader) {
+      const match = cookieHeader.match(/user-session=([^;]+)/);
+      if (match) {
+        userSession = decodeURIComponent(match[1]);
+      }
     }
+  }
+  
+  if (!userSession) {
+    throw createError({
+      statusCode: 401,
+      statusMessage: 'No active session'
+    });
+  }
+  
+  let currentUserId = null;
+  try {
+    const sessionData = typeof userSession === 'string' ? JSON.parse(userSession) : userSession;
+    currentUserId = sessionData?.id;
+  } catch (e) {
+    throw createError({
+      statusCode: 401,
+      statusMessage: 'Invalid session format'
+    });
   }
 
   if (!currentUserId) {
     throw createError({
       statusCode: 401,
-      statusMessage: 'Authentication required'
+      statusMessage: 'User ID not found in session'
     });
   }
 
@@ -117,7 +133,12 @@ async function getCreatorCategory(db: any, categoryId: string, userId: string) {
 
 async function updateCreatorCategory(db: any, event: any, categoryId: string, userId: string) {
   try {
+    console.log('=== UPDATE CATEGORY START ===');
+    console.log('Updating category ID:', categoryId, 'for user:', userId);
+    
     const body = await readBody(event);
+    console.log('Update request body:', JSON.stringify(body, null, 2));
+    
     const { name, slug, description, parentId, image, isActive, sortOrder } = body;
 
     // Check if category exists and belongs to user
@@ -130,7 +151,10 @@ async function updateCreatorCategory(db: any, event: any, categoryId: string, us
       ))
       .limit(1);
 
+    console.log('Existing category found:', existingCategory.length > 0);
+
     if (existingCategory.length === 0) {
+      console.log('Error: Category not found or not owned by user');
       throw createError({
         statusCode: 404,
         statusMessage: 'Category not found'
@@ -139,6 +163,7 @@ async function updateCreatorCategory(db: any, event: any, categoryId: string, us
 
     // Check if slug conflicts with another category (for this user)
     if (slug && slug !== existingCategory[0].slug) {
+      console.log('Checking slug conflict for:', slug);
       const conflictingCategory = await db
         .select()
         .from(productCategories)
@@ -149,6 +174,7 @@ async function updateCreatorCategory(db: any, event: any, categoryId: string, us
         .limit(1);
 
       if (conflictingCategory.length > 0) {
+        console.log('Error: Slug already exists for another category');
         throw createError({
           statusCode: 409,
           statusMessage: 'Category with this slug already exists'
@@ -168,6 +194,8 @@ async function updateCreatorCategory(db: any, event: any, categoryId: string, us
     if (isActive !== undefined) updateData.isActive = isActive;
     if (sortOrder !== undefined) updateData.sortOrder = sortOrder;
 
+    console.log('Update data to apply:', JSON.stringify(updateData, null, 2));
+
     const result = await db
       .update(productCategories)
       .set(updateData)
@@ -177,18 +205,27 @@ async function updateCreatorCategory(db: any, event: any, categoryId: string, us
       ))
       .returning();
 
+    console.log('Update result:', JSON.stringify(result, null, 2));
+    console.log('=== UPDATE CATEGORY SUCCESS ===');
+
     return {
       success: true,
       message: 'Category updated successfully',
       data: result[0]
     };
   } catch (error: any) {
+    console.log('=== UPDATE CATEGORY ERROR ===');
+    console.error('Error updating category:', error);
+    console.error('Error message:', error.message);
+    console.error('Error status:', error.statusCode);
+    console.log('=== END ERROR ===');
+    
     if (error.statusCode) {
       throw error;
     }
     throw createError({
       statusCode: 500,
-      statusMessage: 'Failed to update category'
+      statusMessage: `Failed to update category: ${error.message}`
     });
   }
 }

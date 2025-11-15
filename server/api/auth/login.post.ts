@@ -49,6 +49,22 @@ export default defineEventHandler(async (event) => {
             });
         }
 
+        // Create session data
+        const sessionData = {
+            id: user[0].id,
+            role: user[0].role,
+            email: user[0].email,
+            name: user[0].name
+        };
+
+        // Set session cookie
+        setCookie(event, 'user-session', JSON.stringify(sessionData), {
+            secure: false, // Set false for localhost development
+            sameSite: 'lax',
+            httpOnly: false, // Allow client-side access for session restore
+            maxAge: 60 * 60 * 24 * 7, // 7 days
+        });
+
         // Return user data (exclude password)
         return {
             success: true,

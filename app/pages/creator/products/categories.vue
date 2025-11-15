@@ -286,12 +286,15 @@ const handleFormSubmit = async (formData: CategoryFormData) => {
   saving.value = true
   
   try {
+    console.log('Form data received:', formData)
+    
     if (selectedCategory.value?.id) {
       // Update existing category
       await updateCategory(selectedCategory.value.id, formData)
       console.log('Kategori berhasil diperbarui')
     } else {
       // Create new category
+      console.log('Creating new category...')
       await createCategory(formData)
       console.log('Kategori berhasil ditambahkan')
     }
@@ -300,6 +303,7 @@ const handleFormSubmit = async (formData: CategoryFormData) => {
     selectedCategory.value = null
   } catch (error: any) {
     console.error('Error saving category:', error)
+    console.error('Error details:', error.data || error.response || error)
   } finally {
     saving.value = false
   }

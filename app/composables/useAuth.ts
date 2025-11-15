@@ -61,29 +61,7 @@ export const useAuth = () => {
             if (result.success && result.user) {
                 user.value = result.user
                 
-                // Store user session in cookie for server-side access
-                const userCookie = useCookie('user-session', {
-                    default: () => null,
-                    secure: false, // Set false for localhost development
-                    sameSite: 'lax',
-                    httpOnly: false, // Allow client-side access for session restore
-                    maxAge: 60 * 60 * 24 * 7, // 7 days
-                    encode: value => JSON.stringify(value),
-                    decode: value => {
-                        try {
-                            return JSON.parse(value)
-                        } catch {
-                            return null
-                        }
-                    }
-                })
-                userCookie.value = {
-                    id: result.user.id,
-                    role: result.user.role,
-                    email: result.user.email,
-                    name: result.user.name
-                }
-                
+                // Session cookie is already set by server, no need to set again
                 await navigateTo('/')
                 return { success: true }
             }

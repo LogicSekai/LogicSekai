@@ -22,6 +22,20 @@
       "when": 1762712277788,
       "tag": "0002_oval_forgotten_one",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1763197167231,
+      "tag": "0003_spooky_old_lace",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1763213544988,
+      "tag": "0004_magical_swordsman",
+      "breakpoints": true
     }
   ]
 }

@@ -11,6 +11,7 @@ export * from './menu'
 
 // Product Types
 export * from './product-category'
+export * from './product'
 
 // Add other type exports here as they are created
 // export * from './content'
