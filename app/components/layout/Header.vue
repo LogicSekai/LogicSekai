@@ -21,11 +21,11 @@
                         <span class="absolute left-0 -bottom-1 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
                     </NuxtLink>
                     <NuxtLink 
-                        to="/layanan-produk" 
+                        to="/products" 
                         class="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors relative group"
                         active-class="!text-primary"
                     >
-                        Layanan Produk
+                        Layanan & Produk
                         <span class="absolute left-0 -bottom-1 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
                     </NuxtLink>
                     <NuxtLink 

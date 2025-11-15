@@ -11,7 +11,9 @@
                     </div>
                     <span class="text-xl font-bold text-gray-900">Logic Sekai</span> -->
                     <div class="p-4">
-                        <img src="/img/logic_sekai.svg" alt="logo" class="dark:filter dark:brightness-0 dark:invert"/>
+                        <NuxtLink to="/">
+                            <img src="/img/logic_sekai.svg" alt="logo" class="dark:filter dark:brightness-0 dark:invert"/>
+                        </NuxtLink>
                     </div>
                 </div>
                 <Button variant="ghost" size="sm" class="lg:hidden text-sidebar-foreground" @click="sidebarOpen = false">
