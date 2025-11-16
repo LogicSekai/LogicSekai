@@ -1,6 +1,6 @@
 import { getDB } from '~/lib/db/connection'
-import { products, users } from '~/lib/db/schema'
-import { eq, and, or, like, desc, asc, sql } from 'drizzle-orm'
+import { products, users, productCategories, productCategoryMappings } from '~/lib/db/schema'
+import { eq, and, or, like, desc, asc, sql, inArray } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   try {
@@ -33,10 +33,28 @@ export default defineEventHandler(async (event) => {
       )
     }
 
-    // Add category filter (we'll implement this later when categories are ready)
-    // if (category) {
-    //   whereConditions.push(eq(products.categoryId, category))
-    // }
+    // Add category filter
+    let categoryFilteredProductIds: string[] = []
+    if (category) {
+      // Get product IDs that belong to the specified category
+      const categoryFilterResults = await db
+        .select({ productId: productCategoryMappings.productId })
+        .from(productCategoryMappings)
+        .leftJoin(productCategories, eq(productCategoryMappings.categoryId, productCategories.id))
+        .where(or(
+          eq(productCategories.slug, category),
+          eq(productCategories.name, category)
+        ))
+      
+      categoryFilteredProductIds = categoryFilterResults.map((result: any) => result.productId)
+      
+      if (categoryFilteredProductIds.length > 0) {
+        whereConditions.push(inArray(products.id, categoryFilteredProductIds))
+      } else {
+        // If no products found for the category, return empty result
+        whereConditions.push(eq(products.id, 'non-existent-id'))
+      }
+    }
 
     // Build sort condition
     let orderBy
@@ -59,6 +77,7 @@ export default defineEventHandler(async (event) => {
       .select({
         id: products.id,
         title: products.title,
+        slug: products.slug,
         description: products.description,
         shortDescription: products.shortDescription,
         basePrice: products.basePrice,
@@ -96,19 +115,51 @@ export default defineEventHandler(async (event) => {
     const totalCount = parseInt(totalCountResult[0]?.count as string) || 0
     const totalPages = Math.ceil(totalCount / limit)
 
+    // Get categories for all products in one query
+    const productIds = productsData.map((p: any) => p.id)
+    const categoriesData = productIds.length > 0 ? await db
+      .select({
+        productId: productCategoryMappings.productId,
+        categoryId: productCategories.id,
+        categoryName: productCategories.name,
+        categorySlug: productCategories.slug
+      })
+      .from(productCategoryMappings)
+      .leftJoin(productCategories, eq(productCategoryMappings.categoryId, productCategories.id))
+      .where(inArray(productCategoryMappings.productId, productIds))
+    : []
+
+    // Create a map of product categories for efficient lookup
+    const productCategoriesMap = new Map()
+    categoriesData.forEach((cat: any) => {
+      if (!productCategoriesMap.has(cat.productId)) {
+        productCategoriesMap.set(cat.productId, [])
+      }
+      productCategoriesMap.get(cat.productId).push({
+        id: cat.categoryId,
+        name: cat.categoryName,
+        slug: cat.categorySlug
+      })
+    })
+
     // Format products data
-    const formattedProducts = productsData.map(product => ({
-      id: product.id,
-      title: product.title,
-      description: product.description || product.shortDescription || '',
-      price: product.basePrice || 0,
-      thumbnail: product.thumbnailImage,
-      category: 'General', // We'll implement categories later
-      tags: product.tags ? JSON.parse(product.tags) : [],
-      status: product.status,
-      createdAt: product.created?.toISOString(),
-      creator: product.creator
-    }))
+    const formattedProducts = productsData.map((product: any) => {
+      const productCategories = productCategoriesMap.get(product.id) || []
+      return {
+        id: product.id,
+        title: product.title,
+        slug: product.slug,
+        description: product.description || product.shortDescription || '',
+        price: product.basePrice || 0,
+        thumbnail: product.thumbnailImage,
+        category: productCategories.length > 0 ? productCategories[0].name : 'Uncategorized',
+        categories: productCategories,
+        tags: product.tags ? JSON.parse(product.tags) : [],
+        status: product.status,
+        createdAt: product.created?.toISOString(),
+        creator: product.creator
+      }
+    })
 
     return {
       success: true,

@@ -1,6 +1,6 @@
 <template>
   <div class="group">
-    <NuxtLink :to="`/products/${product.id}`" class="block">
+    <NuxtLink :to="`/products/${product.creator.username}/${product.slug}`" class="block">
       <!-- Product Image -->
       <div class="relative aspect-video overflow-hidden rounded-lg bg-gray-200 aspect-square mb-4">
         <img
@@ -61,17 +61,17 @@
             {{ product.category }}
           </span>
           <span
-            v-for="tag in product.tags.slice(0, 2)"
-            :key="tag"
+            v-for="category in product.categories.slice(1, 3)"
+            :key="category.id"
             class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800"
           >
-            {{ tag }}
+            {{ category.name }}
           </span>
           <span
-            v-if="product.tags.length > 2"
+            v-if="product.categories.length > 3"
             class="text-xs text-gray-500"
           >
-            +{{ product.tags.length - 2 }}
+            +{{ product.categories.length - 3 }}
           </span>
         </div>
         
@@ -90,11 +90,12 @@ import { Image } from 'lucide-vue-next'
 interface Product {
   id: string
   title: string
+  slug: string
   description: string
   price: number
   thumbnail?: string
   category: string
-  tags: string[]
+  categories: { id: string; name: string; slug: string }[]
   status: string
   creator: {
     id: string
@@ -112,24 +113,8 @@ interface Props {
 
 defineProps<Props>()
 
-// Utilities
-const formatPrice = (price: number) => {
-  if (price === 0) return 'Free'
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(price)
-}
-
-const formatDate = (date: string) => {
-  return new Intl.DateTimeFormat('id-ID', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  }).format(new Date(date))
-}
+// Use formatter composable
+const { formatPrice, formatDate } = useFormatter()
 </script>
 
 <style scoped>

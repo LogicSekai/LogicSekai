@@ -29,6 +29,7 @@
     "clsx": "^2.1.1",
     "drizzle-kit": "^0.31.6",
     "drizzle-orm": "^0.44.7",
+    "embla-carousel-vue": "^8.6.0",
     "lucide-vue-next": "^0.553.0",
     "nuxt": "^4.2.1",
     "reka-ui": "^2.6.0",

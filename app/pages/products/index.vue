@@ -157,11 +157,12 @@ import ProductCard from '~/components/products/ProductCard.vue'
 interface Product {
   id: string
   title: string
+  slug: string
   description: string
   price: number
   thumbnail?: string
   category: string
-  tags: string[]
+  categories: { id: string; name: string; slug: string }[]
   status: string
   featured?: boolean
   creator: {

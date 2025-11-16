@@ -11,6 +11,14 @@ export {
     productContributorsRelations,
     productReviewsRelations 
 } from './products';
+export { 
+    transactions, 
+    transactionItems, 
+    downloadHistory,
+    transactionsRelations,
+    transactionItemsRelations,
+    downloadHistoryRelations 
+} from './transactions';
 
 // Define cross-table relations here to avoid circular imports
 import { relations } from 'drizzle-orm';

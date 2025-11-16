@@ -36,6 +36,13 @@
       "when": 1763213544988,
       "tag": "0004_magical_swordsman",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1763220380794,
+      "tag": "0005_absent_norrin_radd",
+      "breakpoints": true
     }
   ]
 }

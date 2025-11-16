@@ -61,7 +61,7 @@
                         </div>
                         <div class="ml-4">
                             <p class="text-sm font-medium text-gray-600">Total Revenue</p>
-                            <p class="text-2xl font-semibold text-gray-900">{{ formatCurrency(stats.totalRevenue) }}</p>
+                            <p class="text-2xl font-semibold text-gray-900">{{ formatPrice(stats.totalRevenue) }}</p>
                         </div>
                     </div>
                 </div>
@@ -188,10 +188,10 @@
                                             {{ product.status }}
                                         </span>
                                         <span class="text-sm text-gray-500">
-                                            {{ formatCurrency(product.basePrice, product.currency) }}
+                                            {{ formatPrice(product.basePrice) }}
                                         </span>
                                         <span class="text-sm text-gray-500">
-                                            {{ product.totalSales }} sales
+                                            {{ formatNumber(product.totalSales) }} sales
                                         </span>
                                         <span class="text-sm text-gray-500">
                                             ⭐ {{ product.averageRating.toFixed(1) }}
@@ -258,7 +258,9 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useCreatorProducts } from '~/composables/useCreatorProducts'
-import { formatCurrency, formatCompactNumber } from '~/types/product'
+
+// Use formatter composable
+const { formatNumber, formatPrice } = useFormatter()
 
 // Meta
 definePageMeta({
@@ -314,10 +316,6 @@ const deleteProduct = async () => {
     } catch (err) {
         console.error('Failed to delete product:', err)
     }
-}
-
-const formatNumber = (num: number) => {
-    return formatCompactNumber(num)
 }
 
 // Lifecycle

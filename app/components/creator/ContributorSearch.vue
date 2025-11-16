@@ -46,11 +46,14 @@
             class="text-xs px-2 py-1 border border-gray-300 rounded"
             @change="updateContributor"
           >
-            <option value="contributor">Contributor</option>
             <option value="co-author">Co-Author</option>
             <option value="designer">Designer</option>
             <option value="developer">Developer</option>
             <option value="tester">Tester</option>
+            <option value="reviewer">Reviewer</option>
+            <option value="contributor">Contributor</option>
+            <option value="collaborator">Collaborator</option>
+            <option value="consultant">Consultant</option>
           </select>
         </div>
       </div>
