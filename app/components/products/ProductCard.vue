@@ -2,7 +2,7 @@
   <div class="group">
     <NuxtLink :to="`/products/${product.creator.username}/${product.slug}`" class="block">
       <!-- Product Image -->
-      <div class="relative aspect-video overflow-hidden rounded-lg bg-gray-200 aspect-square mb-4">
+      <div class="relative aspect-video overflow-hidden rounded-lg bg-gray-200 mb-4">
         <img
             v-if="product.thumbnail"
             :src="product.thumbnail"

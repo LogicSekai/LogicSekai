@@ -24,8 +24,8 @@
 
     <!-- Stock Information -->
     <div v-if="stock !== null" class="text-sm text-gray-600 text-center">
-      <span v-if="stock > 10" class="text-green-600">Stok tersedia</span>
-      <span v-else-if="stock > 0" class="text-orange-600">Sisa {{ stock }} item</span>
+      <span v-if="stock! > 10" class="text-green-600">Stok tersedia</span>
+      <span v-else-if="stock! > 0" class="text-orange-600">Sisa {{ stock }} item</span>
       <span v-else class="text-red-600">Stok habis</span>
     </div>
 
@@ -144,7 +144,7 @@ const handlePurchase = async () => {
     }
 
     // Use the new checkout API
-    const response = await $fetch(`/api/checkout/${props.productId}`, {
+    const response:any = await $fetch(`/api/checkout/${props.productId}`, {
       method: 'POST'
     })
 
@@ -181,7 +181,7 @@ const downloadProduct = async () => {
     isProcessing.value = true
 
     // Use the new download API to get secure download URL
-    const response = await $fetch(`/api/download/${props.productId}`, {
+    const response:any = await $fetch(`/api/download/${props.productId}`, {
       method: 'POST'
     })
 
