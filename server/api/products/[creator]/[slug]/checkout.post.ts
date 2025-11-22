@@ -1,6 +1,6 @@
 import { getDB, initializeDB } from '~/lib/db/connection'
 import { products, users, transactions, transactionItems } from '~/lib/db/schema'
-import { eq, and } from 'drizzle-orm'
+import { eq, and, sql } from 'drizzle-orm'
 import { createId } from '@paralleldrive/cuid2'
 
 export default defineEventHandler(async (event) => {
@@ -46,7 +46,8 @@ export default defineEventHandler(async (event) => {
         discountStartDate: products.discountStartDate,
         discountEndDate: products.discountEndDate,
         status: products.status,
-        isAvailable: products.isAvailable
+        isAvailable: products.isAvailable,
+        totalSales: products.totalSales
       })
       .from(products)
       .leftJoin(users, eq(products.userId, users.id))
@@ -179,11 +180,11 @@ export default defineEventHandler(async (event) => {
     })
 
     if (isFree) {
-      // Update product sales count for free products
+      // Update product sales count for free products - using atomic increment
       await db
         .update(products)
         .set({ 
-          totalSales: (product as any).totalSales ? (product as any).totalSales + 1 : 1,
+          totalSales: sql`${products.totalSales} + 1`,
           updated: new Date()
         })
         .where(eq(products.id, product.id))
