@@ -197,6 +197,10 @@
                                             ⭐ {{ product.averageRating.toFixed(1) }}
                                         </span>
                                     </div>
+                                    <div class="flex items-center space-x-4 mt-1 text-xs text-gray-400">
+                                        <span>Updated: {{ formatDate(product.updated) }}</span>
+                                        <span>Created: {{ formatDate(product.created) }}</span>
+                                    </div>
                                 </div>
                             </div>
 
@@ -260,7 +264,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useCreatorProducts } from '~/composables/useCreatorProducts'
 
 // Use formatter composable
-const { formatNumber, formatPrice } = useFormatter()
+const { formatNumber, formatPrice, formatDate } = useFormatter()
 
 // Meta
 definePageMeta({

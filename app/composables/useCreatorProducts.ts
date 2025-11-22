@@ -143,11 +143,38 @@ export const useCreatorProducts = () => {
 
   // Toggle product status
   const toggleProductStatus = async (productId: string) => {
-    const product = products.value.find(p => p.id === productId)
-    if (!product) return
+    loading.value = true
+    error.value = null
     
-    const newStatus = product.status === 'published' ? 'draft' : 'published'
-    return await updateProduct(productId, { status: newStatus })
+    try {
+      const response = await $fetch<{ 
+        success: boolean; 
+        message: string; 
+        data: { id: string; oldStatus: string; newStatus: string; updated: string } 
+      }>(`/api/creator/products/${productId}`, {
+        method: 'PATCH',
+        body: { action: 'toggle-status' }
+      })
+      
+      if (response.success) {
+        // Update product in local state
+        const index = products.value.findIndex(p => p.id === productId)
+        if (index !== -1 && products.value[index]) {
+          products.value[index].status = response.data.newStatus as any
+          // Note: Keep as string since API returns ISO string
+        }
+        await fetchProducts() // Refresh data to get latest updated timestamp
+        return response.data
+      } else {
+        throw new Error('Failed to toggle product status')
+      }
+    } catch (err: any) {
+      error.value = err.data?.message || err.message || 'Failed to toggle product status'
+      console.error('Error toggling product status:', err)
+      throw err
+    } finally {
+      loading.value = false
+    }
   }
 
   // Toggle product availability

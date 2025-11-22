@@ -18,6 +18,7 @@ export default defineEventHandler(async (event) => {
       .select({
         id: products.id,
         title: products.title,
+        slug: products.slug,
         description: products.description,
         shortDescription: products.shortDescription,
         basePrice: products.basePrice,
@@ -59,6 +60,7 @@ export default defineEventHandler(async (event) => {
     const formattedProducts = featuredProducts.map((product: any) => ({
       id: product.id,
       title: product.title,
+      slug: product.slug,
       description: product.description || product.shortDescription || '',
       price: product.basePrice || 0,
       thumbnail: product.thumbnailImage,

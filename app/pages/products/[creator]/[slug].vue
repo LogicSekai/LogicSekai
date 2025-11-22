@@ -144,13 +144,31 @@
                                     </div>
                                     <div class="flex flex-col gap-3">
                                         <div class="flex gap-3">
+                                            <!-- Download/Purchase Button -->
                                             <Button 
-                                                @click="handleDownload"
+                                                @click="ownership.canDownload ? handleDownload() : handlePurchase()"
                                                 size="lg"
-                                                class="shadow-lg">
-                                                <CloudDownload class="w-5 h-5" />
-                                                <span>Download</span>
+                                                class="shadow-lg"
+                                                :disabled="purchaseLoading || downloadLoading || checkingOwnership"
+                                                :class="{
+                                                    'bg-green-600 hover:bg-green-700': ownership.canDownload,
+                                                    'bg-primary hover:bg-primary/90': !ownership.canDownload
+                                                }">
+                                                <CloudDownload v-if="downloadLoading" class="w-5 h-5 animate-spin" />
+                                                <CloudDownload v-else-if="ownership.canDownload" class="w-5 h-5" />
+                                                <ShoppingBag v-else class="w-5 h-5" />
+                                                <span v-if="checkingOwnership">Checking...</span>
+                                                <span v-else-if="ownership.canDownload">
+                                                    {{ downloadLoading ? 'Downloading...' : 'Download' }}
+                                                </span>
+                                                <span v-else-if="getFinalPrice() === 0">
+                                                    {{ purchaseLoading ? 'Processing...' : 'Get Free' }}
+                                                </span>
+                                                <span v-else>
+                                                    {{ purchaseLoading ? 'Processing...' : `Buy ${formatPrice(getFinalPrice())}` }}
+                                                </span>
                                             </Button>
+                                            
                                             <NuxtLink
                                                 :to="product.livePreviewUrl || '#'"
                                                 target="_blank"
@@ -164,12 +182,26 @@
                                             </NuxtLink>
                                         </div>
 
-                                        <!-- Login Required Notice -->
+                                        <!-- Status Messages -->
                                         <div v-if="!user" class="flex items-center gap-2 text-xs text-amber-600 dark:text-amber-400">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                             </svg>
                                             <span>Login diperlukan untuk download file</span>
+                                        </div>
+                                        
+                                        <div v-else-if="ownership.owned && ownership.canDownload" class="flex items-center gap-2 text-xs text-green-600 dark:text-green-400">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            <span>Anda sudah memiliki produk ini</span>
+                                        </div>
+                                        
+                                        <div v-else-if="ownership.transactionStatus === 'pending'" class="flex items-center gap-2 text-xs text-blue-600 dark:text-blue-400">
+                                            <svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            <span>Pembayaran sedang diproses</span>
                                         </div>
                                     </div>
                                 </div>
@@ -483,7 +515,7 @@
                                     <CalendarClock class="w-4 h-4" />
                                     Last Updated:
                                 </span>
-                                <!-- <span class="text-sm font-medium text-dark dark:text-white">{{ product.lastUpdate }}</span> -->
+                                <span class="text-sm font-medium text-dark dark:text-white">{{ formatDate(product.updated) }}</span>
                             </div>
                             <div class="flex justify-between items-center pb-4 border-b border-stroke dark:border-dark-3">
                                 <span class="text-sm text-body-color dark:text-dark-6 flex items-center gap-2">
@@ -753,6 +785,7 @@ interface Product {
     totalSales: number
     averageRating: number
     totalReviews: number
+    updated: string
     creator: {
         id: string
         username: string
@@ -797,6 +830,13 @@ const activeTab = ref('description')
 const userOwnsProduct = ref(false)
 const purchaseLoading = ref(false)
 const downloadLoading = ref(false)
+const ownership = ref({
+  owned: false,
+  canDownload: false,
+  transactionStatus: null as string | null,
+  requiresPayment: true
+})
+const checkingOwnership = ref(false)
 
 // Tabs configuration
 const tabs = [
@@ -817,8 +857,8 @@ const fetchProduct = async () => {
         if (response.success) {
             product.value = response.data
             
-            // Check if user owns this product
-            // await checkUserOwnership()
+            // Check ownership
+            await checkOwnership()
         } else {
             product.value = null
         }
@@ -827,6 +867,50 @@ const fetchProduct = async () => {
         product.value = null
     } finally {
         loading.value = false
+    }
+}
+
+const checkOwnership = async () => {
+    try {
+        checkingOwnership.value = true
+        
+        if (!product.value?.id) {
+            console.log('No product ID available for ownership check')
+            return
+        }
+        
+        console.log('🔍 Checking ownership for product:', product.value.id)
+        const response = await $fetch<{
+            success: boolean
+            isOwned: boolean
+            canPurchase: boolean
+            isFree: boolean
+            isLoggedIn: boolean
+            ownership?: {
+                transactionId: string
+                purchaseDate: string
+                pricePaid: number
+                downloadCount: number
+                downloadLimit: number
+                remainingDownloads: number
+            }
+        }>(`/api/ownership/${product.value.id}`)
+
+        console.log('📊 Ownership response:', response)
+
+        if (response.success) {
+            ownership.value = {
+                owned: response.isOwned,
+                canDownload: response.isOwned,
+                transactionStatus: response.isOwned ? 'completed' : null,
+                requiresPayment: !response.isFree && !response.isOwned
+            }
+            userOwnsProduct.value = response.isOwned
+        }
+    } catch (error) {
+        console.error('Error checking ownership:', error)
+    } finally {
+        checkingOwnership.value = false
     }
 }
 
@@ -883,57 +967,92 @@ const getDiscountPercentage = () => {
 }
 
 const handlePurchase = async () => {
+    if (!user.value) {
+        console.log('❌ User not logged in, redirecting to login')
+        // Redirect to login
+        await navigateTo('/auth/login')
+        return
+    }
+
     try {
         purchaseLoading.value = true
         
-        const finalPrice = getFinalPrice()
-        
-        if (finalPrice === 0) {
-            // Free product - create transaction and allow download
-            await $fetch('/api/transactions/create', {
-                method: 'POST',
-                body: {
-                productId: product.value?.id,
-                transactionType: 'download',
-                finalPrice: 0
+        console.log('🛒 Starting checkout process for:', creatorUsername, productSlug)
+        const response = await $fetch<{
+            success: boolean
+            status: string
+            message: string
+            transactionId: string
+            canDownload?: boolean
+            paymentUrl?: string
+        }>(`/api/products/${creatorUsername}/${productSlug}/checkout`, {
+            method: 'POST'
+        })
+
+        console.log('📦 Checkout response:', response)
+
+        if (response.success) {
+            if (response.status === 'free_download' || response.status === 'already_owned') {
+                // Free product or already owned - can download immediately
+                ownership.value.owned = true
+                ownership.value.canDownload = true
+                userOwnsProduct.value = true
+                
+                if (response.status === 'free_download') {
+                    await handleDownload()
                 }
-            })
-            
-            userOwnsProduct.value = true
-            await handleDownload()
-        } else {
-            // Paid product - redirect to payment
-            const response = await $fetch<{
-                success: boolean
-                paymentUrl?: string
-                transactionId?: string
-            }>('/api/transactions/create', {
-                method: 'POST',
-                body: {
-                    productId: product.value?.id,
-                    transactionType: 'purchase',
-                    finalPrice
+            } else if (response.status === 'pending_payment') {
+                // Paid product - show payment options or redirect
+                if (response.paymentUrl) {
+                    window.location.href = response.paymentUrl
+                } else {
+                    // Show payment modal or redirect to payment page
+                    alert('Payment required. Transaction created with ID: ' + response.transactionId)
                 }
-            })
-            
-            if (response.success && response.paymentUrl) {
-                window.location.href = response.paymentUrl
             }
         }
-    } catch (error) {
-        console.error('Error creating transaction:', error)
+    } catch (error: any) {
+        console.error('❌ Error in checkout:', error)
+        console.error('Error details:', {
+            statusCode: error.statusCode,
+            statusMessage: error.statusMessage,
+            data: error.data,
+            message: error.message
+        })
+        
+        if (error.statusCode === 401) {
+            console.log('🔐 Authentication required, redirecting to login')
+            await navigateTo('/auth/login')
+        } else {
+            const errorMessage = error.data?.error || error.data?.message || error.statusMessage || 'Checkout failed'
+            console.log('⚠️ Showing error message:', errorMessage)
+            alert(errorMessage)
+        }
     } finally {
         purchaseLoading.value = false
     }
 }
 
 const handleDownload = async () => {
+    if (!user.value) {
+        await navigateTo('/auth/login')
+        return
+    }
+
+    if (!ownership.value.canDownload) {
+        // Need to purchase first
+        await handlePurchase()
+        return
+    }
+
     try {
         downloadLoading.value = true
         
         const response = await $fetch<{
             success: boolean
             downloadUrl?: string
+            fileName?: string
+            message?: string
         }>(`/api/products/${creatorUsername}/${productSlug}/download`, {
             method: 'POST'
         })
@@ -942,13 +1061,22 @@ const handleDownload = async () => {
             // Create download link and trigger download
             const link = document.createElement('a')
             link.href = response.downloadUrl
-            link.download = `${product.value?.title}.zip`
+            link.download = response.fileName || `${product.value?.title}.zip`
             document.body.appendChild(link)
             link.click()
             document.body.removeChild(link)
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error downloading product:', error)
+        
+        if (error.statusCode === 401) {
+            await navigateTo('/auth/login')
+        } else if (error.statusCode === 403) {
+            alert('Purchase required to download this product')
+            await handlePurchase()
+        } else {
+            alert(error.data?.message || 'Download failed')
+        }
     } finally {
         downloadLoading.value = false
     }

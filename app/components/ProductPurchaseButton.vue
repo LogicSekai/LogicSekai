@@ -103,23 +103,26 @@ const isProcessing = ref(false)
 const showSuccessModal = ref(false)
 const errorMessage = ref('')
 const transactionResult = ref<any>(null)
+const ownershipStatus = ref<any>(null)
+const isLoadingOwnership = ref(false)
 
 // Computed properties
-const isInStock = computed(() => props.stock === null || props.stock > 0)
-const isFree = computed(() => props.finalPrice === 0)
+const isInStock = computed(() => props.stock === null || props.stock === undefined || props.stock > 0)
+const isFree = computed(() => ownershipStatus.value?.isFree || props.finalPrice === 0)
+const isOwnedComputed = computed(() => ownershipStatus.value?.isOwned || props.isOwned)
 const buttonVariant = computed(() => {
-  if (props.isOwned || isFree.value) return 'download'
+  if (isOwnedComputed.value || isFree.value) return 'download'
   return 'purchase'
 })
 
 const modalTitle = computed(() => {
-  if (isFree.value || props.isOwned) return 'Unduhan Berhasil'
+  if (isFree.value || isOwnedComputed.value) return 'Unduhan Berhasil'
   return 'Pembelian Berhasil'
 })
 
 const modalMessage = computed(() => {
   if (isFree.value) return 'Produk gratis telah berhasil diunduh.'
-  if (props.isOwned) return 'Anda sudah memiliki produk ini.'
+  if (isOwnedComputed.value) return 'Anda sudah memiliki produk ini.'
   if (transactionResult.value?.status === 'completed') {
     return 'Pembayaran berhasil! Anda sekarang dapat mengunduh produk.'
   }
@@ -135,39 +138,39 @@ const handlePurchase = async () => {
     errorMessage.value = ''
 
     // If user already owns the product, just download
-    if (props.isOwned) {
+    if (isOwnedComputed.value) {
       await downloadProduct()
       return
     }
 
-    // Create transaction
-    const response = await $fetch('/api/transactions/create', {
-      method: 'POST',
-      body: {
-        productId: props.productId,
-        transactionType: isFree.value ? 'free_download' : 'purchase',
-        finalPrice: props.finalPrice
-      }
+    // Use the new checkout API
+    const response = await $fetch(`/api/checkout/${props.productId}`, {
+      method: 'POST'
     })
 
     transactionResult.value = response
     showSuccessModal.value = true
 
-    // If it's a free product or completed transaction, track the download
-    if (response.status === 'completed') {
-      // Track download history
-      await $fetch('/api/downloads/track', {
-        method: 'POST',
-        body: {
-          productId: props.productId,
-          transactionId: response.transactionId
-        }
-      }).catch(console.error) // Don't block UI for tracking errors
+    // Refresh ownership status after successful checkout
+    if (response.success) {
+      await checkOwnership()
     }
 
   } catch (error: any) {
     console.error('Purchase error:', error)
-    errorMessage.value = error.data?.message || 'Terjadi kesalahan saat memproses pembelian'
+    
+    // Handle specific error cases
+    if (error.status === 401) {
+      errorMessage.value = 'Anda harus login untuk melakukan pembelian'
+    } else if (error.status === 404) {
+      errorMessage.value = 'Produk tidak ditemukan'
+    } else if (error.status === 409) {
+      errorMessage.value = 'Anda sudah memiliki produk ini'
+      // Refresh ownership status if we get this error
+      await checkOwnership()
+    } else {
+      errorMessage.value = error.data?.message || 'Terjadi kesalahan saat memproses pembelian'
+    }
   } finally {
     isProcessing.value = false
   }
@@ -175,20 +178,40 @@ const handlePurchase = async () => {
 
 const downloadProduct = async () => {
   try {
-    // Get creator username from current route or product data
-    const route = useRoute()
-    const creatorUsername = route.params.creator as string
-    
-    if (creatorUsername) {
-      window.open(`/api/products/${creatorUsername}/${props.productSlug}/download`, '_blank')
+    isProcessing.value = true
+
+    // Use the new download API to get secure download URL
+    const response = await $fetch(`/api/download/${props.productId}`, {
+      method: 'POST'
+    })
+
+    if (response.success && response.downloadUrl) {
+      // Redirect to the secure download URL
+      window.open(response.downloadUrl, '_blank')
+      showSuccessModal.value = false
+      
+      // Show remaining downloads info if available
+      if (response.remainingDownloads !== undefined) {
+        console.log(`Remaining downloads: ${response.remainingDownloads}`)
+      }
     } else {
-      // Fallback to old URL structure if creator not available
-      window.open(`/api/products/${props.productSlug}/download`, '_blank')
+      throw new Error('Invalid download response')
     }
-    showSuccessModal.value = false
-  } catch (error) {
+
+  } catch (error: any) {
     console.error('Download error:', error)
-    errorMessage.value = 'Gagal mengunduh produk'
+    
+    if (error.status === 401) {
+      errorMessage.value = 'Anda harus login untuk mengunduh'
+    } else if (error.status === 403) {
+      errorMessage.value = 'Anda tidak memiliki akses untuk mengunduh produk ini'
+    } else if (error.status === 429) {
+      errorMessage.value = 'Batas unduhan telah tercapai'
+    } else {
+      errorMessage.value = error.data?.message || 'Gagal mengunduh produk'
+    }
+  } finally {
+    isProcessing.value = false
   }
 }
 
@@ -198,10 +221,35 @@ const redirectToPayment = () => {
   }
 }
 
+// Methods for ownership checking
+const checkOwnership = async () => {
+  if (isLoadingOwnership.value) return
+  
+  try {
+    isLoadingOwnership.value = true
+    const response = await $fetch(`/api/ownership/${props.productId}`)
+    ownershipStatus.value = response
+  } catch (error) {
+    console.error('Error checking ownership:', error)
+    // Don't show error to user, just use props fallback
+  } finally {
+    isLoadingOwnership.value = false
+  }
+}
+
+// Check ownership on mount
+onMounted(() => {
+  checkOwnership()
+})
+
 // Watch for changes in props
 watch(() => props.isOwned, (newValue) => {
   if (newValue) {
     errorMessage.value = ''
   }
+})
+
+watch(() => props.productId, () => {
+  checkOwnership()
 })
 </script>

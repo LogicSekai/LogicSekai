@@ -61,14 +61,14 @@
             {{ product.category }}
           </span>
           <span
-            v-for="category in product.categories.slice(1, 3)"
+            v-for="category in product.categories?.slice(1, 3) || []"
             :key="category.id"
             class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800"
           >
             {{ category.name }}
           </span>
           <span
-            v-if="product.categories.length > 3"
+            v-if="product.categories && product.categories.length > 3"
             class="text-xs text-gray-500"
           >
             +{{ product.categories.length - 3 }}

@@ -154,6 +154,7 @@ export default defineEventHandler(async (event) => {
       totalSales: product.totalSales || 0,
       averageRating: product.averageRating || 0,
       totalReviews: product.totalReviews || 0,
+      updated: product.updated?.toISOString(),
       creator: product.creator,
       contributors: contributorsData.map((c: any) => ({
         id: c.id,
