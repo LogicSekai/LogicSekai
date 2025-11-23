@@ -5,35 +5,53 @@ import { createId } from '@paralleldrive/cuid2'
 
 export default defineEventHandler(async (event) => {
   try {
+    console.log('=== CHECKOUT API START ===')
+    
+    // Set proper headers
+    setHeader(event, 'content-type', 'application/json')
+    
     // Initialize database
     let db = getDB()
     if (!db) {
       db = initializeDB()
     }
+    console.log('Database initialized:', !!db)
 
     const creatorUsername = getRouterParam(event, 'creator')
     const productSlug = getRouterParam(event, 'slug')
     
+    console.log('Route params:', { creatorUsername, productSlug })
+    
     if (!creatorUsername || !productSlug) {
-      throw createError({
-        statusCode: 400,
-        statusMessage: 'Creator username and product slug are required'
-      })
+      setResponseStatus(event, 400)
+      return {
+        success: false,
+        error: 'Creator username and product slug are required'
+      }
     }
 
     // Get user from auth context (set by middleware)
     const authContext = event.context.auth
     
+    console.log('Auth context:', { 
+      exists: !!authContext, 
+      isAuthenticated: authContext?.isAuthenticated,
+      userId: authContext?.user?.id 
+    })
+    
     if (!authContext || !authContext.isAuthenticated) {
-      throw createError({
-        statusCode: 401,
-        statusMessage: 'Authentication required'
-      })
+      setResponseStatus(event, 401)
+      return {
+        success: false,
+        error: 'Authentication required'
+      }
     }
 
     const userData = authContext.user
+    console.log('User data from auth context:', { id: userData?.id, username: userData?.username })
 
     // Get product by creator and slug
+    console.log('Fetching product...')
     const productData = await db
       .select({
         id: products.id,
@@ -61,14 +79,18 @@ export default defineEventHandler(async (event) => {
       )
       .limit(1)
 
+    console.log('Product query result:', productData.length > 0 ? 'Found' : 'Not found')
+
     if (!productData.length) {
-      throw createError({
-        statusCode: 404,
-        statusMessage: 'Product not found'
-      })
+      setResponseStatus(event, 404)
+      return {
+        success: false,
+        error: 'Product not found'
+      }
     }
 
     const product = productData[0]
+    console.log('Product:', { id: product.id, title: product.title, basePrice: product.basePrice })
 
     // Calculate final price
     const now = new Date()
@@ -87,7 +109,10 @@ export default defineEventHandler(async (event) => {
       }
     }
 
+    console.log('Final price calculated:', finalPrice)
+
     // Check if user already has a transaction for this product
+    console.log('Checking existing transactions...')
     const existingTransactions = await db
       .select({
         id: transactions.id,
@@ -103,9 +128,12 @@ export default defineEventHandler(async (event) => {
       )
       .limit(1)
 
+    console.log('Existing transactions:', existingTransactions.length)
+
     // If user already has a completed (paid) transaction
     if (existingTransactions.length > 0) {
       const existingTransaction = existingTransactions[0]
+      console.log('Existing transaction status:', existingTransaction.status)
       
       if (existingTransaction.status === 'completed') {
         return {
@@ -117,6 +145,7 @@ export default defineEventHandler(async (event) => {
       }
 
       // If transaction exists but not completed, update to pending
+      console.log('Updating existing transaction to pending...')
       await db
         .update(transactions)
         .set({
@@ -136,6 +165,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // No existing transaction - create a new one
+    console.log('Creating new transaction...')
     const transactionId = createId()
     const discountAmount = (product.basePrice || 0) - finalPrice
     const clientIP = getHeader(event, 'x-forwarded-for') || getHeader(event, 'x-real-ip') || '127.0.0.1'
@@ -144,6 +174,8 @@ export default defineEventHandler(async (event) => {
     // If product is free (price = 0), create completed transaction immediately
     const isFree = finalPrice === 0
     const transactionStatus = isFree ? 'completed' : 'pending'
+
+    console.log('Transaction details:', { transactionId, isFree, status: transactionStatus, finalPrice })
 
     const transactionData = {
       id: transactionId,
@@ -164,9 +196,12 @@ export default defineEventHandler(async (event) => {
       completedAt: isFree ? new Date() : null
     }
 
+    console.log('Inserting transaction...')
     await db.insert(transactions).values(transactionData)
+    console.log('Transaction inserted successfully')
 
     // Create transaction item
+    console.log('Creating transaction item...')
     await db.insert(transactionItems).values({
       id: createId(),
       transactionId,
@@ -178,9 +213,11 @@ export default defineEventHandler(async (event) => {
       totalPrice: finalPrice,
       createdAt: new Date()
     })
+    console.log('Transaction item created successfully')
 
     if (isFree) {
       // Update product sales count for free products - using atomic increment
+      console.log('Updating product sales count...')
       await db
         .update(products)
         .set({ 
@@ -189,6 +226,7 @@ export default defineEventHandler(async (event) => {
         })
         .where(eq(products.id, product.id))
 
+      console.log('=== CHECKOUT API SUCCESS (FREE) ===')
       return {
         success: true,
         transactionId,
@@ -201,6 +239,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // Paid product - return transaction details for payment
+    console.log('=== CHECKOUT API SUCCESS (PAID) ===')
     return {
       success: true,
       transactionId,
@@ -213,15 +252,25 @@ export default defineEventHandler(async (event) => {
     }
 
   } catch (error: any) {
-    console.error('Error in checkout:', error)
+    console.error('❌ Error in checkout API:', error)
+    console.error('Error stack:', error.stack)
+    
+    // Set proper headers for error response
+    setHeader(event, 'content-type', 'application/json')
     
     if (error.statusCode) {
-      throw error
+      setResponseStatus(event, error.statusCode)
+      return {
+        success: false,
+        error: error.statusMessage || 'Unknown error'
+      }
     }
     
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Failed to process checkout'
-    })
+    setResponseStatus(event, 500)
+    return {
+      success: false,
+      error: 'Failed to process checkout',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    }
   }
 })
