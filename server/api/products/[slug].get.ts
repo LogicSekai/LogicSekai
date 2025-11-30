@@ -1,27 +1,34 @@
 import { getDB, initializeDB } from '~/lib/db/connection'
-import { products, users, productContributors, productCategories, productCategoryMappings } from '~/lib/db/schema'
+import { products, users, productCategories, productCategoryMappings } from '~/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   try {
-    // Initialize database if not already done
+    console.log('=== GET PRODUCT BY ID API ===')
+    
+    // Set proper headers
+    setHeader(event, 'content-type', 'application/json')
+    
+    // Initialize database
     let db = getDB()
     if (!db) {
       db = initializeDB()
     }
 
-    const slug = getRouterParam(event, 'slug')
+    const productId = getRouterParam(event, 'id')
+    console.log('Product ID:', productId)
     
-    if (!slug) {
+    if (!productId) {
       throw createError({
         statusCode: 400,
-        statusMessage: 'Product slug is required'
+        statusMessage: 'Product ID is required'
       })
     }
 
-    // Get product with creator info
+    // Get product with creator info and categories
     const productData = await db
       .select({
+        // Product fields
         id: products.id,
         title: products.title,
         slug: products.slug,
@@ -29,6 +36,8 @@ export default defineEventHandler(async (event) => {
         shortDescription: products.shortDescription,
         features: products.features,
         tags: products.tags,
+        thumbnailImage: products.thumbnailImage,
+        previewImages: products.previewImages,
         basePrice: products.basePrice,
         currency: products.currency,
         discountType: products.discountType,
@@ -41,10 +50,9 @@ export default defineEventHandler(async (event) => {
         isAvailable: products.isAvailable,
         version: products.version,
         releaseDate: products.releaseDate,
+        lastUpdated: products.lastUpdated,
         licenseType: products.licenseType,
         supportType: products.supportType,
-        thumbnailImage: products.thumbnailImage,
-        previewImages: products.previewImages,
         livePreviewUrl: products.livePreviewUrl,
         documentationUrl: products.documentationUrl,
         totalViews: products.totalViews,
@@ -53,18 +61,19 @@ export default defineEventHandler(async (event) => {
         totalReviews: products.totalReviews,
         created: products.created,
         updated: products.updated,
-        creator: {
-          id: users.id,
-          username: users.username,
-          name: users.name,
-          avatar: users.avatar
-        }
+        userId: products.userId,
+        
+        // Creator fields
+        creatorId: users.id,
+        creatorUsername: users.username,
+        creatorName: users.name,
+        creatorAvatar: users.avatar
       })
       .from(products)
       .leftJoin(users, eq(products.userId, users.id))
       .where(
         and(
-          eq(products.slug, slug),
+          eq(products.id, productId),
           eq(products.status, 'published'),
           eq(products.isAvailable, true)
         )
@@ -79,102 +88,114 @@ export default defineEventHandler(async (event) => {
     }
 
     const product = productData[0]
+    console.log('✅ Product found:', product.title)
 
-    // Get contributors
-    const contributorsData = await db
-      .select({
-        id: users.id,
-        username: users.username,
-        name: users.name,
-        avatar: users.avatar,
-        role: productContributors.role
-      })
-      .from(productContributors)
-      .leftJoin(users, eq(productContributors.userId, users.id))
-      .where(eq(productContributors.productId, product.id))
-
-    // Get categories
-    const categoriesData = await db
+    // Get product categories
+    const categoryData = await db
       .select({
         id: productCategories.id,
         name: productCategories.name,
-        slug: productCategories.slug,
-        description: productCategories.description
+        slug: productCategories.slug
       })
       .from(productCategoryMappings)
       .leftJoin(productCategories, eq(productCategoryMappings.categoryId, productCategories.id))
       .where(eq(productCategoryMappings.productId, product.id))
 
-    // Increment view count
-    await db
-      .update(products)
-      .set({ 
-        totalViews: (product.totalViews || 0) + 1,
-        updated: new Date()
-      })
-      .where(eq(products.id, product.id))
+    console.log('📂 Categories found:', categoryData.length)
+
+    // Parse JSON fields
+    let features = []
+    let tags = []
+    let previewImages = []
+    
+    try {
+      features = product.features ? JSON.parse(product.features) : []
+      tags = product.tags ? JSON.parse(product.tags) : []
+      previewImages = product.previewImages ? JSON.parse(product.previewImages) : []
+    } catch (error) {
+      console.warn('Failed to parse JSON fields:', error)
+    }
+
+    // Increment view count (fire and forget)
+    try {
+      await db
+        .update(products)
+        .set({ 
+          totalViews: (product.totalViews || 0) + 1,
+          updated: new Date()
+        })
+        .where(eq(products.id, product.id))
+      
+      console.log('📊 View count incremented')
+    } catch (error) {
+      console.warn('Failed to increment view count:', error)
+    }
 
     // Format response
-    const formattedProduct = {
-      id: product.id,
-      title: product.title,
-      slug: product.slug,
-      description: product.description,
-      shortDescription: product.shortDescription,
-      thumbnail: product.thumbnailImage,
-      previewImages: product.previewImages ? JSON.parse(product.previewImages) : [],
-      basePrice: product.basePrice || 0,
-      currency: product.currency || 'IDR',
-      discountType: product.discountType,
-      discountValue: product.discountValue,
-      discountStartDate: product.discountStartDate?.toISOString(),
-      discountEndDate: product.discountEndDate?.toISOString(),
-      stockType: product.stockType || 'unlimited',
-      stockQuantity: product.stockQuantity,
-      status: product.status,
-      features: product.features ? JSON.parse(product.features) : [],
-      tags: product.tags ? JSON.parse(product.tags) : [],
-      categories: categoriesData.map((c: any) => ({
-        id: c.id,
-        name: c.name,
-        slug: c.slug,
-        description: c.description
-      })),
-      category: categoriesData.length > 0 ? categoriesData[0].name : '', // Primary category fallback
-      version: product.version,
-      releaseDate: product.releaseDate?.toISOString(),
-      licenseType: product.licenseType,
-      supportType: product.supportType,
-      livePreviewUrl: product.livePreviewUrl,
-      documentationUrl: product.documentationUrl,
-      totalViews: (product.totalViews || 0) + 1, // Include the increment
-      totalSales: product.totalSales || 0,
-      averageRating: product.averageRating || 0,
-      totalReviews: product.totalReviews || 0,
-      creator: product.creator,
-      contributors: contributorsData.map((c: any) => ({
-        id: c.id,
-        username: c.username,
-        name: c.name,
-        avatar: c.avatar,
-        role: c.role || 'contributor'
-      }))
+    const response = {
+      success: true,
+      data: {
+        id: product.id,
+        title: product.title,
+        slug: product.slug,
+        description: product.description,
+        shortDescription: product.shortDescription,
+        thumbnail: product.thumbnailImage,
+        previewImages,
+        basePrice: product.basePrice,
+        currency: product.currency,
+        discountType: product.discountType,
+        discountValue: product.discountValue,
+        discountStartDate: product.discountStartDate,
+        discountEndDate: product.discountEndDate,
+        stockType: product.stockType,
+        stockQuantity: product.stockQuantity,
+        status: product.status,
+        features,
+        tags,
+        categories: categoryData,
+        version: product.version,
+        releaseDate: product.releaseDate,
+        licenseType: product.licenseType,
+        supportType: product.supportType,
+        livePreviewUrl: product.livePreviewUrl,
+        documentationUrl: product.documentationUrl,
+        totalViews: (product.totalViews || 0) + 1, // Include the increment
+        totalSales: product.totalSales,
+        averageRating: product.averageRating,
+        totalReviews: product.totalReviews,
+        updated: product.updated,
+        creator: {
+          id: product.creatorId,
+          username: product.creatorUsername,
+          name: product.creatorName,
+          avatar: product.creatorAvatar
+        },
+        contributors: [] // TODO: Implement contributors if needed
+      }
     }
 
-    return {
-      success: true,
-      data: formattedProduct
-    }
+    console.log('📤 Sending product response')
+    return response
+
   } catch (error: any) {
-    console.error('Error fetching product:', error)
+    console.error('❌ Error in get product by ID API:', error)
+    
+    // Set proper headers for error response
+    setHeader(event, 'content-type', 'application/json')
     
     if (error.statusCode) {
-      throw error
+      setResponseStatus(event, error.statusCode)
+      return {
+        success: false,
+        error: error.statusMessage || 'Unknown error'
+      }
     }
     
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Failed to fetch product'
-    })
+    setResponseStatus(event, 500)
+    return {
+      success: false,
+      error: 'Failed to fetch product'
+    }
   }
 })

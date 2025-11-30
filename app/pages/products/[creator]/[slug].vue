@@ -831,10 +831,10 @@ const userOwnsProduct = ref(false)
 const purchaseLoading = ref(false)
 const downloadLoading = ref(false)
 const ownership = ref({
-  owned: false,
-  canDownload: false,
-  transactionStatus: null as string | null,
-  requiresPayment: true
+    owned: false,
+    canDownload: false,
+    transactionStatus: null as string | null,
+    requiresPayment: true
 })
 const checkingOwnership = ref(false)
 
@@ -849,6 +849,8 @@ const tabs = [
 const fetchProduct = async () => {
     try {
         loading.value = true
+        
+        // Try to get product by slug first to get the ID
         const response = await $fetch<{
             success: boolean
             data: Product
@@ -856,6 +858,7 @@ const fetchProduct = async () => {
 
         if (response.success) {
             product.value = response.data
+            console.log('📦 Product loaded:', product.value.title, 'ID:', product.value.id)
             
             // Check ownership
             await checkOwnership()
@@ -977,39 +980,57 @@ const handlePurchase = async () => {
     try {
         purchaseLoading.value = true
         
-        console.log('🛒 Starting checkout process for:', creatorUsername, productSlug)
+        if (!product.value?.id) {
+            console.log('❌ No product ID available')
+            return
+        }
+        
+        console.log('🛒 Starting checkout process for product ID:', product.value.id)
         const response = await $fetch<{
             success: boolean
-            status: string
+            status?: string
             message: string
-            transactionId: string
+            transactionId?: string
             canDownload?: boolean
             paymentUrl?: string
-        }>(`/api/products/${creatorUsername}/${productSlug}/checkout`, {
+            alreadyOwned?: boolean
+            error?: string
+            transaction?: any
+        }>(`/api/checkout/${product.value.id}`, {
             method: 'POST'
         })
 
         console.log('📦 Checkout response:', response)
 
         if (response.success) {
-            if (response.status === 'free_download' || response.status === 'already_owned') {
-                // Free product or already owned - can download immediately
+            if (response.status === 'completed' || response.status === 'already_owned') {
+                // Free product completed or already owned - can download immediately
                 ownership.value.owned = true
                 ownership.value.canDownload = true
                 userOwnsProduct.value = true
                 
-                if (response.status === 'free_download') {
-                    await handleDownload()
-                }
-            } else if (response.status === 'pending_payment') {
-                // Paid product - show payment options or redirect
-                if (response.paymentUrl) {
-                    window.location.href = response.paymentUrl
+                // Show success message
+                if (response.status === 'completed') {
+                    alert('Product acquired successfully! You can now download it.')
+                    // Refresh ownership status
+                    await checkOwnership()
                 } else {
-                    // Show payment modal or redirect to payment page
+                    alert('You already own this product!')
+                }
+            } else if (response.status === 'pending') {
+                // Paid product - redirect to payment
+                if (response.paymentUrl) {
+                    console.log('💳 Redirecting to payment:', response.paymentUrl)
+                    await navigateTo(response.paymentUrl)
+                } else {
                     alert('Payment required. Transaction created with ID: ' + response.transactionId)
                 }
             }
+        } else {
+            // Handle error response
+            const errorMessage = (response as any).error || response.message || 'Checkout failed'
+            console.log('⚠️ Checkout error:', errorMessage)
+            alert(errorMessage)
         }
     } catch (error: any) {
         console.error('❌ Error in checkout:', error)
