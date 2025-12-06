@@ -120,37 +120,37 @@ export default defineEventHandler(async (event) => {
               }
               return user.role === role
             },
-            isAdmin: () => user.role === 'admin',
-            isCreator: () => user.role === 'creator' || user.role === 'admin',
+            isAdmin: () => user.role === 'superadmin',
+            isCreator: () => user.role === 'creator' || user.role === 'superadmin',
             canAccess: (resource: string, action: string = 'read') => {
               // Admin can access everything
-              if (user.role === 'admin') return true
+              if (user.role === 'superadmin') return true
               
               // Define access rules
               const accessRules: Record<string, Record<string, string[]>> = {
                 'products': {
                   'read': ['public'],
-                  'create': ['creator', 'admin'],
-                  'edit': ['creator', 'admin'],
-                  'delete': ['creator', 'admin']
+                  'create': ['creator', 'superadmin'],
+                  'edit': ['creator', 'superadmin'],
+                  'delete': ['creator', 'superadmin']
                 },
                 'users': {
-                  'read': ['admin'],
-                  'create': ['admin'],
-                  'edit': ['admin'],
-                  'delete': ['admin']
+                  'read': ['superadmin'],
+                  'create': ['superadmin'],
+                  'edit': ['superadmin'],
+                  'delete': ['superadmin']
                 },
                 'creator': {
-                  'read': ['creator', 'admin'],
-                  'create': ['creator', 'admin'],
-                  'edit': ['creator', 'admin'],
-                  'delete': ['creator', 'admin']
+                  'read': ['creator', 'superadmin'],
+                  'create': ['creator', 'superadmin'],
+                  'edit': ['creator', 'superadmin'],
+                  'delete': ['creator', 'superadmin']
                 },
-                'admin': {
-                  'read': ['admin'],
-                  'create': ['admin'],
-                  'edit': ['admin'],
-                  'delete': ['admin']
+                'superadmin': {
+                  'read': ['superadmin'],
+                  'create': ['superadmin'],
+                  'edit': ['superadmin'],
+                  'delete': ['superadmin']
                 }
               }
 
