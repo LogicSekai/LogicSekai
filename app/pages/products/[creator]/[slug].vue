@@ -148,12 +148,9 @@
                                             <Button 
                                                 @click="ownership.canDownload ? handleDownload() : handlePurchase()"
                                                 size="lg"
-                                                class="shadow-lg"
+                                                class="shadow-lg bg-primary hover:bg-primary/90"
                                                 :disabled="purchaseLoading || downloadLoading || checkingOwnership"
-                                                :class="{
-                                                    'bg-green-600 hover:bg-green-700': ownership.canDownload,
-                                                    'bg-primary hover:bg-primary/90': !ownership.canDownload
-                                                }">
+                                                >
                                                 <CloudDownload v-if="downloadLoading" class="w-5 h-5 animate-spin" />
                                                 <CloudDownload v-else-if="ownership.canDownload" class="w-5 h-5" />
                                                 <ShoppingBag v-else class="w-5 h-5" />
@@ -442,11 +439,24 @@
                         </h3>
                         <div class="space-y-3">
                             <Button 
-                                @click="handleDownload"
-                                class="w-full shadow-lg"
-                                size="lg">
-                                <CloudDownload class="w-5 h-5" />
-                                <span>Download Sekarang</span>
+                                @click="ownership.canDownload ? handleDownload() : handlePurchase()"
+                                size="lg"
+                                class="w-full shadow-lg bg-primary hover:bg-primary/90"
+                                :disabled="purchaseLoading || downloadLoading || checkingOwnership"
+                                >
+                                <CloudDownload v-if="downloadLoading" class="w-5 h-5 animate-spin" />
+                                <CloudDownload v-else-if="ownership.canDownload" class="w-5 h-5" />
+                                <ShoppingBag v-else class="w-5 h-5" />
+                                <span v-if="checkingOwnership">Checking...</span>
+                                <span v-else-if="ownership.canDownload">
+                                    {{ downloadLoading ? 'Downloading...' : 'Download' }}
+                                </span>
+                                <span v-else-if="getFinalPrice() === 0">
+                                    {{ purchaseLoading ? 'Processing...' : 'Get Free' }}
+                                </span>
+                                <span v-else>
+                                    {{ purchaseLoading ? 'Processing...' : `Buy ${formatPrice(getFinalPrice())}` }}
+                                </span>
                             </Button>
                             
                             <!-- Login Required Notice for File Download -->
