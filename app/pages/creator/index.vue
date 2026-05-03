@@ -1,28 +1,22 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { 
-    TrendingUp, 
-    Users, 
-    ShoppingCart, 
-    Eye, 
-    MessageCircle, 
-    Heart,
+import { ref, computed } from 'vue'
+import {
+    TrendingUp,
+    ShoppingCart,
+    Eye,
     Star,
     DollarSign,
-    Calendar,
     BarChart3,
     ArrowUpRight,
     ArrowDownRight,
     Plus,
     Edit,
     Activity,
-    Clock
+    Clock,
+    MessageCircle,
+    Users,
+    ChevronRight
 } from 'lucide-vue-next'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
-import { Button } from '~/components/ui/button'
-import { Badge } from '~/components/ui/badge'
-import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
-import Progress from '~/components/ui/progress.vue'
 
 definePageMeta({
     title: 'Creator Overview - Logic Sekai',
@@ -30,7 +24,6 @@ definePageMeta({
     middleware: 'creator'
 })
 
-// Mock data for dashboard
 const stats = ref({
     totalRevenue: 125420,
     totalProducts: 24,
@@ -45,63 +38,15 @@ const stats = ref({
 })
 
 const recentProducts = ref([
-    {
-        id: 1,
-        title: 'Premium Web Design Course',
-        price: 299000,
-        sales: 23,
-        rating: 4.8,
-        image: '/api/placeholder/80/80',
-        status: 'published'
-    },
-    {
-        id: 2,
-        title: 'React Advanced Tutorial',
-        price: 199000,
-        sales: 18,
-        rating: 4.6,
-        image: '/api/placeholder/80/80',
-        status: 'published'
-    },
-    {
-        id: 3,
-        title: 'UI/UX Design Masterclass',
-        price: 449000,
-        sales: 31,
-        rating: 4.9,
-        image: '/api/placeholder/80/80',
-        status: 'draft'
-    }
+    { id: 1, title: 'Premium Web Design Course', price: 299000, sales: 23, rating: 4.8, status: 'published' },
+    { id: 2, title: 'React Advanced Tutorial', price: 199000, sales: 18, rating: 4.6, status: 'published' },
+    { id: 3, title: 'UI/UX Design Masterclass', price: 449000, sales: 31, rating: 4.9, status: 'draft' }
 ])
 
 const recentReviews = ref([
-    {
-        id: 1,
-        customerName: 'Ahmad Rahman',
-        productTitle: 'Premium Web Design Course',
-        rating: 5,
-        comment: 'Sangat membantu dan mudah dipahami. Materi lengkap dan up-to-date.',
-        date: '2024-01-15',
-        avatar: '/api/placeholder/40/40'
-    },
-    {
-        id: 2,
-        customerName: 'Sarah Wijaya',
-        productTitle: 'React Advanced Tutorial',
-        rating: 4,
-        comment: 'Penjelasan detail dan contoh yang praktis. Recommended!',
-        date: '2024-01-14',
-        avatar: '/api/placeholder/40/40'
-    },
-    {
-        id: 3,
-        customerName: 'Budi Santoso',
-        productTitle: 'UI/UX Design Masterclass',
-        rating: 5,
-        comment: 'Kualitas materi sangat baik. Instruktur profesional.',
-        date: '2024-01-13',
-        avatar: '/api/placeholder/40/40'
-    }
+    { id: 1, customerName: 'Ahmad Rahman', productTitle: 'Premium Web Design Course', rating: 5, comment: 'Sangat membantu dan mudah dipahami. Materi lengkap dan up-to-date.', date: '2024-01-15' },
+    { id: 2, customerName: 'Sarah Wijaya', productTitle: 'React Advanced Tutorial', rating: 4, comment: 'Penjelasan detail dan contoh yang praktis. Recommended!', date: '2024-01-14' },
+    { id: 3, customerName: 'Budi Santoso', productTitle: 'UI/UX Design Masterclass', rating: 5, comment: 'Kualitas materi sangat baik. Instruktur profesional.', date: '2024-01-13' }
 ])
 
 const monthlyEarnings = ref([
@@ -113,299 +58,239 @@ const monthlyEarnings = ref([
     { month: 'Jun', amount: 12540000 }
 ])
 
-// Computed values
-const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
-    }).format(amount)
-}
+const maxEarning = computed(() => Math.max(...monthlyEarnings.value.map(e => e.amount)))
 
-const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('id-ID', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric'
-    })
-}
+const formatCurrency = (amount: number) =>
+    new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount)
 
-const getStatusBadge = (status: string): 'default' | 'secondary' | 'outline' => {
-    const variants = {
-        published: 'default' as const,
-        draft: 'secondary' as const,
-        pending: 'outline' as const
-    }
-    return variants[status as keyof typeof variants] || 'secondary'
-}
+const formatDate = (date: string) =>
+    new Date(date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
 
-const getGrowthColor = (growth: number) => {
-    return growth >= 0 ? 'text-green-600' : 'text-red-600'
-}
+const currentDate = computed(() =>
+    new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+)
 
-const getGrowthIcon = (growth: number) => {
-    return growth >= 0 ? ArrowUpRight : ArrowDownRight
-}
+const statCards = computed(() => [
+    { label: 'Total Pendapatan', value: formatCurrency(stats.value.totalRevenue), growth: stats.value.revenueGrowth, sub: 'dari bulan lalu', icon: DollarSign, accent: 'text-emerald-500' },
+    { label: 'Total Produk', value: stats.value.totalProducts, growth: stats.value.salesGrowth, sub: 'penjualan bulan ini', icon: ShoppingCart, accent: 'text-indigo-500' },
+    { label: 'Total Views', value: stats.value.totalViews.toLocaleString('id-ID'), growth: stats.value.viewsGrowth, sub: 'dari bulan lalu', icon: Eye, accent: 'text-violet-500' },
+    { label: 'Rata-rata Rating', value: stats.value.averageRating, growth: stats.value.reviewsGrowth, sub: `${stats.value.totalReviews} reviews`, icon: Star, accent: 'text-amber-500' },
+])
 
-const currentDate = computed(() => {
-    return new Date().toLocaleDateString('id-ID', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    })
-})
+const quickActions = [
+    { label: 'Kelola Produk', icon: ShoppingCart, to: '/creator/products' },
+    { label: 'Kelola Blog', icon: Edit, to: '/creator/blog' },
+    { label: 'Lihat Analytics', icon: BarChart3, to: '/creator/analytics' },
+    { label: 'Kelola Review', icon: MessageCircle, to: '/creator/reviews' },
+    { label: 'Pengaturan', icon: Users, to: '/creator/settings' },
+]
 </script>
 
 <template>
-    <div class="space-y-8 p-6">
-        <!-- Header Section -->
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+    <div class="p-6 space-y-8">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
             <div>
-                <h1 class="text-3xl font-bold text-foreground">Creator Dashboard</h1>
-                <p class="text-muted-foreground mt-1">{{ currentDate }}</p>
+                <p class="font-mono text-xs tracking-[0.2em] uppercase text-indigo-600 mb-1">// CREATOR DASHBOARD</p>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Ringkasan</h1>
+                <p class="font-mono text-xs text-gray-400 mt-1">{{ currentDate }}</p>
             </div>
-            <div class="flex items-center space-x-3">
-                <Button @click="$router.push('/creator/products/create')" class="bg-primary text-primary-foreground hover:bg-primary/90">
-                    <Plus class="h-4 w-4 mr-2" />
+            <div class="flex items-center gap-3">
+                <button
+                    @click="$router.push('/creator/products/create')"
+                    class="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs tracking-[0.15em] uppercase transition-colors"
+                >
+                    <Plus class="h-3.5 w-3.5" />
                     Tambah Produk
-                </Button>
-                <Button variant="outline" @click="$router.push('/creator/blog/create')">
-                    <Edit class="h-4 w-4 mr-2" />
+                </button>
+                <button
+                    @click="$router.push('/creator/blog/create')"
+                    class="flex items-center gap-2 px-4 py-2 border border-gray-200 dark:border-white/10 font-mono text-xs uppercase tracking-widest text-gray-600 dark:text-gray-300 hover:border-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                >
+                    <Edit class="h-3.5 w-3.5" />
                     Tulis Artikel
-                </Button>
+                </button>
             </div>
         </div>
 
-        <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <!-- Total Revenue -->
-            <Card class="border-border hover:shadow-md transition-shadow">
-                <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle class="text-sm font-medium text-muted-foreground">Total Revenue</CardTitle>
-                    <DollarSign class="h-4 w-4 text-green-600" />
-                </CardHeader>
-                <CardContent>
-                    <div class="text-2xl font-bold text-foreground">{{ formatCurrency(stats.totalRevenue) }}</div>
-                    <div class="flex items-center text-xs mt-1">
-                        <component :is="getGrowthIcon(stats.revenueGrowth)" :class="['h-3 w-3 mr-1', getGrowthColor(stats.revenueGrowth)]" />
-                        <span :class="getGrowthColor(stats.revenueGrowth)">{{ Math.abs(stats.revenueGrowth) }}%</span>
-                        <span class="text-muted-foreground ml-1">dari bulan lalu</span>
-                    </div>
-                </CardContent>
-            </Card>
-
-            <!-- Total Products -->
-            <Card class="border-border hover:shadow-md transition-shadow">
-                <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle class="text-sm font-medium text-muted-foreground">Total Produk</CardTitle>
-                    <ShoppingCart class="h-4 w-4 text-blue-600" />
-                </CardHeader>
-                <CardContent>
-                    <div class="text-2xl font-bold text-foreground">{{ stats.totalProducts }}</div>
-                    <div class="flex items-center text-xs mt-1">
-                        <component :is="getGrowthIcon(stats.salesGrowth)" :class="['h-3 w-3 mr-1', getGrowthColor(stats.salesGrowth)]" />
-                        <span :class="getGrowthColor(stats.salesGrowth)">{{ Math.abs(stats.salesGrowth) }}%</span>
-                        <span class="text-muted-foreground ml-1">penjualan bulan ini</span>
-                    </div>
-                </CardContent>
-            </Card>
-
-            <!-- Total Views -->
-            <Card class="border-border hover:shadow-md transition-shadow">
-                <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle class="text-sm font-medium text-muted-foreground">Total Views</CardTitle>
-                    <Eye class="h-4 w-4 text-purple-600" />
-                </CardHeader>
-                <CardContent>
-                    <div class="text-2xl font-bold text-foreground">{{ stats.totalViews.toLocaleString('id-ID') }}</div>
-                    <div class="flex items-center text-xs mt-1">
-                        <component :is="getGrowthIcon(stats.viewsGrowth)" :class="['h-3 w-3 mr-1', getGrowthColor(stats.viewsGrowth)]" />
-                        <span :class="getGrowthColor(stats.viewsGrowth)">{{ Math.abs(stats.viewsGrowth) }}%</span>
-                        <span class="text-muted-foreground ml-1">dari bulan lalu</span>
-                    </div>
-                </CardContent>
-            </Card>
-
-            <!-- Average Rating -->
-            <Card class="border-border hover:shadow-md transition-shadow">
-                <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle class="text-sm font-medium text-muted-foreground">Rata-rata Rating</CardTitle>
-                    <Star class="h-4 w-4 text-yellow-500" />
-                </CardHeader>
-                <CardContent>
-                    <div class="text-2xl font-bold text-foreground">{{ stats.averageRating }}</div>
-                    <div class="flex items-center text-xs mt-1">
-                        <component :is="getGrowthIcon(stats.reviewsGrowth)" :class="['h-3 w-3 mr-1', getGrowthColor(stats.reviewsGrowth)]" />
-                        <span :class="getGrowthColor(stats.reviewsGrowth)">{{ Math.abs(stats.reviewsGrowth) }}%</span>
-                        <span class="text-muted-foreground ml-1">{{ stats.totalReviews }} reviews</span>
-                    </div>
-                </CardContent>
-            </Card>
+        <!-- Stat Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div
+                v-for="card in statCards"
+                :key="card.label"
+                class="border border-gray-100 dark:border-white/6 p-5"
+            >
+                <div class="flex items-center justify-between mb-3">
+                    <p class="font-mono text-[10px] uppercase tracking-widest text-gray-400">{{ card.label }}</p>
+                    <component :is="card.icon" class="h-4 w-4" :class="card.accent" />
+                </div>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ card.value }}</p>
+                <div class="flex items-center gap-1 mt-2">
+                    <component
+                        :is="card.growth >= 0 ? ArrowUpRight : ArrowDownRight"
+                        class="h-3 w-3"
+                        :class="card.growth >= 0 ? 'text-emerald-500' : 'text-red-500'"
+                    />
+                    <span
+                        class="font-mono text-[10px]"
+                        :class="card.growth >= 0 ? 'text-emerald-500' : 'text-red-500'"
+                    >{{ Math.abs(card.growth) }}%</span>
+                    <span class="font-mono text-[10px] text-gray-400">{{ card.sub }}</span>
+                </div>
+            </div>
         </div>
 
-        <!-- Charts and Recent Activity -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Monthly Earnings Chart -->
-            <Card class="col-span-1 lg:col-span-2 border-border">
-                <CardHeader>
-                    <CardTitle class="text-foreground flex items-center">
-                        <BarChart3 class="h-5 w-5 mr-2" />
-                        Pendapatan Bulanan
-                    </CardTitle>
-                    <CardDescription class="text-muted-foreground">
-                        Grafik pendapatan 6 bulan terakhir
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div class="space-y-4">
-                        <div v-for="item in monthlyEarnings" :key="item.month" class="flex items-center space-x-4">
-                            <div class="w-12 text-sm font-medium text-muted-foreground">{{ item.month }}</div>
-                            <div class="flex-1">
-                                <div class="flex items-center justify-between mb-1">
-                                    <span class="text-sm text-foreground">{{ formatCurrency(item.amount) }}</span>
-                                    <span class="text-xs text-muted-foreground">
-                                        {{ ((item.amount / Math.max(...monthlyEarnings.map(e => e.amount))) * 100).toFixed(0) }}%
-                                    </span>
-                                </div>
-                                <Progress 
-                                    :value="(item.amount / Math.max(...monthlyEarnings.map(e => e.amount))) * 100" 
-                                    class="h-2"
+        <!-- Charts + Quick Actions -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <!-- Monthly Earnings -->
+            <div class="lg:col-span-2 border border-gray-100 dark:border-white/6">
+                <div class="px-6 py-4 border-b border-gray-100 dark:border-white/6 flex items-center gap-2">
+                    <BarChart3 class="h-3.5 w-3.5 text-indigo-600" />
+                    <p class="font-mono text-xs tracking-[0.2em] uppercase text-indigo-600">// PENDAPATAN BULANAN</p>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div v-for="item in monthlyEarnings" :key="item.month" class="flex items-center gap-4">
+                        <span class="font-mono text-[10px] uppercase tracking-widest text-gray-400 w-8 shrink-0">{{ item.month }}</span>
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between mb-1.5">
+                                <span class="font-mono text-xs text-gray-700 dark:text-gray-300">{{ formatCurrency(item.amount) }}</span>
+                                <span class="font-mono text-[10px] text-gray-400">{{ ((item.amount / maxEarning) * 100).toFixed(0) }}%</span>
+                            </div>
+                            <div class="h-1.5 bg-gray-100 dark:bg-white/6">
+                                <div
+                                    class="h-full bg-indigo-600 transition-all"
+                                    :style="{ width: `${(item.amount / maxEarning) * 100}%` }"
                                 />
                             </div>
                         </div>
                     </div>
-                </CardContent>
-            </Card>
+                </div>
+            </div>
 
             <!-- Quick Actions -->
-            <Card class="border-border">
-                <CardHeader>
-                    <CardTitle class="text-foreground flex items-center">
-                        <Activity class="h-5 w-5 mr-2" />
-                        Aksi Cepat
-                    </CardTitle>
-                </CardHeader>
-                <CardContent class="space-y-3">
-                    <Button variant="outline" class="w-full justify-start" @click="$router.push('/creator/products')">
-                        <ShoppingCart class="h-4 w-4 mr-2" />
-                        Kelola Produk
-                    </Button>
-                    <Button variant="outline" class="w-full justify-start" @click="$router.push('/creator/blog')">
-                        <Edit class="h-4 w-4 mr-2" />
-                        Kelola Blog
-                    </Button>
-                    <Button variant="outline" class="w-full justify-start" @click="$router.push('/creator/analytics')">
-                        <BarChart3 class="h-4 w-4 mr-2" />
-                        Lihat Analytics
-                    </Button>
-                    <Button variant="outline" class="w-full justify-start" @click="$router.push('/creator/reviews')">
-                        <MessageCircle class="h-4 w-4 mr-2" />
-                        Kelola Review
-                    </Button>
-                    <Button variant="outline" class="w-full justify-start" @click="$router.push('/creator/settings')">
-                        <Users class="h-4 w-4 mr-2" />
-                        Pengaturan
-                    </Button>
-                </CardContent>
-            </Card>
+            <div class="border border-gray-100 dark:border-white/6">
+                <div class="px-6 py-4 border-b border-gray-100 dark:border-white/6 flex items-center gap-2">
+                    <Activity class="h-3.5 w-3.5 text-indigo-600" />
+                    <p class="font-mono text-xs tracking-[0.2em] uppercase text-indigo-600">// AKSI CEPAT</p>
+                </div>
+                <div>
+                    <button
+                        v-for="(action, i) in quickActions"
+                        :key="action.label"
+                        @click="$router.push(action.to)"
+                        :class="[
+                            'w-full flex items-center justify-between px-5 py-3.5 text-left hover:bg-gray-50 dark:hover:bg-white/4 transition-colors group',
+                            i < quickActions.length - 1 ? 'border-b border-gray-100 dark:border-white/6' : ''
+                        ]"
+                    >
+                        <div class="flex items-center gap-3">
+                            <component :is="action.icon" class="h-3.5 w-3.5 text-gray-400 group-hover:text-indigo-500 transition-colors" />
+                            <span class="font-mono text-xs uppercase tracking-widest text-gray-600 dark:text-gray-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{{ action.label }}</span>
+                        </div>
+                        <ChevronRight class="h-3 w-3 text-gray-300 dark:text-white/20 group-hover:text-indigo-500 transition-colors" />
+                    </button>
+                </div>
+            </div>
         </div>
 
-        <!-- Recent Products and Reviews -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Recent Products + Reviews -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <!-- Recent Products -->
-            <Card class="border-border">
-                <CardHeader class="flex flex-row items-center justify-between">
-                    <div>
-                        <CardTitle class="text-foreground">Produk Terbaru</CardTitle>
-                        <CardDescription class="text-muted-foreground">Produk yang baru saja Anda buat</CardDescription>
-                    </div>
-                    <Button variant="ghost" size="sm" @click="$router.push('/creator/products')">
-                        Lihat Semua
-                    </Button>
-                </CardHeader>
-                <CardContent class="space-y-4">
-                    <div v-for="product in recentProducts" :key="product.id" class="flex items-center space-x-4 p-3 rounded-lg border border-border hover:bg-accent/50 transition-colors">
-                        <img 
-                            :src="product.image" 
-                            :alt="product.title"
-                            class="w-12 h-12 rounded object-cover"
-                        />
+            <div class="border border-gray-100 dark:border-white/6">
+                <div class="px-6 py-4 border-b border-gray-100 dark:border-white/6 flex items-center justify-between">
+                    <p class="font-mono text-xs tracking-[0.2em] uppercase text-indigo-600">// PRODUK TERBARU</p>
+                    <button
+                        @click="$router.push('/creator/products')"
+                        class="font-mono text-[10px] uppercase tracking-widest text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                    >
+                        Lihat Semua →
+                    </button>
+                </div>
+                <div>
+                    <div
+                        v-for="(product, i) in recentProducts"
+                        :key="product.id"
+                        :class="[
+                            'flex items-center gap-4 px-5 py-4 hover:bg-gray-50 dark:hover:bg-white/4 transition-colors',
+                            i < recentProducts.length - 1 ? 'border-b border-gray-100 dark:border-white/6' : ''
+                        ]"
+                    >
+                        <!-- Placeholder square thumbnail -->
+                        <div class="w-10 h-10 shrink-0 bg-indigo-100 dark:bg-indigo-600/20 flex items-center justify-center">
+                            <ShoppingCart class="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                        </div>
                         <div class="flex-1 min-w-0">
-                            <h4 class="font-medium text-foreground truncate">{{ product.title }}</h4>
-                            <div class="flex items-center space-x-2 mt-1">
-                                <span class="text-sm font-medium text-primary">{{ formatCurrency(product.price) }}</span>
-                                <Badge :variant="getStatusBadge(product.status)" class="text-xs">
-                                    {{ product.status === 'published' ? 'Published' : product.status === 'draft' ? 'Draft' : 'Pending' }}
-                                </Badge>
+                            <p class="text-sm font-semibold text-gray-900 dark:text-white truncate">{{ product.title }}</p>
+                            <div class="flex items-center gap-3 mt-1">
+                                <span class="font-mono text-[10px] text-indigo-600 dark:text-indigo-400">{{ formatCurrency(product.price) }}</span>
+                                <span
+                                    :class="[
+                                        'font-mono text-[10px] uppercase tracking-widest px-1.5 py-0.5 border',
+                                        product.status === 'published'
+                                            ? 'border-emerald-400 text-emerald-600 dark:text-emerald-400'
+                                            : 'border-gray-300 dark:border-white/20 text-gray-400'
+                                    ]"
+                                >{{ product.status }}</span>
                             </div>
-                            <div class="flex items-center space-x-3 mt-1 text-xs text-muted-foreground">
-                                <span class="flex items-center">
-                                    <ShoppingCart class="h-3 w-3 mr-1" />
-                                    {{ product.sales }} terjual
-                                </span>
-                                <span class="flex items-center">
-                                    <Star class="h-3 w-3 mr-1 text-yellow-500" />
-                                    {{ product.rating }}
-                                </span>
+                        </div>
+                        <div class="text-right shrink-0">
+                            <p class="font-mono text-xs text-gray-700 dark:text-gray-300">{{ product.sales }} terjual</p>
+                            <div class="flex items-center gap-0.5 justify-end mt-1">
+                                <Star class="h-3 w-3 text-amber-500 fill-amber-500" />
+                                <span class="font-mono text-[10px] text-gray-400">{{ product.rating }}</span>
                             </div>
                         </div>
                     </div>
-                </CardContent>
-            </Card>
+                </div>
+            </div>
 
             <!-- Recent Reviews -->
-            <Card class="border-border">
-                <CardHeader class="flex flex-row items-center justify-between">
-                    <div>
-                        <CardTitle class="text-foreground">Review Terbaru</CardTitle>
-                        <CardDescription class="text-muted-foreground">Feedback dari pelanggan</CardDescription>
-                    </div>
-                    <Button variant="ghost" size="sm" @click="$router.push('/creator/reviews')">
-                        Lihat Semua
-                    </Button>
-                </CardHeader>
-                <CardContent class="space-y-4">
-                    <div v-for="review in recentReviews" :key="review.id" class="p-3 rounded-lg border border-border hover:bg-accent/50 transition-colors">
-                        <div class="flex items-start space-x-3">
-                            <Avatar class="h-8 w-8">
-                                <AvatarImage :src="review.avatar" :alt="review.customerName" />
-                                <AvatarFallback class="bg-primary text-primary-foreground text-xs">
-                                    {{ review.customerName.charAt(0) }}
-                                </AvatarFallback>
-                            </Avatar>
+            <div class="border border-gray-100 dark:border-white/6">
+                <div class="px-6 py-4 border-b border-gray-100 dark:border-white/6 flex items-center justify-between">
+                    <p class="font-mono text-xs tracking-[0.2em] uppercase text-indigo-600">// REVIEW TERBARU</p>
+                    <button
+                        @click="$router.push('/creator/reviews')"
+                        class="font-mono text-[10px] uppercase tracking-widest text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                    >
+                        Lihat Semua →
+                    </button>
+                </div>
+                <div>
+                    <div
+                        v-for="(review, i) in recentReviews"
+                        :key="review.id"
+                        :class="[
+                            'px-5 py-4 hover:bg-gray-50 dark:hover:bg-white/4 transition-colors',
+                            i < recentReviews.length - 1 ? 'border-b border-gray-100 dark:border-white/6' : ''
+                        ]"
+                    >
+                        <div class="flex items-start gap-3">
+                            <!-- Avatar square -->
+                            <div class="w-7 h-7 shrink-0 bg-indigo-600 flex items-center justify-center text-white text-[10px] font-bold">
+                                {{ review.customerName.charAt(0) }}
+                            </div>
                             <div class="flex-1 min-w-0">
-                                <div class="flex items-center justify-between">
-                                    <h5 class="text-sm font-medium text-foreground">{{ review.customerName }}</h5>
-                                    <div class="flex items-center space-x-1">
-                                        <Star v-for="i in 5" :key="i" 
-                                            :class="[
-                                                'h-3 w-3',
-                                                i <= review.rating ? 'text-yellow-500 fill-current' : 'text-gray-300'
-                                            ]"
+                                <div class="flex items-center justify-between gap-2">
+                                    <p class="text-xs font-semibold text-gray-900 dark:text-white">{{ review.customerName }}</p>
+                                    <div class="flex items-center gap-0.5 shrink-0">
+                                        <Star
+                                            v-for="j in 5"
+                                            :key="j"
+                                            :class="['h-2.5 w-2.5', j <= review.rating ? 'text-amber-500 fill-amber-500' : 'text-gray-200 dark:text-white/10']"
                                         />
                                     </div>
                                 </div>
-                                <p class="text-xs text-muted-foreground mt-1">{{ review.productTitle }}</p>
-                                <p class="text-sm text-foreground mt-2 overflow-hidden" 
-                                   style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-clamp: 2;">
-                                   {{ review.comment }}
+                                <p class="font-mono text-[10px] text-indigo-600 dark:text-indigo-400 mt-0.5 truncate">{{ review.productTitle }}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1.5 line-clamp-2">{{ review.comment }}</p>
+                                <p class="font-mono text-[10px] text-gray-300 dark:text-white/20 mt-2 flex items-center gap-1">
+                                    <Clock class="h-2.5 w-2.5" />
+                                    {{ formatDate(review.date) }}
                                 </p>
-                                <div class="flex items-center justify-between mt-2">
-                                    <span class="text-xs text-muted-foreground flex items-center">
-                                        <Clock class="h-3 w-3 mr-1" />
-                                        {{ formatDate(review.date) }}
-                                    </span>
-                                    <Button variant="ghost" size="sm" class="text-xs h-6 px-2">
-                                        Balas
-                                    </Button>
-                                </div>
                             </div>
                         </div>
                     </div>
-                </CardContent>
-            </Card>
+                </div>
+            </div>
         </div>
     </div>
 </template>

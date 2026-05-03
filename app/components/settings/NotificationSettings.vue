@@ -1,28 +1,41 @@
 <template>
-    <div class="space-y-4">
-        <h3 class="text-lg font-medium text-foreground">Notifications</h3>
-        <div class="space-y-4">
-            <div 
-                v-for="notification in notificationSettings"
+    <div class="space-y-3">
+        <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-indigo-600">// NOTIFIKASI</p>
+        <div class="space-y-0 border border-gray-100 dark:border-white/6">
+            <div
+                v-for="(notification, index) in notificationSettings"
                 :key="notification.key"
-                class="flex items-center justify-between p-4 border border-border rounded-lg"
+                :class="[
+                    'flex items-center justify-between px-4 py-3',
+                    index < notificationSettings.length - 1 ? 'border-b border-gray-100 dark:border-white/6' : ''
+                ]"
             >
-                <div class="space-y-1">
-                    <p class="font-medium text-foreground">{{ notification.title }}</p>
-                    <p class="text-sm text-muted-foreground">{{ notification.description }}</p>
+                <div>
+                    <p class="font-mono text-xs uppercase tracking-widest text-gray-700 dark:text-gray-300">{{ notification.title }}</p>
+                    <p class="text-[11px] text-gray-400 mt-0.5">{{ notification.description }}</p>
                 </div>
-                <Switch
-                    :checked="modelValue[notification.key]"
-                    @update:checked="updateNotification(notification.key, $event)"
-                    class="data-[state=checked]:bg-primary"
-                />
+                <!-- Custom toggle switch -->
+                <button
+                    type="button"
+                    @click="updateNotification(notification.key, !modelValue[notification.key])"
+                    :class="[
+                        'relative inline-flex h-5 w-9 shrink-0 items-center transition-colors',
+                        modelValue[notification.key] ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-white/10'
+                    ]"
+                >
+                    <span
+                        :class="[
+                            'inline-block h-3 w-3 bg-white transition-transform',
+                            modelValue[notification.key] ? 'translate-x-5' : 'translate-x-1'
+                        ]"
+                    />
+                </button>
             </div>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { Switch } from '~/components/ui/switch'
 
 // Props
 interface Props {

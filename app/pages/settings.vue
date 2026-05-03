@@ -1,26 +1,25 @@
 <template>
-    <div class="min-h-screen bg-background">
+    <div class="min-h-screen bg-white dark:bg-[#030308]">
         <!-- Header -->
-        <div class="border-b border-border bg-card/50">
-            <div class="container mx-auto px-4 py-6">
+        <div class="border-b border-gray-100 dark:border-white/6">
+            <div class="container mx-auto px-6 lg:px-10 py-8">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h1 class="text-3xl font-bold text-foreground">Account Settings</h1>
-                        <p class="text-muted-foreground mt-1">Manage your account information, security, and preferences</p>
+                        <p class="font-mono text-xs tracking-[0.2em] uppercase text-indigo-600 mb-2">// AKUN</p>
+                        <h1 class="text-2xl font-black uppercase tracking-tight text-gray-900 dark:text-white">Pengaturan</h1>
                     </div>
-                    <Button 
-                        variant="outline"
+                    <button
                         @click="$router.back()"
-                        class="border-border text-foreground hover:bg-accent hover:text-accent-foreground"
+                        class="flex items-center gap-2 px-4 py-2 border border-gray-200 dark:border-white/10 text-xs font-mono uppercase tracking-widest text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:border-gray-400 dark:hover:border-white/30 transition-colors"
                     >
-                        <ArrowLeft class="h-4 w-4 mr-2" />
-                        Back
-                    </Button>
+                        <ArrowLeft class="h-3.5 w-3.5" />
+                        Kembali
+                    </button>
                 </div>
             </div>
         </div>
 
-        <div class="container mx-auto px-4 py-8">
+        <div class="container mx-auto px-6 lg:px-10 py-8">
             <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
                 <!-- Sidebar Navigation -->
                 <div class="lg:col-span-1">
@@ -83,7 +82,6 @@
 </template>
 
 <script setup lang="ts">
-import { Button } from '~/components/ui/button'
 import { ArrowLeft } from 'lucide-vue-next'
 import { useToaster } from '~/composables/useToaster'
 

@@ -1,119 +1,95 @@
 <template>
-    <Card class="border-border">
-        <CardHeader>
-            <CardTitle class="text-foreground flex items-center">
-                <User class="h-5 w-5 mr-2" />
-                Profile Information
-            </CardTitle>
-            <CardDescription class="text-muted-foreground">
-                Update your personal information and profile details
-            </CardDescription>
-        </CardHeader>
-        <CardContent>
-            <form @submit.prevent="handleUpdateProfile" class="space-y-6">
-                <!-- Avatar Section -->
-                <ProfileAvatarSection 
-                    :user="user"
-                    @upload-avatar="$emit('upload-avatar')"
-                    @remove-avatar="handleRemoveAvatar"
-                />
+    <div class="border border-gray-100 dark:border-white/6">
+        <!-- Header -->
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-white/6">
+            <p class="font-mono text-xs tracking-[0.2em] uppercase text-indigo-600">// INFORMASI PROFIL</p>
+        </div>
 
-                <Separator class="bg-border" />
+        <form @submit.prevent="handleUpdateProfile" class="p-6 space-y-6">
+            <!-- Avatar -->
+            <ProfileAvatarSection
+                :user="user"
+                @upload-avatar="$emit('upload-avatar')"
+                @remove-avatar="handleRemoveAvatar"
+            />
 
-                <!-- Profile Fields -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Full Name -->
-                    <div class="space-y-2">
-                        <label class="text-sm font-medium text-foreground">
-                            Full Name <span class="text-destructive">*</span>
+            <div class="border-t border-gray-100 dark:border-white/6 pt-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <!-- Name -->
+                    <div class="space-y-1.5">
+                        <label class="font-mono text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400">
+                            Nama Lengkap <span class="text-red-500">*</span>
                         </label>
                         <Input
                             v-model="profileForm.name"
                             type="text"
-                            placeholder="Enter your full name"
-                            class="bg-background border-border text-foreground"
-                            :class="{
-                                'border-destructive focus:border-destructive': errors.name
-                            }"
+                            placeholder="Nama lengkap Anda"
+                            class="rounded-none border-gray-200 dark:border-white/10 bg-transparent text-gray-900 dark:text-white focus-visible:ring-0 focus-visible:border-indigo-500 dark:focus-visible:border-indigo-400 transition-colors"
+                            :class="{ 'border-red-400 dark:border-red-500': errors.name }"
                         />
-                        <p v-if="errors.name" class="text-sm text-destructive">
-                            {{ errors.name }}
-                        </p>
+                        <p v-if="errors.name" class="font-mono text-[10px] text-red-500">{{ errors.name }}</p>
                     </div>
 
                     <!-- Username -->
-                    <div class="space-y-2">
-                        <label class="text-sm font-medium text-foreground">
-                            Username <span class="text-destructive">*</span>
+                    <div class="space-y-1.5">
+                        <label class="font-mono text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400">
+                            Username <span class="text-red-500">*</span>
                         </label>
                         <Input
                             v-model="profileForm.username"
                             type="text"
-                            placeholder="Enter your username"
-                            class="bg-background border-border text-foreground"
-                            :class="{
-                                'border-destructive focus:border-destructive': errors.username
-                            }"
+                            placeholder="username_anda"
+                            class="rounded-none border-gray-200 dark:border-white/10 bg-transparent text-gray-900 dark:text-white focus-visible:ring-0 focus-visible:border-indigo-500 dark:focus-visible:border-indigo-400 transition-colors"
+                            :class="{ 'border-red-400 dark:border-red-500': errors.username }"
                         />
-                        <p v-if="errors.username" class="text-sm text-destructive">
-                            {{ errors.username }}
-                        </p>
+                        <p v-if="errors.username" class="font-mono text-[10px] text-red-500">{{ errors.username }}</p>
                     </div>
 
                     <!-- Email -->
-                    <div class="space-y-2 md:col-span-2">
-                        <label class="text-sm font-medium text-foreground">
-                            Email Address <span class="text-destructive">*</span>
+                    <div class="space-y-1.5 md:col-span-2">
+                        <label class="font-mono text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400">
+                            Email <span class="text-red-500">*</span>
                         </label>
                         <Input
                             v-model="profileForm.email"
                             type="email"
-                            placeholder="Enter your email address"
-                            class="bg-background border-border text-foreground"
-                            :class="{
-                                'border-destructive focus:border-destructive': errors.email
-                            }"
+                            placeholder="nama@email.com"
+                            class="rounded-none border-gray-200 dark:border-white/10 bg-transparent text-gray-900 dark:text-white focus-visible:ring-0 focus-visible:border-indigo-500 dark:focus-visible:border-indigo-400 transition-colors"
+                            :class="{ 'border-red-400 dark:border-red-500': errors.email }"
                         />
-                        <p v-if="errors.email" class="text-sm text-destructive">
-                            {{ errors.email }}
-                        </p>
+                        <p v-if="errors.email" class="font-mono text-[10px] text-red-500">{{ errors.email }}</p>
                     </div>
                 </div>
+            </div>
 
-                <!-- Action Buttons -->
-                <div class="flex items-center justify-end space-x-3 pt-6 border-t border-border">
-                    <Button
-                        type="button"
-                        variant="outline"
-                        @click="handleReset"
-                        :disabled="isLoading"
-                        class="border-border text-foreground hover:bg-accent"
-                    >
-                        Reset
-                    </Button>
-                    <Button
-                        type="submit"
-                        :disabled="isLoading"
-                        class="bg-primary text-primary-foreground hover:bg-primary/90"
-                    >
-                        <Loader2 v-if="isLoading" class="h-4 w-4 mr-2 animate-spin" />
-                        <Save v-else class="h-4 w-4 mr-2" />
-                        {{ isLoading ? 'Updating...' : 'Save Changes' }}
-                    </Button>
-                </div>
-            </form>
-        </CardContent>
-    </Card>
+            <!-- Actions -->
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-white/6">
+                <button
+                    type="button"
+                    @click="handleReset"
+                    :disabled="isLoading"
+                    class="px-4 py-2 border border-gray-200 dark:border-white/10 font-mono text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-white/30 hover:text-gray-900 dark:hover:text-white disabled:opacity-40 transition-colors"
+                >
+                    Reset
+                </button>
+                <button
+                    type="submit"
+                    :disabled="isLoading"
+                    class="flex items-center gap-2 px-5 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-xs tracking-[0.15em] uppercase transition-colors"
+                >
+                    <Loader2 v-if="isLoading" class="h-3.5 w-3.5 animate-spin" />
+                    <Save v-else class="h-3.5 w-3.5" />
+                    {{ isLoading ? 'Menyimpan...' : 'Simpan' }}
+                </button>
+            </div>
+        </form>
+    </div>
 </template>
 
 <script setup lang="ts">
 import { reactive, watch } from 'vue'
-import { User, Save, Loader2 } from 'lucide-vue-next'
-import { Button } from '~/components/ui/button'
+import { Save, Loader2 } from 'lucide-vue-next'
 import { Input } from '~/components/ui/input'
-import { Separator } from '~/components/ui/separator'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
-// Import ProfileAvatarSection component
 import ProfileAvatarSection from '~/components/settings/ProfileAvatarSection.vue'
 
 // Props

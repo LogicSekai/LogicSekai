@@ -1,5 +1,5 @@
 <template>
-    <div class="space-y-6">
+    <div class="p-6 space-y-8">
         <div class="flex items-center justify-between">
             <div>
                 <h1 class="text-2xl font-bold text-foreground">Add New User</h1>

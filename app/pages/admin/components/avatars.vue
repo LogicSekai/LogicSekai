@@ -1,5 +1,5 @@
 <template>
-    <div class="space-y-8 p-6">
+    <div class="p-6 space-y-8">
         <div>
             <h1 class="text-2xl font-bold text-foreground mb-2">Avatar Components</h1>
             <p class="text-muted-foreground">Reusable avatar components with various configurations</p>

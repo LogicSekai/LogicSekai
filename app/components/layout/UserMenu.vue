@@ -1,87 +1,117 @@
 <template>
-    <DropdownMenu v-if="user">
-        <DropdownMenuTrigger asChild>
-            <Button variant="ghost" class="relative h-8 w-8 rounded-full">
-                <Avatar class="h-8 w-8">
-                    <AvatarImage 
-                        :src="user.avatar || ''" 
-                        :alt="user.name || 'User'" 
-                    />
-                    <AvatarFallback class="bg-primary text-primary-foreground">
-                        {{ user.name?.[0]?.toUpperCase() || 'U' }}
-                    </AvatarFallback>
-                </Avatar>
-            </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent class="w-56" align="end" :sideOffset="5">
-            <DropdownMenuLabel class="font-normal">
-                <div class="flex flex-col space-y-1">
-                    <p class="text-sm font-medium leading-none">{{ user.name }}</p>
-                    <p class="text-xs leading-none text-muted-foreground">{{ user.email }}</p>
-                </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-                <DropdownMenuItem @click="$router.push('/profile')">
-                    <User class="mr-2 h-4 w-4" />
-                    <span>Profile</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem @click="$router.push('/dashboard')">
-                    <LayoutGrid class="mr-2 h-4 w-4" />
-                    <span>Dashboard</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem v-if="user.role === 'creator' || user.role === 'superadmin'" @click="$router.push('/creator')">
-                    <Palette class="mr-2 h-4 w-4" />
-                    <span>Creator</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem v-if="user.role === 'superadmin'" @click="$router.push('/admin')">
-                    <Shield class="mr-2 h-4 w-4" />
-                    <span>Admin Panel</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem @click="$router.push('/settings')">
-                    <Settings class="mr-2 h-4 w-4" />
-                    <span>Settings</span>
-                </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem @click="logout" class="text-destructive focus:text-destructive">
-                <LogOut class="mr-2 h-4 w-4" />
-                <span>Log out</span>
-            </DropdownMenuItem>
-        </DropdownMenuContent>
-    </DropdownMenu>
+    <!-- Logged in -->
+    <div v-if="user" class="relative" ref="menuRef">
+        <!-- Avatar trigger -->
+        <button
+            @click="open = !open"
+            class="w-8 h-8 bg-indigo-600 flex items-center justify-center text-white text-xs font-bold hover:bg-indigo-500 transition-colors overflow-hidden"
+        >
+            <img v-if="user.avatar" :src="user.avatar" :alt="user.name" class="w-full h-full object-cover" />
+            <span v-else>{{ user.name?.[0]?.toUpperCase() || 'U' }}</span>
+        </button>
 
-    <div v-else class="flex items-center space-x-2">
-        <Button variant="ghost" @click="$router.push('/auth/login')">
-            Log in
-        </Button>
-        <Button @click="$router.push('/auth/register')">
-            Sign up
-        </Button>
+        <!-- Dropdown panel -->
+        <Transition
+            enter-active-class="transition-all duration-150 ease-out"
+            enter-from-class="opacity-0 translate-y-1"
+            enter-to-class="opacity-100 translate-y-0"
+            leave-active-class="transition-all duration-100 ease-in"
+            leave-from-class="opacity-100 translate-y-0"
+            leave-to-class="opacity-0 translate-y-1"
+        >
+            <div
+                v-show="open"
+                class="absolute right-0 top-10 w-56 bg-white dark:bg-[#030308] border border-gray-100 dark:border-white/6 shadow-xl z-50"
+            >
+                <!-- User info -->
+                <div class="px-4 py-3 border-b border-gray-100 dark:border-white/6">
+                    <p class="text-xs font-bold text-gray-900 dark:text-white truncate">{{ user.name }}</p>
+                    <p class="font-mono text-[10px] text-gray-400 truncate mt-0.5">{{ user.email }}</p>
+                </div>
+
+                <!-- Menu items -->
+                <div class="py-1">
+                    <button @click="navigate('/transactions')"
+                        class="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/4 hover:text-gray-900 dark:hover:text-white transition-colors text-left">
+                        <Receipt class="w-3.5 h-3.5 shrink-0 text-gray-400" />
+                        <span>Transaksi Saya</span>
+                    </button>
+                    <button v-if="user.role === 'creator' || user.role === 'superadmin'" @click="navigate('/creator')"
+                        class="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/4 hover:text-gray-900 dark:hover:text-white transition-colors text-left">
+                        <Palette class="w-3.5 h-3.5 shrink-0 text-gray-400" />
+                        <span>Creator Dashboard</span>
+                    </button>
+                    <button v-if="user.role === 'superadmin'" @click="navigate('/admin')"
+                        class="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/4 hover:text-gray-900 dark:hover:text-white transition-colors text-left">
+                        <Shield class="w-3.5 h-3.5 shrink-0 text-gray-400" />
+                        <span>Admin Panel</span>
+                    </button>
+                    <button @click="navigate('/settings')"
+                        class="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/4 hover:text-gray-900 dark:hover:text-white transition-colors text-left">
+                        <Settings class="w-3.5 h-3.5 shrink-0 text-gray-400" />
+                        <span>Pengaturan</span>
+                    </button>
+                </div>
+
+                <!-- Role badge -->
+                <div class="px-4 py-2 border-t border-gray-100 dark:border-white/6 flex items-center justify-between">
+                    <span class="font-mono text-[10px] uppercase tracking-widest text-gray-300 dark:text-white/20">Role</span>
+                    <span class="font-mono text-[10px] uppercase tracking-widest border border-indigo-200 dark:border-indigo-500/30 text-indigo-600 dark:text-indigo-400 px-1.5 py-0.5">
+                        {{ user.role }}
+                    </span>
+                </div>
+
+                <!-- Logout -->
+                <div class="border-t border-gray-100 dark:border-white/6 py-1">
+                    <button @click="handleLogout"
+                        class="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 hover:text-red-600 transition-colors text-left">
+                        <LogOut class="w-3.5 h-3.5 shrink-0" />
+                        <span>Keluar</span>
+                    </button>
+                </div>
+            </div>
+        </Transition>
+    </div>
+
+    <!-- Not logged in -->
+    <div v-else class="flex items-center gap-2">
+        <NuxtLink to="/auth/login"
+            class="font-mono text-xs tracking-[0.12em] uppercase text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors px-3 py-2">
+            Masuk
+        </NuxtLink>
+        <NuxtLink to="/auth/register"
+            class="font-mono text-xs tracking-[0.12em] uppercase bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 transition-colors">
+            Daftar
+        </NuxtLink>
     </div>
 </template>
 
 <script setup lang="ts">
-import { 
-    User, 
-    Settings, 
-    Shield, 
-    LogOut,
-    LayoutGrid,
-    Palette,
-} from 'lucide-vue-next'
-import { Button } from '~/components/ui/button'
-import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuGroup,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from '~/components/ui/dropdown-menu'
+import { ref, onMounted, onUnmounted } from 'vue'
+import { Settings, Shield, LogOut, Palette, Receipt } from 'lucide-vue-next'
 
-// Auth state
-const { user, isLoggedIn, logout } = useAuth()
+const { user, logout } = useAuth()
+const router = useRouter()
+
+const open = ref(false)
+const menuRef = ref<HTMLElement | null>(null)
+
+const navigate = (path: string) => {
+    open.value = false
+    router.push(path)
+}
+
+const handleLogout = async () => {
+    open.value = false
+    await logout()
+}
+
+const handleOutsideClick = (e: MouseEvent) => {
+    if (menuRef.value && !menuRef.value.contains(e.target as Node)) {
+        open.value = false
+    }
+}
+
+onMounted(() => document.addEventListener('click', handleOutsideClick))
+onUnmounted(() => document.removeEventListener('click', handleOutsideClick))
 </script>

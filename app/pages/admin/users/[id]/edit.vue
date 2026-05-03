@@ -1,50 +1,46 @@
 <template>
-    <div class="space-y-6">
+    <div class="p-6 space-y-8">
         <!-- Header -->
         <div class="flex items-center justify-between">
-            <div>
-                <h1 class="text-2xl font-bold text-foreground">Edit User</h1>
-                <p class="text-muted-foreground mt-1">Update user information and settings</p>
-            </div>
-            <div class="flex items-center space-x-2">
-                <Button variant="outline" @click="goBack" class="border-border text-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
-                    <ArrowLeft class="h-4 w-4 mr-2" />
-                    Back to Users
+            <div class="flex items-center gap-3">
+                <Button variant="ghost" size="sm" @click="navigateTo('/admin/users')" class="text-muted-foreground hover:text-foreground -ml-1">
+                    <ArrowLeft class="h-4 w-4 mr-1" />
+                    Kembali
                 </Button>
-                <Button 
-                    v-if="user"
-                    variant="outline" 
-                    @click="viewUser" 
-                    class="border-border text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
-                >
+                <div class="w-px h-5 bg-border" />
+                <div>
+                    <h1 class="text-2xl font-bold text-foreground">Edit Pengguna</h1>
+                    <p class="text-sm text-muted-foreground">Perbarui informasi dan pengaturan akun</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <Button v-if="user" variant="outline" @click="navigateTo(`/admin/users/${userId}`)" class="border-border text-foreground hover:bg-accent transition-colors">
                     <Eye class="h-4 w-4 mr-2" />
-                    View Profile
+                    Lihat Profil
                 </Button>
             </div>
         </div>
 
         <!-- Loading State -->
-        <div v-if="isLoading" class="flex items-center justify-center py-12">
-            <div class="flex items-center space-x-2">
-                <Loader2 class="h-6 w-6 animate-spin text-primary" />
-                <span class="text-muted-foreground">Loading user data...</span>
+        <div v-if="isLoading" class="flex items-center justify-center py-16">
+            <div class="flex items-center gap-2 text-muted-foreground">
+                <Loader2 class="h-5 w-5 animate-spin" />
+                <span class="text-sm">Memuat data pengguna...</span>
             </div>
         </div>
 
         <!-- Error State -->
-        <Card v-else-if="error" class="border-destructive/20">
-            <CardContent class="p-6">
-                <div class="flex items-center space-x-2 text-destructive">
-                    <AlertCircle class="h-5 w-5" />
-                    <span class="font-medium">Error loading user</span>
-                </div>
-                <p class="text-muted-foreground mt-2">{{ error }}</p>
-                <Button @click="fetchUser" class="mt-4 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
-                    <RefreshCw class="h-4 w-4 mr-2" />
-                    Retry
-                </Button>
-            </CardContent>
-        </Card>
+        <div v-else-if="error" class="border border-destructive/20 rounded-lg p-6 bg-destructive/5">
+            <div class="flex items-center gap-2 text-destructive mb-2">
+                <AlertCircle class="h-5 w-5" />
+                <span class="font-medium">Gagal memuat pengguna</span>
+            </div>
+            <p class="text-sm text-muted-foreground">{{ error }}</p>
+            <Button @click="fetchUser" class="mt-4 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors" size="sm">
+                <RefreshCw class="h-4 w-4 mr-2" />
+                Coba Lagi
+            </Button>
+        </div>
 
         <!-- Edit Form -->
         <div v-else-if="user" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -53,18 +49,18 @@
                 <!-- Basic Information -->
                 <Card>
                     <CardHeader>
-                        <CardTitle>Basic Information</CardTitle>
-                        <CardDescription>Update user's personal details</CardDescription>
+                        <CardTitle>Informasi Dasar</CardTitle>
+                        <CardDescription>Perbarui data pribadi pengguna</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <form @submit="onSubmit" class="space-y-4">
                             <FormField v-slot="{ componentField }" name="name">
                                 <FormItem>
-                                    <FormLabel class="text-card-foreground">Full Name</FormLabel>
+                                    <FormLabel class="text-card-foreground">Nama Lengkap</FormLabel>
                                     <FormControl>
                                         <Input
                                             v-bind="componentField"
-                                            placeholder="Enter full name"
+                                            placeholder="Masukkan nama lengkap"
                                             class="bg-background border-border text-foreground placeholder-muted-foreground focus:ring-ring transition-colors"
                                         />
                                     </FormControl>
@@ -78,12 +74,12 @@
                                     <FormControl>
                                         <Input
                                             v-bind="componentField"
-                                            placeholder="Enter username"
+                                            placeholder="Masukkan username"
                                             class="bg-background border-border text-foreground placeholder-muted-foreground focus:ring-ring transition-colors"
                                         />
                                     </FormControl>
                                     <FormDescription class="text-xs text-muted-foreground">
-                                        Username must be unique and contain only letters, numbers, and underscores
+                                        Username harus unik dan hanya boleh berisi huruf, angka, dan underscore
                                     </FormDescription>
                                     <FormMessage class="text-left" />
                                 </FormItem>
@@ -91,12 +87,12 @@
 
                             <FormField v-slot="{ componentField }" name="email">
                                 <FormItem>
-                                    <FormLabel class="text-card-foreground">Email Address</FormLabel>
+                                    <FormLabel class="text-card-foreground">Alamat Email</FormLabel>
                                     <FormControl>
                                         <Input
                                             type="email"
                                             v-bind="componentField"
-                                            placeholder="Enter email address"
+                                            placeholder="Masukkan alamat email"
                                             class="bg-background border-border text-foreground placeholder-muted-foreground focus:ring-ring transition-colors"
                                         />
                                     </FormControl>
@@ -107,24 +103,24 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <FormField v-slot="{ componentField }" name="role">
                                     <FormItem>
-                                        <FormLabel class="text-card-foreground">Role</FormLabel>
+                                        <FormLabel class="text-card-foreground">Peran</FormLabel>
                                         <Select v-bind="componentField">
                                             <FormControl>
                                                 <SelectTrigger class="bg-background border-border text-foreground focus:ring-ring transition-colors w-2/3">
-                                                    <SelectValue placeholder="Select role" />
+                                                    <SelectValue placeholder="Pilih peran" />
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent class="bg-popover border-border">
                                                 <SelectItem value="user" class="text-popover-foreground hover:bg-accent hover:text-accent-foreground">
                                                     <div class="flex items-center space-x-2">
                                                         <div class="w-2 h-2 bg-gray-400 rounded-full"></div>
-                                                        <span>User</span>
+                                                        <span>Pengguna</span>
                                                     </div>
                                                 </SelectItem>
                                                 <SelectItem value="creator" class="text-popover-foreground hover:bg-accent hover:text-accent-foreground">
                                                     <div class="flex items-center space-x-2">
                                                         <div class="w-2 h-2 bg-purple-500 rounded-full"></div>
-                                                        <span>Creator</span>
+                                                        <span>Kreator</span>
                                                     </div>
                                                 </SelectItem>
                                                 <SelectItem value="superadmin" class="text-popover-foreground hover:bg-accent hover:text-accent-foreground">
@@ -141,7 +137,7 @@
 
                                 <FormField v-slot="{ componentField }" name="verified">
                                     <FormItem>
-                                        <FormLabel class="text-card-foreground">Verification Status</FormLabel>
+                                        <FormLabel class="text-card-foreground">Status Verifikasi</FormLabel>
                                         <div class="flex items-center space-x-2 pt-2">
                                             <Checkbox 
                                                 v-bind="componentField"
@@ -149,23 +145,23 @@
                                                 class="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                                             />
                                             <Label for="verified" class="text-sm text-foreground cursor-pointer">
-                                                Email verified
+                                                Email terverifikasi
                                             </Label>
                                         </div>
                                         <FormDescription class="text-xs text-muted-foreground">
-                                            Verified users have confirmed their email address
+                                            Pengguna yang terverifikasi telah mengkonfirmasi alamat emailnya
                                         </FormDescription>
                                         <FormMessage class="text-left" />
                                     </FormItem>
                                 </FormField>
                             </div>
 
-                            <!-- Password Section (Optional) -->
+                            <!-- Password Section -->
                             <div class="border-t border-border pt-4">
                                 <div class="flex items-center justify-between mb-4">
                                     <div>
                                         <h3 class="text-sm font-medium text-foreground">Password</h3>
-                                        <p class="text-xs text-muted-foreground">Leave empty to keep current password</p>
+                                        <p class="text-xs text-muted-foreground">Kosongkan untuk tetap memakai password saat ini</p>
                                     </div>
                                     <Button 
                                         type="button" 
@@ -174,19 +170,19 @@
                                         @click="showPasswordFields = !showPasswordFields"
                                         class="border-border text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
                                     >
-                                        {{ showPasswordFields ? 'Cancel' : 'Change Password' }}
+                                        {{ showPasswordFields ? 'Batal' : 'Ganti Password' }}
                                     </Button>
                                 </div>
 
                                 <div v-show="showPasswordFields" class="space-y-4">
                                     <FormField v-slot="{ componentField }" name="password">
                                         <FormItem>
-                                            <FormLabel class="text-card-foreground">New Password</FormLabel>
+                                            <FormLabel class="text-card-foreground">Password Baru</FormLabel>
                                             <FormControl>
                                                 <Input
                                                     type="password"
                                                     v-bind="componentField"
-                                                    placeholder="Enter new password"
+                                                    placeholder="Masukkan password baru"
                                                     class="bg-background border-border text-foreground placeholder-muted-foreground focus:ring-ring transition-colors"
                                                 />
                                             </FormControl>
@@ -196,12 +192,12 @@
 
                                     <FormField v-slot="{ componentField }" name="confirmPassword">
                                         <FormItem>
-                                            <FormLabel class="text-card-foreground">Confirm New Password</FormLabel>
+                                            <FormLabel class="text-card-foreground">Konfirmasi Password Baru</FormLabel>
                                             <FormControl>
                                                 <Input
                                                     type="password"
                                                     v-bind="componentField"
-                                                    placeholder="Confirm new password"
+                                                    placeholder="Konfirmasi password baru"
                                                     class="bg-background border-border text-foreground placeholder-muted-foreground focus:ring-ring transition-colors"
                                                 />
                                             </FormControl>
@@ -227,7 +223,7 @@
                                     class="bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
                                 >
                                     <Loader2 v-if="isSubmitting" class="mr-2 h-4 w-4 animate-spin" />
-                                    Update User
+                                    Simpan Perubahan
                                 </Button>
                             </div>
                         </form>
@@ -237,26 +233,13 @@
                 <!-- Activity Log -->
                 <Card>
                     <CardHeader>
-                        <CardTitle>Recent Activity</CardTitle>
-                        <CardDescription>User's recent actions and changes</CardDescription>
+                        <CardTitle>Log Aktivitas</CardTitle>
+                        <CardDescription>Aktivitas terbaru pengguna</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <div v-if="activities.length === 0" class="text-center py-6">
+                        <div class="text-center py-6">
                             <Clock class="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                            <p class="text-muted-foreground">No recent activity</p>
-                        </div>
-                        <div v-else class="space-y-3">
-                            <div 
-                                v-for="activity in activities" 
-                                :key="activity.id"
-                                class="flex items-start space-x-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
-                            >
-                                <div class="w-2 h-2 bg-primary rounded-full mt-2"></div>
-                                <div class="flex-1">
-                                    <p class="text-sm text-foreground">{{ activity.action }}</p>
-                                    <p class="text-xs text-muted-foreground">{{ formatDate(activity.timestamp) }}</p>
-                                </div>
-                            </div>
+                            <p class="text-muted-foreground text-sm">Belum ada aktivitas tercatat</p>
                         </div>
                     </CardContent>
                 </Card>
@@ -264,10 +247,10 @@
 
             <!-- Sidebar -->
             <div class="space-y-6">
-                <!-- User Preview -->
+                <!-- Sidebar: User Preview -->
                 <Card>
                     <CardHeader>
-                        <CardTitle>User Preview</CardTitle>
+                        <CardTitle>Pratinjau Pengguna</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div class="text-center space-y-4">
@@ -294,18 +277,18 @@
                             </div>
                             <div class="flex items-center justify-center space-x-2">
                                 <span 
-                                    class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+                                    class="inline-flex items-center px-2 py-1 rounded text-xs font-medium"
                                     :class="getRoleBadgeClass(user.role)"
                                 >
-                                    {{ user.role }}
+                                    {{ getRoleLabel(user.role) }}
                                 </span>
                                 <span 
-                                    class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+                                    class="inline-flex items-center px-2 py-1 rounded text-xs font-medium"
                                     :class="isVerified(user.verified) 
                                         ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' 
                                         : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'"
                                 >
-                                    {{ isVerified(user.verified) ? 'Verified' : 'Unverified' }}
+                                    {{ isVerified(user.verified) ? 'Terverifikasi' : 'Belum Diverifikasi' }}
                                 </span>
                             </div>
                         </div>
@@ -315,15 +298,15 @@
                 <!-- User Stats -->
                 <Card>
                     <CardHeader>
-                        <CardTitle>User Statistics</CardTitle>
+                        <CardTitle>Statistik Pengguna</CardTitle>
                     </CardHeader>
                     <CardContent class="space-y-3">
                         <div class="flex items-center justify-between">
-                            <span class="text-sm text-muted-foreground">Member since</span>
+                            <span class="text-sm text-muted-foreground">Bergabung sejak</span>
                             <span class="text-sm text-foreground">{{ formatDate(user.created) }}</span>
                         </div>
                         <div class="flex items-center justify-between">
-                            <span class="text-sm text-muted-foreground">Last updated</span>
+                            <span class="text-sm text-muted-foreground">Terakhir diperbarui</span>
                             <span class="text-sm text-foreground">{{ formatDate(user.updated) }}</span>
                         </div>
                         <div class="flex items-center justify-between">
@@ -337,11 +320,11 @@
                             </Badge>
                         </div>
                         <div v-if="userStatus.isDeleted" class="flex items-center justify-between">
-                            <span class="text-sm text-muted-foreground">Deleted At</span>
+                            <span class="text-sm text-muted-foreground">Dihapus Pada</span>
                             <span class="text-sm text-red-600">{{ userStatus.deletedDate }}</span>
                         </div>
                         <div v-if="userStatus.isSuspended" class="flex items-center justify-between">
-                            <span class="text-sm text-muted-foreground">Suspended At</span>
+                            <span class="text-sm text-muted-foreground">Ditangguhkan Pada</span>
                             <span class="text-sm text-orange-600">{{ userStatus.suspendedDate }}</span>
                         </div>
                     </CardContent>
@@ -350,8 +333,8 @@
                 <!-- Danger Zone -->
                 <Card class="border-destructive/20">
                     <CardHeader>
-                        <CardTitle class="text-destructive">User Management</CardTitle>
-                        <CardDescription>User account management actions</CardDescription>
+                        <CardTitle class="text-destructive">Manajemen Akun</CardTitle>
+                        <CardDescription>Tindakan pengelolaan akun pengguna</CardDescription>
                     </CardHeader>
                     <CardContent class="space-y-3">
                         <!-- Recovery Button for Deleted Users -->
@@ -363,7 +346,7 @@
                             :disabled="isSubmitting"
                         >
                             <RotateCcw class="h-4 w-4 mr-2" />
-                            Recover Deleted Account
+                            Pulihkan Akun
                         </Button>
 
                         <!-- Reactivate Button for Suspended Users -->
@@ -375,10 +358,10 @@
                             :disabled="isSubmitting"
                         >
                             <UserCheck class="h-4 w-4 mr-2" />
-                            Reactivate Suspended User
+                            Aktifkan Kembali
                         </Button>
 
-                        <!-- Suspend Button (only show if user is active) -->
+                        <!-- Suspend Button -->
                         <Button 
                             v-if="userStatus.status === 'active'"
                             variant="outline" 
@@ -387,10 +370,10 @@
                             :disabled="isSubmitting"
                         >
                             <UserX class="h-4 w-4 mr-2" />
-                            Suspend User
+                            Tangguhkan Pengguna
                         </Button>
 
-                        <!-- Delete Button (only show if user is not deleted) -->
+                        <!-- Delete Button -->
                         <Button 
                             v-if="!userStatus.isDeleted"
                             variant="outline" 
@@ -399,7 +382,7 @@
                             :disabled="isSubmitting"
                         >
                             <Trash2 class="h-4 w-4 mr-2" />
-                            Delete User (Soft)
+                            Hapus Pengguna
                         </Button>
                     </CardContent>
                 </Card>
@@ -476,13 +459,7 @@ import { isVerified, formatVerificationDate, getVerificationBadgeInfo, createVer
 import { getUserStatusInfo } from '@/utils/user-management'
 
 // Import User Types
-import type { 
-    User, 
-    UserRole, 
-    AdminUpdateUserRequest,
-    UserResponse,
-    UserActivity 
-} from '~/types'
+import type { User, UserRole, AdminUpdateUserRequest, UserResponse } from '~/types'
 
 // Get route parameters
 const route = useRoute()
@@ -495,7 +472,6 @@ const isLoading = ref<boolean>(true)
 const isSubmitting = ref<boolean>(false)
 const error = ref<string>('')
 const showPasswordFields = ref<boolean>(false)
-const activities = ref<UserActivity[]>([])
 const showAvatarDialog = ref<boolean>(false)
 const showDeleteDialog = ref<boolean>(false)
 const showSuspendDialog = ref<boolean>(false)
@@ -504,33 +480,29 @@ const showReactivateDialog = ref<boolean>(false)
 
 // Form validation schema
 const editUserSchema = toTypedSchema(z.object({
-    name: z.string().min(1, 'Name is required').min(2, 'Name must be at least 2 characters'),
-    username: z.string().min(1, 'Username is required')
-        .min(3, 'Username must be at least 3 characters')
-        .regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores'),
-    email: z.string().min(1, 'Email is required').email('Invalid email address'),
+    name: z.string().min(1, 'Nama wajib diisi').min(2, 'Nama minimal 2 karakter'),
+    username: z.string().min(1, 'Username wajib diisi')
+        .min(3, 'Username minimal 3 karakter')
+        .regex(/^[a-zA-Z0-9_]+$/, 'Username hanya boleh berisi huruf, angka, dan underscore'),
+    email: z.string().min(1, 'Email wajib diisi').email('Format email tidak valid'),
     role: z.enum(['user', 'creator', 'superadmin'] as const),
-    verified: z.boolean(), // We'll convert this internally for API calls
+    verified: z.boolean(),
     password: z.string().optional(),
     confirmPassword: z.string().optional(),
 }).refine((data) => {
     if (data.password || data.confirmPassword) {
-        if (!data.password || !data.confirmPassword) {
-            return false
-        }
+        if (!data.password || !data.confirmPassword) return false
         return data.password === data.confirmPassword
     }
     return true
 }, {
-    message: 'Passwords do not match',
+    message: 'Password tidak cocok',
     path: ['confirmPassword'],
 }).refine((data) => {
-    if (data.password) {
-        return data.password.length >= 8
-    }
+    if (data.password) return data.password.length >= 8
     return true
 }, {
-    message: 'Password must be at least 8 characters',
+    message: 'Password minimal 8 karakter',
     path: ['password'],
 }))
 
@@ -558,19 +530,6 @@ const fetchUser = async (): Promise<void> => {
                 role: response.user.role,
                 verified: response.user.verified !== null && response.user.verified !== undefined,
             })
-            
-            // Fetch user activities (mock data for now)
-            activities.value = [
-                {
-                    id: '1',
-                    userId: response.user.id,
-                    action: 'Profile updated',
-                    details: 'User updated their profile information',
-                    ipAddress: '192.168.1.1',
-                    userAgent: 'Mozilla/5.0...',
-                    timestamp: new Date().toISOString()
-                }
-            ]
         } else {
             error.value = response.error || 'Failed to fetch user'
         }
@@ -608,13 +567,13 @@ const onSubmit = form.handleSubmit(async (values) => {
         
         if (response.success && response.user) {
             user.value = response.user
-            useToaster('success' ,'User updated successfully!')
+            useToaster('success', 'Pengguna berhasil diperbarui!')
             showPasswordFields.value = false
         } else {
-            error.value = response.error || 'Failed to update user'
+            error.value = response.error || 'Gagal memperbarui pengguna'
         }
     } catch (err: any) {
-        error.value = err.data?.message || err.message || 'Failed to update user'
+        error.value = err.data?.message || err.message || 'Gagal memperbarui pengguna'
     } finally {
         isSubmitting.value = false
     }
@@ -635,22 +594,12 @@ const resetForm = (): void => {
     }
 }
 
-const goBack = (): void => {
-    router.push('/admin/users')
-}
+const uploadAvatar = () => { showAvatarDialog.value = true }
 
-const viewUser = (): void => {
-    router.push(`/admin/users/${userId}`)
-}
-
-const uploadAvatar = (): void => {
-    showAvatarDialog.value = true
-}
-
-const onAvatarUploaded = (avatarUrl: string): void => {
+const onAvatarUploaded = (avatarUrl: string) => {
     if (user.value) {
         user.value.avatar = avatarUrl
-        useToaster('success', 'Avatar updated successfully!')
+        useToaster('success', 'Avatar berhasil diperbarui!')
     }
 }
 
@@ -683,7 +632,12 @@ const onUserDeleted = (deletedUser: User): void => {
     router.push('/admin/users')
 }
 
-const getRoleBadgeClass = (role: UserRole): string => {
+const getRoleLabel = (role: UserRole) => {
+    const map: Record<string, string> = { superadmin: 'Superadmin', creator: 'Kreator', user: 'Pengguna' }
+    return map[role] ?? role
+}
+
+const getRoleBadgeClass = (role: UserRole) => {
     switch (role) {
         case 'superadmin':
             return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'

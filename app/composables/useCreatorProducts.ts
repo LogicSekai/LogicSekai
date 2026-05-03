@@ -177,6 +177,28 @@ export const useCreatorProducts = () => {
     }
   }
 
+  // Fetch single product by ID
+  const fetchProduct = async (productId: string) => {
+    loading.value = true
+    error.value = null
+
+    try {
+      const response = await $fetch<{ success: boolean; data: any }>(`/api/creator/products/${productId}`)
+      if (response.success) {
+        return response.data
+      } else {
+        error.value = 'Failed to fetch product'
+        return null
+      }
+    } catch (err: any) {
+      error.value = err.data?.message || err.message || 'Failed to fetch product'
+      console.error('Error fetching product:', err)
+      return null
+    } finally {
+      loading.value = false
+    }
+  }
+
   // Toggle product availability
   const toggleProductAvailability = async (productId: string) => {
     const product = products.value.find(p => p.id === productId)
@@ -218,6 +240,7 @@ export const useCreatorProducts = () => {
     
     // Actions
     fetchProducts,
+    fetchProduct,
     createProduct,
     updateProduct,
     deleteProduct,

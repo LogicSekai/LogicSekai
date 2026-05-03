@@ -159,3 +159,31 @@ export type ProductContributor = typeof productContributors.$inferSelect;
 export type NewProductContributor = typeof productContributors.$inferInsert;
 export type ProductReview = typeof productReviews.$inferSelect;
 export type NewProductReview = typeof productReviews.$inferInsert;
+
+// ─── Product Reports ──────────────────────────────────────────────────────────
+export const productReports = sqliteTable('product_reports', {
+    id: text('id').primaryKey().$defaultFn(() => createId()),
+    productId: text('product_id').notNull().references(() => products.id, { onDelete: 'cascade' }),
+    userId: text('user_id').references(() => users.id, { onDelete: 'set null' }),
+    reason: text('reason').notNull(), // 'copyright', 'inappropriate', 'scam', 'spam', 'other'
+    description: text('description'),
+    reporterEmail: text('reporter_email'), // for non-logged-in reporters
+    status: text('status').default('pending'), // 'pending', 'reviewed', 'resolved', 'dismissed'
+    adminNote: text('admin_note'),
+    created: integer('created', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+    updatedAt: integer('updated_at', { mode: 'timestamp' }),
+});
+
+export const productReportsRelations = relations(productReports, ({ one }) => ({
+    product: one(products, {
+        fields: [productReports.productId],
+        references: [products.id],
+    }),
+    user: one(users, {
+        fields: [productReports.userId],
+        references: [users.id],
+    }),
+}));
+
+export type ProductReport = typeof productReports.$inferSelect;
+export type NewProductReport = typeof productReports.$inferInsert;

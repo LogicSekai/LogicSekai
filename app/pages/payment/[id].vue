@@ -1,182 +1,196 @@
 <template>
-  <div class="min-h-screen bg-gray-50 flex items-center justify-center">
-    <div class="max-w-md w-full mx-4">
-      <Card>
-        <CardHeader class="text-center">
-          <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <CreditCard class="w-8 h-8 text-blue-600" />
+  <div class="min-h-screen bg-white dark:bg-[#030308] flex flex-col">
+
+    <!-- Top bar -->
+    <div class="border-b border-gray-100 dark:border-white/6">
+      <div class="container mx-auto px-6 lg:px-10 h-14 flex items-center justify-between">
+        <NuxtLink to="/">
+          <img src="/img/logic_sekai.svg" alt="Logic Sekai" class="h-6 w-auto dark:filter dark:brightness-0 dark:invert" />
+        </NuxtLink>
+        <p class="font-mono text-xs tracking-[0.2em] uppercase text-indigo-600">// PEMBAYARAN</p>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="flex-1 flex items-center justify-center px-6 py-12">
+      <div class="w-full max-w-md">
+
+        <!-- Loading -->
+        <div v-if="loading" class="border border-gray-100 dark:border-white/6 p-12 text-center">
+          <Loader2 class="w-8 h-8 animate-spin text-indigo-600 mx-auto mb-4" />
+          <p class="font-mono text-xs uppercase tracking-widest text-gray-400">Memuat transaksi...</p>
+        </div>
+
+        <!-- Error -->
+        <div v-else-if="error && !transaction" class="border-l-2 border-red-500 pl-4 py-3 bg-red-50 dark:bg-red-900/10">
+          <p class="font-mono text-xs uppercase tracking-widest text-red-600 dark:text-red-400 mb-1">// ERROR</p>
+          <p class="text-sm text-red-600 dark:text-red-400">{{ error }}</p>
+        </div>
+
+        <!-- Transaction -->
+        <div v-else-if="transaction" class="border border-gray-100 dark:border-white/6">
+
+          <!-- Header -->
+          <div class="px-6 py-5 border-b border-gray-100 dark:border-white/6 flex items-center gap-4">
+            <div class="w-10 h-10 bg-indigo-600/10 flex items-center justify-center shrink-0">
+              <CreditCard class="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+            </div>
+            <div>
+              <h1 class="font-black uppercase tracking-tight text-gray-900 dark:text-white text-sm">Selesaikan Pembayaran</h1>
+              <p class="font-mono text-[10px] text-gray-400 mt-0.5">ID: {{ transaction.id.slice(0, 12) }}...</p>
+            </div>
+            <!-- Status badge -->
+            <span class="ml-auto font-mono text-[10px] uppercase tracking-widest px-2 py-0.5 shrink-0"
+              :class="{
+                'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400': transaction.status === 'completed',
+                'bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400': transaction.status === 'pending',
+                'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400': transaction.status === 'failed',
+              }"
+            >{{ getStatusText(transaction.status) }}</span>
           </div>
-          <CardTitle class="text-2xl">Pembayaran</CardTitle>
-          <CardDescription>
-            Selesaikan pembayaran untuk melanjutkan
-          </CardDescription>
-        </CardHeader>
 
-        <CardContent>
-          <!-- Loading State -->
-          <div v-if="loading" class="text-center py-8">
-            <Loader2 class="w-8 h-8 animate-spin text-gray-400 mx-auto mb-4" />
-            <p class="text-gray-600">Memuat informasi transaksi...</p>
+          <!-- Product info -->
+          <div class="px-6 py-4 flex items-center gap-4 border-b border-gray-100 dark:border-white/6">
+            <img
+              :src="transaction.product.image || '/images/placeholder-product.jpg'"
+              :alt="transaction.product.title"
+              class="w-14 h-14 object-cover shrink-0 bg-gray-100 dark:bg-white/4"
+            />
+            <div class="min-w-0">
+              <p class="font-bold text-sm text-gray-900 dark:text-white truncate">{{ transaction.product.title }}</p>
+              <p class="font-mono text-[10px] uppercase tracking-widest text-gray-400 mt-0.5">Produk Digital</p>
+            </div>
           </div>
 
-          <!-- Error State -->
-          <Alert v-else-if="error" variant="destructive" class="mb-6">
-            <AlertCircle class="h-4 w-4" />
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{{ error }}</AlertDescription>
-          </Alert>
+          <!-- Price breakdown -->
+          <div class="px-6 py-4 space-y-3 border-b border-gray-100 dark:border-white/6">
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-500 dark:text-gray-400">Harga Asli</span>
+              <span class="text-gray-900 dark:text-white">{{ formatPrice(transaction.pricing.originalPrice, transaction.pricing.currency) }}</span>
+            </div>
+            <div v-if="transaction.pricing.discountAmount > 0" class="flex justify-between text-sm">
+              <span class="text-green-600 dark:text-green-400">Diskon</span>
+              <span class="text-green-600 dark:text-green-400">-{{ formatPrice(transaction.pricing.discountAmount, transaction.pricing.currency) }}</span>
+            </div>
+            <div class="flex justify-between items-end pt-2 border-t border-gray-100 dark:border-white/6">
+              <span class="font-mono text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400">Total Bayar</span>
+              <span class="text-2xl font-black text-gray-900 dark:text-white">{{ formatPrice(transaction.pricing.finalPrice, transaction.pricing.currency) }}</span>
+            </div>
+          </div>
 
-          <!-- Transaction Details -->
-          <div v-else-if="transaction" class="space-y-6">
-            <!-- Product Info -->
-            <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-              <img
-                :src="transaction.product.image || '/images/placeholder-product.jpg'"
-                :alt="transaction.product.title"
-                class="w-16 h-16 rounded-lg object-cover"
-              />
-              <div class="flex-1">
-                <h3 class="font-semibold text-gray-900">{{ transaction.product.title }}</h3>
-                <p class="text-sm text-gray-600">ID: {{ transaction.id.slice(0, 8) }}...</p>
-              </div>
+          <!-- Actions area -->
+          <div class="px-6 py-5">
+
+            <!-- PENDING: payment methods -->
+            <div v-if="transaction.status === 'pending'" class="space-y-3">
+              <p class="font-mono text-xs uppercase tracking-[0.15em] text-gray-400 mb-4">// PILIH METODE</p>
+
+              <button
+                @click="simulatePayment('bank_transfer')"
+                :disabled="processing"
+                class="w-full flex items-center gap-3 px-4 py-3.5 border border-gray-200 dark:border-white/10 hover:border-indigo-500 dark:hover:border-indigo-400 text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed group"
+              >
+                <Building class="w-4 h-4 shrink-0 text-gray-400 group-hover:text-indigo-500 transition-colors" />
+                <span class="font-mono text-xs uppercase tracking-widest">Transfer Bank</span>
+                <Loader2 v-if="processing" class="w-3.5 h-3.5 ml-auto animate-spin" />
+              </button>
+
+              <button
+                @click="simulatePayment('e_wallet')"
+                :disabled="processing"
+                class="w-full flex items-center gap-3 px-4 py-3.5 border border-gray-200 dark:border-white/10 hover:border-indigo-500 dark:hover:border-indigo-400 text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed group"
+              >
+                <Wallet class="w-4 h-4 shrink-0 text-gray-400 group-hover:text-indigo-500 transition-colors" />
+                <span class="font-mono text-xs uppercase tracking-widest">E-Wallet</span>
+                <Loader2 v-if="processing" class="w-3.5 h-3.5 ml-auto animate-spin" />
+              </button>
+
+              <button
+                @click="simulatePayment('credit_card')"
+                :disabled="processing"
+                class="w-full flex items-center gap-3 px-4 py-3.5 border border-gray-200 dark:border-white/10 hover:border-indigo-500 dark:hover:border-indigo-400 text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed group"
+              >
+                <CreditCard class="w-4 h-4 shrink-0 text-gray-400 group-hover:text-indigo-500 transition-colors" />
+                <span class="font-mono text-xs uppercase tracking-widest">Kartu Kredit</span>
+                <Loader2 v-if="processing" class="w-3.5 h-3.5 ml-auto animate-spin" />
+              </button>
+
+              <p class="font-mono text-[10px] text-gray-300 dark:text-white/20 text-center pt-1">* Simulasi pembayaran untuk demo</p>
             </div>
 
-            <!-- Price Breakdown -->
-            <div class="space-y-3">
-              <div class="flex justify-between">
-                <span class="text-gray-600">Harga Asli</span>
-                <span>{{ formatPrice(transaction.pricing.originalPrice, transaction.pricing.currency) }}</span>
-              </div>
-              
-              <div v-if="transaction.pricing.discountAmount > 0" class="flex justify-between text-green-600">
-                <span>Diskon</span>
-                <span>-{{ formatPrice(transaction.pricing.discountAmount, transaction.pricing.currency) }}</span>
-              </div>
-              
-              <hr class="border-gray-200">
-              
-              <div class="flex justify-between text-lg font-bold">
-                <span>Total Bayar</span>
-                <span>{{ formatPrice(transaction.pricing.finalPrice, transaction.pricing.currency) }}</span>
-              </div>
-            </div>
-
-            <!-- Payment Status -->
-            <div class="text-center">
-              <Badge :variant="getStatusVariant(transaction.status)" class="text-sm">
-                {{ getStatusText(transaction.status) }}
-              </Badge>
-            </div>
-
-            <!-- Payment Actions -->
-            <div class="space-y-3">
-              <div v-if="transaction.status === 'pending'">
-                <!-- Payment Gateway Integration -->
-                <div class="text-center">
-                  <p class="text-gray-600 mb-4">Pilih metode pembayaran:</p>
-                  
-                  <!-- Demo Payment Buttons -->
-                  <div class="space-y-2">
-                    <Button 
-                      class="w-full" 
-                      @click="simulatePayment('bank_transfer')"
-                      :disabled="processing"
-                    >
-                      <Loader2 v-if="processing" class="w-4 h-4 mr-2 animate-spin" />
-                      <Building class="w-4 h-4 mr-2" />
-                      Transfer Bank
-                    </Button>
-                    
-                    <Button 
-                      variant="outline" 
-                      class="w-full" 
-                      @click="simulatePayment('e_wallet')"
-                      :disabled="processing"
-                    >
-                      <Loader2 v-if="processing" class="w-4 h-4 mr-2 animate-spin" />
-                      <Wallet class="w-4 h-4 mr-2" />
-                      E-Wallet
-                    </Button>
-                    
-                    <Button 
-                      variant="outline" 
-                      class="w-full" 
-                      @click="simulatePayment('credit_card')"
-                      :disabled="processing"
-                    >
-                      <Loader2 v-if="processing" class="w-4 h-4 mr-2 animate-spin" />
-                      <CreditCard class="w-4 h-4 mr-2" />
-                      Kartu Kredit
-                    </Button>
-                  </div>
-                  
-                  <p class="text-xs text-gray-500 mt-4">
-                    * Ini adalah simulasi pembayaran untuk demo
-                  </p>
+            <!-- COMPLETED -->
+            <div v-else-if="transaction.status === 'completed'" class="space-y-4">
+              <div class="flex items-center gap-3 border-l-2 border-green-500 pl-4 py-2 bg-green-50 dark:bg-green-900/10">
+                <CheckCircle class="w-4 h-4 text-green-600 dark:text-green-400 shrink-0" />
+                <div>
+                  <p class="font-bold text-sm text-green-700 dark:text-green-400">Pembayaran Berhasil!</p>
+                  <p class="font-mono text-[10px] text-green-600 dark:text-green-500">Transaksi telah selesai</p>
                 </div>
               </div>
 
-              <div v-else-if="transaction.status === 'completed'" class="text-center space-y-4">
-                <div class="text-green-600">
-                  <CheckCircle class="w-16 h-16 mx-auto mb-2" />
-                  <h3 class="text-lg font-semibold">Pembayaran Berhasil!</h3>
-                  <p class="text-sm text-gray-600">Transaksi telah selesai</p>
-                </div>
-                
-                <Button @click="downloadProduct" class="w-full">
-                  <Download class="w-4 h-4 mr-2" />
-                  Unduh Produk
-                </Button>
+              <!-- Download error -->
+              <div v-if="downloadError" class="flex items-start gap-2 px-3 py-2 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30">
+                <span class="font-mono text-[10px] text-red-500">{{ downloadError }}</span>
               </div>
 
-              <div v-else-if="transaction.status === 'failed'" class="text-center">
-                <div class="text-red-600">
-                  <XCircle class="w-16 h-16 mx-auto mb-2" />
-                  <h3 class="text-lg font-semibold">Pembayaran Gagal</h3>
-                  <p class="text-sm text-gray-600">Silakan coba lagi</p>
-                </div>
-                
-                <Button @click="retryPayment" variant="outline" class="w-full mt-4">
-                  <RotateCcw class="w-4 h-4 mr-2" />
-                  Coba Lagi
-                </Button>
-              </div>
+              <button
+                @click="downloadProduct"
+                :disabled="startingDownload"
+                class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-xs tracking-[0.15em] uppercase transition-colors flex items-center justify-center gap-2"
+              >
+                <Loader2 v-if="startingDownload" class="w-4 h-4 animate-spin" />
+                <Download v-else class="w-4 h-4" />
+                {{ startingDownload ? 'Mempersiapkan...' : 'Unduh Produk' }}
+              </button>
             </div>
 
-            <!-- Footer Actions -->
-            <div class="pt-4 border-t border-gray-200">
-              <div class="flex space-x-3">
-                <Button variant="outline" @click="$router.push('/transactions')" class="flex-1">
-                  <ArrowLeft class="w-4 h-4 mr-2" />
-                  Kembali
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  @click="$router.push(transaction.product.creator?.username ? `/products/${transaction.product.creator.username}/${transaction.product.slug}` : `/products/${transaction.product.slug}`)" 
-                  class="flex-1"
-                >
-                  <Eye class="w-4 h-4 mr-2" />
-                  Lihat Produk
-                </Button>
+            <!-- FAILED -->
+            <div v-else-if="transaction.status === 'failed'" class="space-y-4">
+              <div class="flex items-center gap-3 border-l-2 border-red-500 pl-4 py-2 bg-red-50 dark:bg-red-900/10">
+                <XCircle class="w-4 h-4 text-red-600 dark:text-red-400 shrink-0" />
+                <div>
+                  <p class="font-bold text-sm text-red-700 dark:text-red-400">Pembayaran Gagal</p>
+                  <p class="font-mono text-[10px] text-red-500">Silakan coba lagi</p>
+                </div>
               </div>
+              <button
+                @click="retryPayment"
+                class="w-full py-3 border border-gray-200 dark:border-white/10 hover:border-indigo-400 text-gray-700 dark:text-gray-200 font-bold text-xs tracking-[0.15em] uppercase transition-colors flex items-center justify-center gap-2"
+              >
+                <RotateCcw class="w-4 h-4" />
+                Coba Lagi
+              </button>
             </div>
           </div>
-        </CardContent>
-      </Card>
+
+          <!-- Footer actions -->
+          <div class="px-6 py-4 border-t border-gray-100 dark:border-white/6 flex gap-3">
+            <button
+              @click="$router.push('/transactions')"
+              class="flex-1 py-2.5 border border-gray-200 dark:border-white/10 hover:border-gray-400 dark:hover:border-white/30 font-mono text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors flex items-center justify-center gap-2"
+            >
+              <ArrowLeft class="w-3.5 h-3.5" />
+              Kembali
+            </button>
+            <button
+              @click="$router.push(transaction.product.creator?.username ? `/products/${transaction.product.creator.username}/${transaction.product.slug}` : `/products/${transaction.product.slug}`)"
+              class="flex-1 py-2.5 border border-gray-200 dark:border-white/10 hover:border-gray-400 dark:hover:border-white/30 font-mono text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors flex items-center justify-center gap-2"
+            >
+              <Eye class="w-3.5 h-3.5" />
+              Lihat Produk
+            </button>
+          </div>
+        </div>
+
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
-import { Button } from '~/components/ui/button'
-import { Badge } from '~/components/ui/badge'
-import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert'
 import { 
   CreditCard, 
   Loader2, 
-  AlertCircle, 
   CheckCircle, 
   XCircle, 
   Download, 
@@ -186,6 +200,10 @@ import {
   Building,
   Wallet
 } from 'lucide-vue-next'
+
+definePageMeta({
+  layout: 'empty'
+})
 
 // Get transaction ID from route
 const route = useRoute()
@@ -215,37 +233,65 @@ const loadTransaction = async () => {
 const simulatePayment = async (method: string) => {
   try {
     processing.value = true
-    
-    // Simulate payment processing delay
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    
-    // Simulate payment success (90% success rate)
-    const isSuccess = Math.random() > 0.1
-    
-    if (isSuccess) {
-      // Update transaction status to completed
-      // In real implementation, this would be handled by payment gateway webhook
+
+    // Simulate processing delay
+    await new Promise(resolve => setTimeout(resolve, 1500))
+
+    // Call API to persist payment completion
+    const result = await $fetch(`/api/transactions/${transactionId}`, {
+      method: 'PATCH',
+      body: { action: 'complete', paymentMethod: method }
+    }) as any
+
+    if (result.success) {
       transaction.value.status = 'completed'
       transaction.value.payment.method = method
       transaction.value.timestamps.completedAt = new Date().toISOString()
     } else {
-      transaction.value.status = 'failed'
+      throw new Error('Payment failed')
     }
-    
-  } catch (err) {
+
+  } catch (err: any) {
     console.error('Payment error:', err)
-    error.value = 'Gagal memproses pembayaran'
+    transaction.value.status = 'failed'
+    error.value = err.data?.message || 'Gagal memproses pembayaran'
   } finally {
     processing.value = false
   }
 }
 
-const downloadProduct = () => {
-  if (transaction.value?.product?.slug && transaction.value?.product?.creator?.username) {
-    window.open(`/api/products/${transaction.value.product.creator.username}/${transaction.value.product.slug}/download?t=${transactionId}`, '_blank')
-  } else if (transaction.value?.product?.slug) {
-    // Fallback to old URL structure
-    window.open(`/api/products/${transaction.value.product.slug}/download?t=${transactionId}`, '_blank')
+const dm = useDownloadManager()
+const startingDownload = ref(false)
+const downloadError = ref('')
+
+const downloadProduct = async () => {
+  if (!transaction.value?.product) return
+
+  const creator = transaction.value.product.creator?.username
+  const slug = transaction.value.product.slug
+
+  if (!creator || !slug) {
+    downloadError.value = 'Informasi produk tidak lengkap.'
+    return
+  }
+
+  startingDownload.value = true
+  downloadError.value = ''
+
+  try {
+    const fileList = await $fetch<Array<{ index: number; name: string; mimeType: string }>>(
+      `/api/products/${creator}/${slug}/download?info=true&t=${transactionId}`
+    )
+    for (const f of fileList) {
+      const url = `/api/products/${creator}/${slug}/download?file=${f.index}&t=${transactionId}`
+      dm.addTask(url, f.name, f.mimeType)
+    }
+
+  } catch (err: any) {
+    console.error('Download error:', err)
+    downloadError.value = err.data?.message || err.message || 'Gagal memulai unduhan. Coba lagi.'
+  } finally {
+    startingDownload.value = false
   }
 }
 

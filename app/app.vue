@@ -14,4 +14,5 @@ onMounted(() => {
     <NuxtPage />
   </NuxtLayout>
   <Toaster class="pointer-event-auto" />
+  <DownloadBubble />
 </template>

@@ -53,7 +53,7 @@ const handleDelete = () => {
         <DropdownMenuContent>
             <DropdownMenuGroup>
                 <DropdownMenuItem @click="props.view(props.user)">
-                    <span>View</span>
+                    <span>Lihat</span>
                     <DropdownMenuShortcut>
                         <Eye class="w-4 h-4" />
                     </DropdownMenuShortcut>
@@ -65,7 +65,7 @@ const handleDelete = () => {
                     </DropdownMenuShortcut>
                 </DropdownMenuItem>
                 <DropdownMenuItem v-if="!isDeleted(props.user) && props.suspend && !isSuspended(props.user)" @click="props.toggleVerification(props.user)">
-                    <span>{{ props.user.verified ? 'Unverify' : 'Verify' }}</span>
+                    <span>{{ props.user.verified ? 'Hapus Verifikasi' : 'Verifikasi' }}</span>
                     <DropdownMenuShortcut>
                         <UserCheck v-if="!props.user.verified" class="w-4 h-4" />
                         <UserX v-else class="w-4 h-4" />
@@ -77,7 +77,7 @@ const handleDelete = () => {
                     v-if="!isDeleted(props.user) && props.suspend && !isSuspended(props.user)"
                     @click="props.suspend(props.user)"
                 >
-                    <span class="text-orange-600">Suspend</span>
+                    <span class="text-orange-600">Tangguhkan</span>
                     <DropdownMenuShortcut>
                         <AlertTriangle class="w-4 h-4 text-orange-600" />
                     </DropdownMenuShortcut>
@@ -87,7 +87,7 @@ const handleDelete = () => {
                     v-if="!isDeleted(props.user) && props.reactivate && isSuspended(props.user)"
                     @click="props.reactivate(props.user)"
                 >
-                    <span class="text-green-600">Reactivate</span>
+                    <span class="text-green-600">Aktifkan Kembali</span>
                     <DropdownMenuShortcut>
                         <RotateCcw class="w-4 h-4 text-green-600" />
                     </DropdownMenuShortcut>
@@ -96,13 +96,13 @@ const handleDelete = () => {
                 <DropdownMenuItem 
                 v-if="isDeleted(props.user) && props.recover" 
                 @click="props.recover(props.user)">
-                    <span class="text-blue-600">Recover</span>
+                    <span class="text-blue-600">Pulihkan</span>
                     <DropdownMenuShortcut>
                         <RotateCcw class="w-4 h-4 text-blue-600" />
                     </DropdownMenuShortcut>
                 </DropdownMenuItem>
                 <DropdownMenuItem v-else @click="showDialogDelete = true">
-                    <span class="text-destructive">Delete</span>
+                    <span class="text-destructive">Hapus</span>
                     <DropdownMenuShortcut>
                         <Trash2 class="w-4 h-4 text-destructive" />
                     </DropdownMenuShortcut>
@@ -114,20 +114,20 @@ const handleDelete = () => {
     <AlertDialog v-model:open="showDialogDelete">
         <AlertDialogContent>
             <AlertDialogHeader>
-                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogTitle>Konfirmasi Hapus</AlertDialogTitle>
                 <AlertDialogDescription>
-                    Are you sure you want to delete user <strong>{{ props.user.name }}</strong>? This action cannot be undone and will permanently remove all user data.
+                    Apakah kamu yakin ingin menghapus pengguna <strong>{{ props.user.name }}</strong>? Tindakan ini tidak dapat dibatalkan dan akan menghapus semua data pengguna secara permanen.
                 </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-                <AlertDialogCancel @click="showDialogDelete = false">Cancel</AlertDialogCancel>
+                <AlertDialogCancel @click="showDialogDelete = false">Batal</AlertDialogCancel>
                 <AlertDialogAction 
                     @click="handleDelete"
                     :disabled="deletingUsers.includes(props.user.id)"
                 >
                     <Trash2 v-if="!deletingUsers.includes(props.user.id)" class="w-4 h-4" />
                     <div v-else class="w-4 h-4 animate-spin border-2 border-current border-t-transparent rounded-full"></div>
-                    {{ deletingUsers.includes(props.user.id) ? 'Deleting...' : 'Delete User' }}
+                    {{ deletingUsers.includes(props.user.id) ? 'Menghapus...' : 'Hapus Pengguna' }}
                 </AlertDialogAction>
             </AlertDialogFooter>
         </AlertDialogContent>

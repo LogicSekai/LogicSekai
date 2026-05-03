@@ -1,4 +1,5 @@
 import tailwindcss from "@tailwindcss/vite"
+import { resolve } from "path"
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
@@ -47,7 +48,13 @@ export default defineNuxtConfig({
     preset: 'cloudflare-pages',
     experimental: {
       wasm: true
-    }
+    },
+    // Replace Node.js-only packages with stubs in production (Cloudflare Workers)
+    // These code paths are never reached in production (guarded by NODE_ENV checks)
+    alias: process.env.NODE_ENV === 'production' ? {
+      'better-sqlite3': resolve('./server/utils/stubs/better-sqlite3.ts'),
+      'drizzle-orm/better-sqlite3': resolve('./server/utils/stubs/drizzle-better-sqlite3.ts'),
+    } : {},
   },
 
   runtimeConfig: {

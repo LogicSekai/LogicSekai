@@ -1,92 +1,82 @@
-<template>
-  <div class="space-y-4">
-    <!-- Purchase/Download Button -->
-    <Button
-      :class="[
-        'w-full h-12 text-lg font-semibold transition-all duration-200',
-        isProcessing ? 'opacity-50 cursor-not-allowed' : '',
-        buttonVariant === 'download' 
-          ? 'bg-green-600 hover:bg-green-700 text-white' 
-          : 'bg-blue-600 hover:bg-blue-700 text-white'
-      ]"
-      :disabled="isProcessing || (!isInStock && buttonVariant === 'purchase')"
-      @click="handlePurchase"
-    >
-      <Loader2 v-if="isProcessing" class="w-5 h-5 mr-2 animate-spin" />
-      <Download v-else-if="buttonVariant === 'download'" class="w-5 h-5 mr-2" />
-      <ShoppingCart v-else class="w-5 h-5 mr-2" />
-      
-      <span v-if="isProcessing">Memproses...</span>
-      <span v-else-if="buttonVariant === 'download'">Unduh Sekarang</span>
-      <span v-else-if="!isInStock">Stok Habis</span>
-      <span v-else>Beli Sekarang</span>
-    </Button>
+﻿<template>
+    <div class="space-y-3">
+        <!-- Main CTA button -->
+        <button
+            :disabled="isProcessing || (!isInStock && buttonVariant === 'purchase')"
+            @click="handlePurchase"
+            class="w-full py-3.5 flex items-center justify-center gap-2 font-bold text-sm uppercase tracking-widest transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            :class="buttonVariant === 'download'
+                ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                : 'bg-indigo-600 hover:bg-indigo-700 text-white'"
+        >
+            <svg v-if="isProcessing" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+            <svg v-else-if="buttonVariant === 'download'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            <span v-if="isProcessing">Memproses...</span>
+            <span v-else-if="buttonVariant === 'download'">Unduh Sekarang</span>
+            <span v-else-if="!isInStock">Stok Habis</span>
+            <span v-else>Beli Sekarang</span>
+        </button>
 
-    <!-- Stock Information -->
-    <div v-if="stock !== null" class="text-sm text-gray-600 text-center">
-      <span v-if="stock! > 10" class="text-green-600">Stok tersedia</span>
-      <span v-else-if="stock! > 0" class="text-orange-600">Sisa {{ stock }} item</span>
-      <span v-else class="text-red-600">Stok habis</span>
-    </div>
+        <!-- Stock info -->
+        <p v-if="stock !== null && stock !== undefined" class="text-center font-mono text-[10px] uppercase tracking-widest"
+            :class="stock > 10 ? 'text-emerald-500' : stock > 0 ? 'text-amber-500' : 'text-red-500'">
+            {{ stock > 10 ? 'Stok tersedia' : stock > 0 ? `Sisa ${stock} item` : 'Stok habis' }}
+        </p>
 
-    <!-- Purchase Success Modal -->
-    <Dialog v-model:open="showSuccessModal">
-      <DialogContent class="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle class="flex items-center gap-2">
-            <CheckCircle class="w-6 h-6 text-green-600" />
-            {{ modalTitle }}
-          </DialogTitle>
-        </DialogHeader>
-        
-        <div class="space-y-4">
-          <p class="text-gray-600">{{ modalMessage }}</p>
-          
-          <div v-if="transactionResult?.status === 'completed'" class="space-y-3">
-            <Button
-              variant="outline"
-              class="w-full"
-              @click="downloadProduct"
-            >
-              <Download class="w-4 h-4 mr-2" />
-              Unduh Produk
-            </Button>
-          </div>
-          
-          <div v-else-if="transactionResult?.paymentUrl" class="space-y-3">
-            <Button
-              class="w-full bg-blue-600 hover:bg-blue-700"
-              @click="redirectToPayment"
-            >
-              <CreditCard class="w-4 h-4 mr-2" />
-              Lanjutkan Pembayaran
-            </Button>
-          </div>
+        <!-- Error -->
+        <div v-if="errorMessage" class="border border-red-200 dark:border-red-500/30 bg-red-50 dark:bg-red-500/10 px-3 py-2">
+            <p class="text-xs text-red-600 dark:text-red-400">{{ errorMessage }}</p>
         </div>
-        
-        <DialogFooter>
-          <Button variant="outline" @click="showSuccessModal = false">
-            Tutup
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
 
-    <!-- Error Alert -->
-    <Alert v-if="errorMessage" variant="destructive" class="mt-4">
-      <AlertCircle class="h-4 w-4" />
-      <AlertTitle>Error</AlertTitle>
-      <AlertDescription>{{ errorMessage }}</AlertDescription>
-    </Alert>
-  </div>
+        <!-- Success modal -->
+        <Teleport to="body">
+            <div v-if="showSuccessModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+                <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showSuccessModal = false"></div>
+                <div class="relative z-10 w-full max-w-sm bg-white dark:bg-[#030308] border border-gray-100 dark:border-white/10 shadow-2xl">
+                    <div class="px-6 py-5 border-b border-gray-100 dark:border-white/6">
+                        <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-emerald-600">// {{ modalTitle }}</p>
+                    </div>
+                    <div class="p-6 space-y-3">
+                        <p class="text-sm text-gray-600 dark:text-gray-400">{{ modalMessage }}</p>
+
+                        <button v-if="transactionResult?.status === 'completed'"
+                            @click="downloadProduct"
+                            class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center gap-2 font-mono text-[10px] uppercase tracking-widest transition-colors">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                            Unduh Produk
+                        </button>
+
+                        <button v-else-if="transactionResult?.paymentUrl"
+                            @click="redirectToPayment"
+                            class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center gap-2 font-mono text-[10px] uppercase tracking-widest transition-colors">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                            </svg>
+                            Lanjutkan Pembayaran
+                        </button>
+
+                        <button @click="showSuccessModal = false"
+                            class="w-full py-2.5 border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/4 font-mono text-[10px] uppercase tracking-widest transition-colors">
+                            Tutup
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </Teleport>
+    </div>
 </template>
 
 <script setup lang="ts">
-import { Button } from '~/components/ui/button'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '~/components/ui/dialog'
-import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert'
-import { Loader2, Download, ShoppingCart, CheckCircle, CreditCard, AlertCircle } from 'lucide-vue-next'
-
 interface Props {
   productId: string
   productSlug: string
@@ -98,7 +88,6 @@ interface Props {
 
 const props = defineProps<Props>()
 
-// Reactive state
 const isProcessing = ref(false)
 const showSuccessModal = ref(false)
 const errorMessage = ref('')
@@ -106,7 +95,6 @@ const transactionResult = ref<any>(null)
 const ownershipStatus = ref<any>(null)
 const isLoadingOwnership = ref(false)
 
-// Computed properties
 const isInStock = computed(() => props.stock === null || props.stock === undefined || props.stock > 0)
 const isFree = computed(() => ownershipStatus.value?.isFree || props.finalPrice === 0)
 const isOwnedComputed = computed(() => ownershipStatus.value?.isOwned || props.isOwned)
@@ -121,7 +109,7 @@ const modalTitle = computed(() => {
 })
 
 const modalMessage = computed(() => {
-  if (isFree.value) return 'Produk gratis telah berhasil diunduh.'
+  if (isFree.value) return 'Produk gratis telah berhasil diperoleh.'
   if (isOwnedComputed.value) return 'Anda sudah memiliki produk ini.'
   if (transactionResult.value?.status === 'completed') {
     return 'Pembayaran berhasil! Anda sekarang dapat mengunduh produk.'
@@ -129,44 +117,31 @@ const modalMessage = computed(() => {
   return 'Transaksi telah dibuat. Silakan lanjutkan pembayaran.'
 })
 
-// Methods
 const handlePurchase = async () => {
   if (isProcessing.value) return
-  
   try {
     isProcessing.value = true
     errorMessage.value = ''
 
-    // If user already owns the product, just download
     if (isOwnedComputed.value) {
       await downloadProduct()
       return
     }
 
-    // Use the new checkout API
-    const response:any = await $fetch(`/api/checkout/${props.productId}`, {
-      method: 'POST'
-    })
-
+    const response: any = await $fetch(`/api/checkout/${props.productId}`, { method: 'POST' })
     transactionResult.value = response
     showSuccessModal.value = true
 
-    // Refresh ownership status after successful checkout
     if (response.success) {
       await checkOwnership()
     }
-
   } catch (error: any) {
-    console.error('Purchase error:', error)
-    
-    // Handle specific error cases
     if (error.status === 401) {
       errorMessage.value = 'Anda harus login untuk melakukan pembelian'
     } else if (error.status === 404) {
       errorMessage.value = 'Produk tidak ditemukan'
     } else if (error.status === 409) {
       errorMessage.value = 'Anda sudah memiliki produk ini'
-      // Refresh ownership status if we get this error
       await checkOwnership()
     } else {
       errorMessage.value = error.data?.message || 'Terjadi kesalahan saat memproses pembelian'
@@ -179,28 +154,14 @@ const handlePurchase = async () => {
 const downloadProduct = async () => {
   try {
     isProcessing.value = true
-
-    // Use the new download API to get secure download URL
-    const response:any = await $fetch(`/api/download/${props.productId}`, {
-      method: 'POST'
-    })
-
+    const response: any = await $fetch(`/api/download/${props.productId}`, { method: 'POST' })
     if (response.success && response.downloadUrl) {
-      // Redirect to the secure download URL
       window.open(response.downloadUrl, '_blank')
       showSuccessModal.value = false
-      
-      // Show remaining downloads info if available
-      if (response.remainingDownloads !== undefined) {
-        console.log(`Remaining downloads: ${response.remainingDownloads}`)
-      }
     } else {
       throw new Error('Invalid download response')
     }
-
   } catch (error: any) {
-    console.error('Download error:', error)
-    
     if (error.status === 401) {
       errorMessage.value = 'Anda harus login untuk mengunduh'
     } else if (error.status === 403) {
@@ -221,35 +182,21 @@ const redirectToPayment = () => {
   }
 }
 
-// Methods for ownership checking
 const checkOwnership = async () => {
   if (isLoadingOwnership.value) return
-  
   try {
     isLoadingOwnership.value = true
     const response = await $fetch(`/api/ownership/${props.productId}`)
     ownershipStatus.value = response
-  } catch (error) {
-    console.error('Error checking ownership:', error)
-    // Don't show error to user, just use props fallback
+  } catch {
+    // silent
   } finally {
     isLoadingOwnership.value = false
   }
 }
 
-// Check ownership on mount
-onMounted(() => {
-  checkOwnership()
-})
+onMounted(() => checkOwnership())
 
-// Watch for changes in props
-watch(() => props.isOwned, (newValue) => {
-  if (newValue) {
-    errorMessage.value = ''
-  }
-})
-
-watch(() => props.productId, () => {
-  checkOwnership()
-})
+watch(() => props.isOwned, (v) => { if (v) errorMessage.value = '' })
+watch(() => props.productId, () => checkOwnership())
 </script>

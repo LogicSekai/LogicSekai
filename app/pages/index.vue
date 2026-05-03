@@ -1,5 +1,5 @@
 <template>
-    <div class="min-h-screen bg-black">
+    <div class="min-h-screen bg-white dark:bg-[#030308]">
     
         <!-- [SECTION 1] Hero Section - The Hook -->
         <!-- Menangkap perhatian dengan value proposition yang kuat -->

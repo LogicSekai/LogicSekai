@@ -177,12 +177,14 @@ function validateUploadedFile(fileBuffer: Buffer, filename: string, type: string
     thumbnail: 5 * 1024 * 1024, // 5MB
     product: 100 * 1024 * 1024, // 100MB
     preview: 10 * 1024 * 1024, // 10MB
+    gallery: 200 * 1024 * 1024, // 200MB (foto + video)
   }
 
   const allowedExtensions = {
     thumbnail: ['jpg', 'jpeg', 'png', 'webp'],
     product: ['pdf', 'zip', 'xlsx', 'xls', 'docx', 'doc', 'txt', 'jpg', 'jpeg', 'png', 'webp', 'mp4', 'webm', 'mp3', 'wav'],
-    preview: ['jpg', 'jpeg', 'png', 'webp', 'mp4', 'webm']
+    preview: ['jpg', 'jpeg', 'png', 'webp', 'mp4', 'webm'],
+    gallery: ['jpg', 'jpeg', 'png', 'webp', 'gif', 'mp4', 'webm', 'mov'],
   }
 
   const maxSize = maxSizes[type as keyof typeof maxSizes] || maxSizes.product

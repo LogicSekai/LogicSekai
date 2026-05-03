@@ -1,83 +1,78 @@
-<template>
-  <div class="group">
-    <NuxtLink :to="`/products/${product.creator.username}/${product.slug}`" class="block">
-      <!-- Product Image -->
-      <div class="relative aspect-video overflow-hidden rounded-lg bg-gray-200 mb-4">
+﻿<template>
+  <div class="group bg-white dark:bg-[#030308] hover:bg-gray-50 dark:hover:bg-white/2 transition-colors">
+    <NuxtLink :to="`/products/${product.creator.username}/${product.slug}`" class="block p-5">
+
+      <!-- Thumbnail -->
+      <div class="relative aspect-video overflow-hidden bg-gray-100 dark:bg-white/4 mb-4">
         <img
-            v-if="product.thumbnail"
-            :src="product.thumbnail"
-            :alt="product.title"
-            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          v-if="product.thumbnail"
+          :src="product.thumbnail"
+          :alt="product.title"
+          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
-        <div v-else class="w-full h-full flex items-center justify-center bg-linear-to-br from-blue-100 to-purple-100">
-            <Image class="w-16 h-16 text-gray-400" />
+        <div v-else class="w-full h-full flex items-center justify-center">
+          <Image class="w-10 h-10 text-gray-300 dark:text-white/20" />
         </div>
-        
-        <!-- Featured Badge -->
-        <div v-if="featured" class="absolute top-3 left-3">
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                <Image class="w-3 h-3 mr-1" />
-                Featured
-            </span>
+
+        <!-- Featured badge -->
+        <div v-if="featured" class="absolute top-2 left-2">
+          <span class="font-mono text-[10px] tracking-[0.15em] uppercase bg-indigo-600 text-white px-2 py-0.5">
+            FEATURED
+          </span>
         </div>
-        
-        <!-- Price Badge -->
-        <div class="absolute top-3 right-3">
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-black bg-opacity-75 text-white">
-                {{ formatPrice(product.price) }}
-            </span>
+
+        <!-- Price badge -->
+        <div class="absolute bottom-2 right-2">
+          <span class="font-mono text-xs font-bold bg-black/80 dark:bg-black/90 text-white px-2.5 py-1">
+            {{ formatPrice(product.price) }}
+          </span>
         </div>
       </div>
-      
-      <!-- Product Info -->
+
+      <!-- Info -->
       <div class="space-y-2">
-        <h3 class="font-medium text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
+        <h3 class="text-sm font-bold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-2 leading-snug uppercase tracking-tight">
           {{ product.title }}
         </h3>
-        
-        <p class="text-sm text-gray-600 line-clamp-2">
+
+        <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">
           {{ product.description }}
         </p>
-        
-        <!-- Creator Info -->
-        <div class="flex items-center space-x-2">
+
+        <!-- Creator -->
+        <div class="flex items-center gap-2 pt-1">
           <img
             v-if="product.creator.avatar"
             :src="product.creator.avatar"
             :alt="product.creator.name"
-            class="w-5 h-5 rounded-full"
+            class="w-4 h-4 object-cover"
           />
-          <div v-else class="w-5 h-5 rounded-full bg-linear-to-br from-blue-400 to-purple-500 flex items-center justify-center">
-            <span class="text-white text-xs font-medium">
-              {{ product.creator.name?.charAt(0) || product.creator.username?.charAt(0) }}
+          <div v-else class="w-4 h-4 bg-indigo-600 flex items-center justify-center shrink-0">
+            <span class="text-white text-[9px] font-bold">
+              {{ (product.creator.name || product.creator.username)?.charAt(0).toUpperCase() }}
             </span>
           </div>
-          <span class="text-sm text-gray-600">{{ product.creator.name || product.creator.username }}</span>
+          <span class="font-mono text-[10px] uppercase tracking-[0.08em] text-gray-400 dark:text-gray-500">
+            {{ product.creator.name || product.creator.username }}
+          </span>
         </div>
-        
-        <!-- Category & Tags -->
-        <div class="flex items-center flex-wrap gap-1">
-          <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+
+        <!-- Category tags -->
+        <div class="flex flex-wrap gap-1 pt-0.5">
+          <span class="font-mono text-[10px] tracking-widest uppercase text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30 px-1.5 py-0.5">
             {{ product.category }}
           </span>
           <span
-            v-for="category in product.categories?.slice(1, 3) || []"
-            :key="category.id"
-            class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800"
+            v-for="cat in product.categories?.slice(1, 2) || []"
+            :key="cat.id"
+            class="font-mono text-[10px] tracking-widest uppercase text-gray-400 dark:text-gray-500 border border-gray-200 dark:border-white/10 px-1.5 py-0.5"
           >
-            {{ category.name }}
+            {{ cat.name }}
           </span>
           <span
-            v-if="product.categories && product.categories.length > 3"
-            class="text-xs text-gray-500"
-          >
-            +{{ product.categories.length - 3 }}
-          </span>
-        </div>
-        
-        <!-- Date -->
-        <div class="text-xs text-gray-500">
-          {{ formatDate(product.createdAt) }}
+            v-if="product.categories && product.categories.length > 2"
+            class="font-mono text-[10px] text-gray-400 dark:text-gray-600"
+          >+{{ product.categories.length - 2 }}</span>
         </div>
       </div>
     </NuxtLink>
@@ -114,15 +109,7 @@ interface Props {
 defineProps<Props>()
 
 // Use formatter composable
-const { formatPrice, formatDate } = useFormatter()
+const { formatPrice } = useFormatter()
 </script>
 
-<style scoped>
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-</style>
+

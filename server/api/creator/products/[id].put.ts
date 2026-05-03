@@ -99,6 +99,14 @@ async function updateCreatorProduct(db: any, event: any, productId: string, user
       });
     }
 
+    // Block edits for suspended products
+    if (existingProduct[0].status === 'suspended') {
+      throw createError({
+        statusCode: 403,
+        statusMessage: 'Produk ini sedang disuspend oleh admin dan tidak dapat diedit'
+      });
+    }
+
     const {
       title,
       slug,

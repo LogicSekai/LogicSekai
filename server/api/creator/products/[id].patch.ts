@@ -108,6 +108,15 @@ async function toggleProductStatus(db: any, event: any, productId: string, userI
     }
 
     const currentProduct = existingProduct[0];
+
+    // Block all status changes for suspended products
+    if (currentProduct.status === 'suspended') {
+      throw createError({
+        statusCode: 403,
+        statusMessage: 'Produk ini sedang disuspend oleh admin dan tidak dapat diubah statusnya'
+      });
+    }
+
     let newStatus = currentProduct.status;
 
     // Determine new status based on action

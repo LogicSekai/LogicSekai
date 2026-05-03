@@ -1,140 +1,106 @@
 <template>
-    <Card class="border-border">
-        <CardHeader>
-            <CardTitle class="text-foreground flex items-center">
-                <Lock class="h-5 w-5 mr-2" />
-                Change Password
-            </CardTitle>
-            <CardDescription class="text-muted-foreground">
-                Update your password to keep your account secure
-            </CardDescription>
-        </CardHeader>
-        <CardContent>
-            <form @submit.prevent="handleUpdatePassword" class="space-y-6">
-                <div class="space-y-4">
-                    <!-- Current Password -->
-                    <div class="space-y-2">
-                        <label class="text-sm font-medium text-foreground">
-                            Current Password <span class="text-destructive">*</span>
-                        </label>
-                        <div class="relative">
-                            <Input
-                                v-model="passwordForm.currentPassword"
-                                :type="showCurrentPassword ? 'text' : 'password'"
-                                placeholder="Enter current password"
-                                class="bg-background border-border text-foreground pr-10"
-                                :class="{
-                                    'border-destructive focus:border-destructive': errors.currentPassword
-                                }"
-                            />
-                            <button
-                                type="button"
-                                @click="showCurrentPassword = !showCurrentPassword"
-                                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                            >
-                                <Eye v-if="!showCurrentPassword" class="h-4 w-4" />
-                                <EyeOff v-else class="h-4 w-4" />
-                            </button>
-                        </div>
-                        <p v-if="errors.currentPassword" class="text-sm text-destructive">
-                            {{ errors.currentPassword }}
-                        </p>
-                    </div>
+    <div class="border border-gray-100 dark:border-white/6">
+        <!-- Header -->
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-white/6">
+            <p class="font-mono text-xs tracking-[0.2em] uppercase text-indigo-600">// GANTI PASSWORD</p>
+        </div>
 
-                    <!-- New Password -->
-                    <div class="space-y-2">
-                        <label class="text-sm font-medium text-foreground">
-                            New Password <span class="text-destructive">*</span>
-                        </label>
-                        <div class="relative">
-                            <Input
-                                v-model="passwordForm.newPassword"
-                                :type="showNewPassword ? 'text' : 'password'"
-                                placeholder="Enter new password"
-                                class="bg-background border-border text-foreground pr-10"
-                                :class="{
-                                    'border-destructive focus:border-destructive': errors.newPassword
-                                }"
-                            />
-                            <button
-                                type="button"
-                                @click="showNewPassword = !showNewPassword"
-                                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                            >
-                                <Eye v-if="!showNewPassword" class="h-4 w-4" />
-                                <EyeOff v-else class="h-4 w-4" />
-                            </button>
-                        </div>
-                        <p class="text-xs text-muted-foreground">
-                            Password must be at least 8 characters with uppercase, lowercase, and number
-                        </p>
-                        <p v-if="errors.newPassword" class="text-sm text-destructive">
-                            {{ errors.newPassword }}
-                        </p>
-                    </div>
-
-                    <!-- Confirm Password -->
-                    <div class="space-y-2">
-                        <label class="text-sm font-medium text-foreground">
-                            Confirm New Password <span class="text-destructive">*</span>
-                        </label>
-                        <div class="relative">
-                            <Input
-                                v-model="passwordForm.confirmPassword"
-                                :type="showConfirmPassword ? 'text' : 'password'"
-                                placeholder="Confirm new password"
-                                class="bg-background border-border text-foreground pr-10"
-                                :class="{
-                                    'border-destructive focus:border-destructive': errors.confirmPassword
-                                }"
-                            />
-                            <button
-                                type="button"
-                                @click="showConfirmPassword = !showConfirmPassword"
-                                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                            >
-                                <Eye v-if="!showConfirmPassword" class="h-4 w-4" />
-                                <EyeOff v-else class="h-4 w-4" />
-                            </button>
-                        </div>
-                        <p v-if="errors.confirmPassword" class="text-sm text-destructive">
-                            {{ errors.confirmPassword }}
-                        </p>
-                    </div>
+        <form @submit.prevent="handleUpdatePassword" class="p-6 space-y-5">
+            <!-- Current Password -->
+            <div class="space-y-1.5">
+                <label class="font-mono text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400">
+                    Password Saat Ini <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                    <Input
+                        v-model="passwordForm.currentPassword"
+                        :type="showCurrentPassword ? 'text' : 'password'"
+                        placeholder="••••••••"
+                        class="rounded-none border-gray-200 dark:border-white/10 bg-transparent text-gray-900 dark:text-white pr-10 focus-visible:ring-0 focus-visible:border-indigo-500 dark:focus-visible:border-indigo-400 transition-colors"
+                        :class="{ 'border-red-400 dark:border-red-500': errors.currentPassword }"
+                    />
+                    <button type="button" @click="showCurrentPassword = !showCurrentPassword"
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                        <Eye v-if="!showCurrentPassword" class="h-4 w-4" />
+                        <EyeOff v-else class="h-4 w-4" />
+                    </button>
                 </div>
+                <p v-if="errors.currentPassword" class="font-mono text-[10px] text-red-500">{{ errors.currentPassword }}</p>
+            </div>
 
-                <!-- Action Buttons -->
-                <div class="flex items-center justify-end space-x-3 pt-6 border-t border-border">
-                    <Button
-                        type="button"
-                        variant="outline"
-                        @click="handleReset"
-                        :disabled="isLoading"
-                        class="border-border text-foreground hover:bg-accent"
-                    >
-                        Reset
-                    </Button>
-                    <Button
-                        type="submit"
-                        :disabled="isLoading"
-                        class="bg-primary text-primary-foreground hover:bg-primary/90"
-                    >
-                        <Loader2 v-if="isLoading" class="h-4 w-4 mr-2 animate-spin" />
-                        <Lock v-else class="h-4 w-4 mr-2" />
-                        {{ isLoading ? 'Updating...' : 'Update Password' }}
-                    </Button>
+            <!-- New Password -->
+            <div class="space-y-1.5">
+                <label class="font-mono text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400">
+                    Password Baru <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                    <Input
+                        v-model="passwordForm.newPassword"
+                        :type="showNewPassword ? 'text' : 'password'"
+                        placeholder="••••••••"
+                        class="rounded-none border-gray-200 dark:border-white/10 bg-transparent text-gray-900 dark:text-white pr-10 focus-visible:ring-0 focus-visible:border-indigo-500 dark:focus-visible:border-indigo-400 transition-colors"
+                        :class="{ 'border-red-400 dark:border-red-500': errors.newPassword }"
+                    />
+                    <button type="button" @click="showNewPassword = !showNewPassword"
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                        <Eye v-if="!showNewPassword" class="h-4 w-4" />
+                        <EyeOff v-else class="h-4 w-4" />
+                    </button>
                 </div>
-            </form>
-        </CardContent>
-    </Card>
+                <p class="font-mono text-[10px] text-gray-400">Min. 8 karakter dengan huruf besar, kecil, dan angka.</p>
+                <p v-if="errors.newPassword" class="font-mono text-[10px] text-red-500">{{ errors.newPassword }}</p>
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="space-y-1.5">
+                <label class="font-mono text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400">
+                    Konfirmasi Password <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                    <Input
+                        v-model="passwordForm.confirmPassword"
+                        :type="showConfirmPassword ? 'text' : 'password'"
+                        placeholder="••••••••"
+                        class="rounded-none border-gray-200 dark:border-white/10 bg-transparent text-gray-900 dark:text-white pr-10 focus-visible:ring-0 focus-visible:border-indigo-500 dark:focus-visible:border-indigo-400 transition-colors"
+                        :class="{ 'border-red-400 dark:border-red-500': errors.confirmPassword }"
+                    />
+                    <button type="button" @click="showConfirmPassword = !showConfirmPassword"
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                        <Eye v-if="!showConfirmPassword" class="h-4 w-4" />
+                        <EyeOff v-else class="h-4 w-4" />
+                    </button>
+                </div>
+                <p v-if="errors.confirmPassword" class="font-mono text-[10px] text-red-500">{{ errors.confirmPassword }}</p>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-white/6">
+                <button
+                    type="button"
+                    @click="handleReset"
+                    :disabled="isLoading"
+                    class="px-4 py-2 border border-gray-200 dark:border-white/10 font-mono text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-white/30 hover:text-gray-900 dark:hover:text-white disabled:opacity-40 transition-colors"
+                >
+                    Reset
+                </button>
+                <button
+                    type="submit"
+                    :disabled="isLoading"
+                    class="flex items-center gap-2 px-5 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-xs tracking-[0.15em] uppercase transition-colors"
+                >
+                    <Loader2 v-if="isLoading" class="h-3.5 w-3.5 animate-spin" />
+                    <Lock v-else class="h-3.5 w-3.5" />
+                    {{ isLoading ? 'Menyimpan...' : 'Update Password' }}
+                </button>
+            </div>
+        </form>
+    </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { Lock, Eye, EyeOff, Loader2 } from 'lucide-vue-next'
-import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 
 // Props
 interface Props {

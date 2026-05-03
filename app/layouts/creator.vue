@@ -1,157 +1,136 @@
 <template>
-    <div class="min-h-screen bg-background transition-colors">
-    <!-- Sidebar -->
-        <div class="fixed inset-y-0 left-0 z-50 w-64 bg-sidebar shadow-md transform transition-all duration-300 ease-in-out"
-        :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
-            <!-- Logo/Brand -->
-            <div class="flex items-center justify-between h-16 px-4 border-b border-sidebar-border">
-                <div class="flex items-center space-x-2">
-                    <!-- <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                        <span class="text-white font-bold text-sm">LS</span>
-                    </div>
-                    <span class="text-xl font-bold text-gray-900">Logic Sekai</span> -->
-                    <div class="p-4">
-                        <NuxtLink to="/">
-                            <img src="/img/logic_sekai.svg" alt="logo" class="dark:filter dark:brightness-0 dark:invert"/>
-                        </NuxtLink>
-                    </div>
-                </div>
-                <Button variant="ghost" size="sm" class="lg:hidden text-sidebar-foreground" @click="sidebarOpen = false">
-                    <X class="h-5 w-5" />
-                </Button>
+    <div class="min-h-screen bg-gray-50 dark:bg-[#030308] transition-colors">
+        <!-- Sidebar -->
+        <div
+            class="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-[#030308] border-r border-gray-100 dark:border-white/6 transform transition-all duration-300 ease-in-out flex flex-col"
+            :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
+        >
+            <!-- Logo -->
+            <div class="flex items-center justify-between h-14 px-5 border-b border-gray-100 dark:border-white/6 shrink-0">
+                <NuxtLink to="/">
+                    <img src="/img/logic_sekai.svg" alt="logo" class="h-5 dark:filter dark:brightness-0 dark:invert" />
+                </NuxtLink>
+                <button
+                    class="lg:hidden p-1.5 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                    @click="sidebarOpen = false"
+                >
+                    <X class="h-4 w-4" />
+                </button>
             </div>
 
-            <!-- Navigation Menu -->
-            <nav class="mt-4 px-2">
-                <div class="space-y-1">
-                <!-- Dynamic Menu Items -->
-                    <template v-for="menuItem in filteredMenuItems" :key="menuItem.id">
-                        <!-- Menu with children -->
-                        <div v-if="menuItem.child?.length" class="space-y-1">
-                            <button @click="toggleSubmenu(menuItem.id)"
-                            class="w-full flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg transition-colors text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                            :class="activeSubmenu === menuItem.id ? 'bg-sidebar-accent text-sidebar-accent-foreground' : ''">
-                                <div class="flex items-center">
-                                    <component :is="menuItem.icon" class="h-5 w-5 mr-3" />
-                                    {{ menuItem.name }}
-                                </div>
-                                <ChevronDown class="h-4 w-4 transform transition-transform"
-                                :class="activeSubmenu === menuItem.id ? 'rotate-180' : ''"/>
-                            </button>
-                        
-                            <div v-show="activeSubmenu === menuItem.id" class="ml-8 space-y-1">
-                                <NuxtLink
+            <!-- Role badge -->
+            <div class="px-4 py-3 border-b border-gray-100 dark:border-white/6">
+                <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-indigo-600">// CREATOR</p>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="flex-1 overflow-y-auto py-3">
+                <template v-for="menuItem in filteredMenuItems" :key="menuItem.id">
+                    <!-- With children -->
+                    <div v-if="menuItem.child?.length">
+                        <button
+                            @click="toggleSubmenu(menuItem.id)"
+                            class="w-full flex items-center justify-between px-4 py-2.5 border-l-2 border-transparent transition-colors text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/4"
+                            :class="activeSubmenu === menuItem.id ? 'border-indigo-600 text-gray-900 dark:text-white bg-indigo-50 dark:bg-indigo-600/10' : ''"
+                        >
+                            <div class="flex items-center gap-2.5">
+                                <component :is="menuItem.icon" class="h-3.5 w-3.5 shrink-0" />
+                                <span class="font-mono text-[11px] uppercase tracking-widest">{{ menuItem.name }}</span>
+                            </div>
+                            <ChevronDown
+                                class="h-3 w-3 transition-transform shrink-0"
+                                :class="activeSubmenu === menuItem.id ? 'rotate-180' : ''"
+                            />
+                        </button>
+                        <div v-show="activeSubmenu === menuItem.id" class="pl-8">
+                            <NuxtLink
                                 v-for="childItem in menuItem.child"
                                 :key="childItem.id"
                                 :to="childItem.url"
-                                class="flex items-center px-4 py-2 text-sm rounded-lg transition-colors"
-                                :class="$route.path === childItem.url ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'">
-                                    <component :is="childItem.icon" class="h-4 w-4 mr-2" />
-                                    {{ childItem.name }}
-                                </NuxtLink>
-                            </div>
+                                class="flex items-center gap-2 px-4 py-2 border-l-2 border-transparent transition-colors text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/4"
+                                :class="$route.path === childItem.url ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-600/10' : ''"
+                            >
+                                <component :is="childItem.icon" class="h-3 w-3 shrink-0" />
+                                <span class="font-mono text-[10px] uppercase tracking-widest">{{ childItem.name }}</span>
+                            </NuxtLink>
                         </div>
+                    </div>
 
-                        <!-- Single Menu Item -->
-                        <NuxtLink
+                    <!-- Single item -->
+                    <NuxtLink
                         v-else
                         :to="menuItem.url"
-                        class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors"
-                        :class="$route.path === menuItem.url ? 'bg-sidebar-primary text-sidebar-primary-foreground border-r-2 border-sidebar-primary' : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'">
-                            <component :is="menuItem.icon" class="h-5 w-5 mr-3" />
-                            {{ menuItem.name }}
-                        </NuxtLink>
-                    </template>
-                </div>
+                        class="flex items-center gap-2.5 px-4 py-2.5 border-l-2 border-transparent transition-colors text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/4"
+                        :class="$route.path === menuItem.url ? 'border-indigo-600 text-gray-900 dark:text-white bg-indigo-50 dark:bg-indigo-600/10' : ''"
+                    >
+                        <component
+                            :is="menuItem.icon"
+                            class="h-3.5 w-3.5 shrink-0"
+                            :class="$route.path === menuItem.url ? 'text-indigo-600 dark:text-indigo-400' : ''"
+                        />
+                        <span class="font-mono text-[11px] uppercase tracking-widest">{{ menuItem.name }}</span>
+                    </NuxtLink>
+                </template>
             </nav>
         </div>
 
-        <!-- Main Content -->
+        <!-- Main content -->
         <div class="lg:ml-64">
-            <!-- Top Navigation Bar -->
-            <header class="bg-card border-b border-border transition-colors">
-                <div class="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
-                    <!-- Mobile menu button -->
-                    <Button
-                    variant="ghost"
-                    size="sm"
-                    class="lg:hidden text-foreground"
-                    @click="sidebarOpen = true">
-                        <Menu class="h-5 w-5" />
-                    </Button>
+            <!-- Topbar -->
+            <header class="bg-white dark:bg-[#030308] border-b border-gray-100 dark:border-white/6 sticky top-0 z-40">
+                <div class="flex items-center justify-between h-14 px-5">
+                    <!-- Mobile hamburger -->
+                    <button
+                        class="lg:hidden p-1.5 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                        @click="sidebarOpen = true"
+                    >
+                        <Menu class="h-4 w-4" />
+                    </button>
 
                     <!-- Breadcrumb -->
-                    <Breadcrumb class="text-foreground">
-                        <BreadcrumbList>
-                            <BreadcrumbItem>
-                                <BreadcrumbLink href="/admin" class="text-muted-foreground hover:text-foreground transition-colors">
-                                    Admin
-                                </BreadcrumbLink>
-                            </BreadcrumbItem>
-                        <BreadcrumbSeparator class="text-muted-foreground" />
-                            <BreadcrumbItem>
-                                <BreadcrumbPage class="text-foreground">{{ currentPageTitle }}</BreadcrumbPage>
-                            </BreadcrumbItem>
-                        </BreadcrumbList>
-                    </Breadcrumb>
+                    <div class="hidden lg:flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest">
+                        <span class="text-indigo-600">Creator</span>
+                        <span class="text-gray-300 dark:text-white/20">/</span>
+                        <span class="text-gray-500 dark:text-gray-400">{{ currentPageTitle }}</span>
+                    </div>
 
-                    <!-- User menu -->
-                    <div class="flex items-center space-x-4">
-                        <!-- Dark Mode Toggle -->
-                        <Button variant="ghost" size="sm" @click="toggleDarkMode" :title="darkModeText" class="text-muted-foreground hover:text-foreground transition-colors">
-                            <Sun v-if="isDarkMode" class="h-5 w-5" />
-                            <Moon v-else class="h-5 w-5" />
-                        </Button>
-
-                        <!-- Notifications -->
-                        <Button variant="ghost" size="sm" class="text-muted-foreground hover:text-foreground transition-colors">
-                            <Bell class="h-5 w-5" />
-                        </Button>
-
-                        <!-- User dropdown -->
-                        <div class="relative">
-                            <UserMenu />
-                        </div>
+                    <!-- Right actions -->
+                    <div class="flex items-center gap-1">
+                        <button
+                            @click="toggleDarkMode"
+                            :title="darkModeText"
+                            class="p-2 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                        >
+                            <Sun v-if="isDarkMode" class="h-4 w-4" />
+                            <Moon v-else class="h-4 w-4" />
+                        </button>
+                        <button class="p-2 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+                            <Bell class="h-4 w-4" />
+                        </button>
+                        <UserMenu />
                     </div>
                 </div>
             </header>
 
-            <!-- Page Content -->
-            <main class="p-4 sm:p-6 lg:p-8 bg-background min-h-screen transition-colors">
+            <!-- Page content -->
+            <main class="min-h-screen">
                 <slot />
             </main>
         </div>
 
-        <!-- Overlay for mobile sidebar -->
-        <div v-show="sidebarOpen" class="fixed inset-0 bg-black/50 z-40 lg:hidden transition-opacity" @click="sidebarOpen = false"></div>
+        <!-- Mobile overlay -->
+        <div
+            v-show="sidebarOpen"
+            class="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            @click="sidebarOpen = false"
+        />
     </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import UserMenu from '~/components/layout/UserMenu.vue'
-import { Button } from '~/components/ui/button'
-import Avatar from '~/components/Avatar.vue'
-import {
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbList,
-    BreadcrumbPage,
-    BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb'
-import { 
-    Menu, 
-    X,
-    ChevronDown, 
-    ChevronRight,
-    Bell, 
-    User, 
-    LogOut,
-    Settings,
-    Sun,
-    Moon
-} from 'lucide-vue-next'
+import { Menu, X, ChevronDown, Bell, Sun, Moon } from 'lucide-vue-next'
 // Composables
 const { user, logout } = useAuth()
 const route = useRoute()
@@ -236,26 +215,11 @@ watch(() => route.path, () => {
 </script>
 
 <style scoped>
-/* Custom scrollbar for sidebar */
 nav {
     scrollbar-width: thin;
-    scrollbar-color: #cbd5e1 #f8fafc;
+    scrollbar-color: rgba(255,255,255,0.1) transparent;
 }
-
-nav::-webkit-scrollbar {
-    width: 6px;
-}
-
-nav::-webkit-scrollbar-track {
-    background: #f8fafc;
-}
-
-nav::-webkit-scrollbar-thumb {
-    background-color: #cbd5e1;
-    border-radius: 3px;
-}
-
-nav::-webkit-scrollbar-thumb:hover {
-    background-color: #94a3b8;
-}
+nav::-webkit-scrollbar { width: 4px; }
+nav::-webkit-scrollbar-track { background: transparent; }
+nav::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); }
 </style>

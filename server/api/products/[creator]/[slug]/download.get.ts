@@ -1,6 +1,9 @@
+import { existsSync, statSync, createReadStream } from 'node:fs'
+import { join } from 'node:path'
+import archiver from 'archiver'
 import { getDB, initializeDB } from '~/lib/db/connection'
-import { products, users, transactions, downloadHistory } from '~/lib/db/schema'
-import { eq, and, or } from 'drizzle-orm'
+import { products, users, transactions } from '~/lib/db/schema'
+import { eq, and } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   try {
@@ -111,60 +114,123 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // For demo purposes, we'll return the first file info
-    // In a real implementation, you would:
-    // 1. Generate a secure, time-limited download URL
-    // 2. Stream the file content securely
-    // 3. Log the download activity
-    const downloadFile = productFiles[0]
+    // Resolve physical paths for all files
+    const resolvedFiles = productFiles
+      .map((f: any) => {
+        const fileUrl: string = f.url || ''
+        const relativePath = fileUrl.startsWith('/') ? fileUrl.slice(1) : fileUrl
+        const filePath = join(process.cwd(), 'public', relativePath)
+        const fileName = f.name || f.originalName || f.filename || 'file'
+        const mimeType = f.format || f.mimeType || 'application/octet-stream'
+        return { filePath, fileName, mimeType, exists: existsSync(filePath) }
+      })
+      .filter(f => f.exists)
 
-    // Track download if transaction ID is provided
-    if (transactionId) {
-      try {
-        await $fetch('/api/downloads/track', {
-          method: 'POST',
-          body: {
-            productId: product.id,
-            transactionId
-          }
-        })
-      } catch (error) {
-        console.error('Failed to track download:', error)
-        // Don't block the download for tracking errors
+    if (!resolvedFiles.length) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: 'File tidak ditemukan di server. Hubungi creator.'
+      })
+    }
+
+    // -- INFO MODE: return file list as JSON --
+    if (query.info) {
+      return resolvedFiles.map((f, i) => ({
+        index: i,
+        name: f.fileName,
+        size: statSync(f.filePath).size,
+        mimeType: f.mimeType,
+      }))
+    }
+
+    // -- SINGLE FILE BY INDEX MODE (with Range/pause-resume support) --
+    const fileParam = query.file
+    if (fileParam !== undefined) {
+      const fileIndex = parseInt(fileParam as string)
+      if (isNaN(fileIndex) || fileIndex < 0 || fileIndex >= resolvedFiles.length) {
+        throw createError({ statusCode: 404, statusMessage: 'File tidak ditemukan' })
       }
+      const { filePath, fileName, mimeType } = resolvedFiles[fileIndex]
+      const stat = statSync(filePath)
+      const rangeHeader = getHeader(event, 'range')
+
+      if (rangeHeader) {
+        const match = rangeHeader.match(/bytes=(\d+)-(\d*)/)
+        if (match) {
+          const start = parseInt(match[1])
+          const end = match[2] ? parseInt(match[2]) : stat.size - 1
+          const chunkSize = end - start + 1
+          setResponseStatus(event, 206)
+          setResponseHeaders(event, {
+            'Content-Range': `bytes ${start}-${end}/${stat.size}`,
+            'Accept-Ranges': 'bytes',
+            'Content-Length': String(chunkSize),
+            'Content-Type': mimeType,
+            'Content-Disposition': `attachment; filename="${encodeURIComponent(fileName)}"`,
+            'Cache-Control': 'no-store, no-cache',
+          })
+          return sendStream(event, createReadStream(filePath, { start, end }))
+        }
+      }
+
+      setResponseHeaders(event, {
+        'Accept-Ranges': 'bytes',
+        'Content-Type': mimeType,
+        'Content-Disposition': `attachment; filename="${encodeURIComponent(fileName)}"`,
+        'Content-Length': String(stat.size),
+        'Cache-Control': 'no-store, no-cache',
+      })
+      return sendStream(event, createReadStream(filePath))
     }
 
-    // In a real implementation, you would serve the actual file
-    // For now, we'll redirect to a placeholder or return file info
-    return {
-      success: true,
-      product: {
-        id: product.id,
-        title: product.title,
-        slug: product.slug,
-        creator: product.creator
-      },
-      file: {
-        name: downloadFile.name || `${product.title}.zip`,
-        size: downloadFile.size || 'Unknown',
-        type: downloadFile.type || 'application/zip'
-      },
-      message: 'Download ready',
-      // In production, this would be a secure download URL
-      downloadUrl: `/files/products/${product.id}/${downloadFile.name || 'product.zip'}`,
-      expiresAt: new Date(Date.now() + 3600000).toISOString() // 1 hour from now
+    // -- DEFAULT: single → stream directly, multiple → zip --
+    // Single file — stream directly
+    if (resolvedFiles.length === 1) {
+      const { filePath, fileName, mimeType } = resolvedFiles[0]
+      const stat = statSync(filePath)
+
+      setResponseHeaders(event, {
+        'Content-Type': mimeType,
+        'Content-Disposition': `attachment; filename="${encodeURIComponent(fileName)}"`,
+        'Content-Length': String(stat.size),
+        'Cache-Control': 'no-store, no-cache',
+      })
+
+      return sendStream(event, createReadStream(filePath))
     }
+
+    // Multiple files — buffer zip in memory then send
+    // (avoids stream timing issues with Nitro's sendStream)
+    const safeTitle = product.title.replace(/[^\w\s-]/g, '').trim() || 'product'
+    const zipName = `${safeTitle}.zip`
+
+    const zipBuffer = await new Promise<Buffer>((resolve, reject) => {
+      const chunks: Buffer[] = []
+      const archive = archiver('zip', { zlib: { level: 6 } })
+
+      archive.on('data', (chunk) => chunks.push(chunk as Buffer))
+      archive.on('end', () => resolve(Buffer.concat(chunks)))
+      archive.on('error', reject)
+
+      for (const { filePath, fileName } of resolvedFiles) {
+        archive.file(filePath, { name: fileName })
+      }
+
+      archive.finalize()
+    })
+
+    setResponseHeaders(event, {
+      'Content-Type': 'application/zip',
+      'Content-Disposition': `attachment; filename="${encodeURIComponent(zipName)}"`,
+      'Content-Length': String(zipBuffer.length),
+      'Cache-Control': 'no-store, no-cache',
+    })
+
+    return send(event, zipBuffer)
 
   } catch (error: any) {
     console.error('Download error:', error)
-    
-    if (error.statusCode) {
-      throw error
-    }
-    
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Failed to process download'
-    })
+    if (error.statusCode) throw error
+    throw createError({ statusCode: 500, statusMessage: 'Failed to process download' })
   }
 })

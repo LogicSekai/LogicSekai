@@ -1,493 +1,294 @@
-<template>
-    <div class="space-y-6">
+﻿<template>
+    <div class="p-6 space-y-6">
         <!-- Header -->
         <div class="flex items-center justify-between">
-            <div>
-                <h1 class="text-2xl font-bold text-foreground">User Profile</h1>
-                <p class="text-muted-foreground mt-1">View user information and activity</p>
-            </div>
-            <div class="flex items-center space-x-2">
-                <Button variant="outline" @click="goBack" class="border-border text-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
-                    <ArrowLeft class="h-4 w-4 mr-2" />
-                    Back to Users
+            <div class="flex items-center gap-3">
+                <Button variant="ghost" size="sm" @click="navigateTo('/admin/users')" class="text-muted-foreground hover:text-foreground -ml-1">
+                    <ArrowLeft class="h-4 w-4 mr-1" />
+                    Kembali
                 </Button>
-                <Button 
-                    v-if="user"
-                    @click="editUser" 
-                    class="bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-                >
-                    <Edit class="h-4 w-4 mr-2" />
-                    Edit User
-                </Button>
+                <div class="w-px h-5 bg-border" />
+                <div>
+                    <h1 class="text-2xl font-bold text-foreground">Profil Pengguna</h1>
+                    <p class="text-sm text-muted-foreground">Detail informasi akun pengguna</p>
+                </div>
             </div>
+            <Button v-if="user" @click="navigateTo(`/admin/users/${userId}/edit`)" class="bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
+                <Edit class="h-4 w-4 mr-2" />
+                Edit Pengguna
+            </Button>
         </div>
 
         <!-- Loading State -->
-        <div v-if="isLoading" class="flex items-center justify-center py-12">
-            <div class="flex items-center space-x-2">
-                <Loader2 class="h-6 w-6 animate-spin text-primary" />
-                <span class="text-muted-foreground">Loading user data...</span>
+        <div v-if="isLoading" class="flex items-center justify-center py-16">
+            <div class="flex items-center gap-2 text-muted-foreground">
+                <Loader2 class="h-5 w-5 animate-spin" />
+                <span class="text-sm">Memuat data pengguna...</span>
             </div>
         </div>
 
         <!-- Error State -->
-        <Card v-else-if="error" class="border-destructive/20">
-            <CardContent class="p-6">
-                <div class="flex items-center space-x-2 text-destructive">
-                    <AlertCircle class="h-5 w-5" />
-                    <span class="font-medium">Error loading user</span>
-                </div>
-                <p class="text-muted-foreground mt-2">{{ error }}</p>
-                <Button @click="fetchUser" class="mt-4 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
-                    <RefreshCw class="h-4 w-4 mr-2" />
-                    Retry
-                </Button>
-            </CardContent>
-        </Card>
+        <div v-else-if="error" class="border border-destructive/20 rounded-lg p-6 bg-destructive/5">
+            <div class="flex items-center gap-2 text-destructive mb-2">
+                <AlertCircle class="h-5 w-5" />
+                <span class="font-medium">Gagal memuat pengguna</span>
+            </div>
+            <p class="text-sm text-muted-foreground">{{ error }}</p>
+            <Button @click="fetchUser" class="mt-4 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors" size="sm">
+                <RefreshCw class="h-4 w-4 mr-2" />
+                Coba Lagi
+            </Button>
+        </div>
 
-        <!-- User Profile -->
+        <!-- User Content -->
         <div v-else-if="user" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Main Content -->
+            <!-- Left: Main Content -->
             <div class="lg:col-span-2 space-y-6">
-                <!-- Profile Overview -->
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Profile Information</CardTitle>
-                        <CardDescription>User's personal details and account status</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="space-y-4">
+                <!-- Profile Card -->
+                <div class="border border-border rounded-lg bg-card">
+                    <div class="p-4 border-b border-border">
+                        <h2 class="font-semibold text-foreground">Informasi Profil</h2>
+                        <p class="text-xs text-muted-foreground">Data pribadi dan status akun pengguna</p>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-start gap-6">
+                            <UserAvatar :user="user" size="xl" :show-verification-status="true" :show-role-badge="true" class="shrink-0" />
+                            <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                    <Label class="text-sm font-medium text-muted-foreground">Full Name</Label>
+                                    <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide">Nama Lengkap</p>
                                     <p class="text-foreground mt-1">{{ user.name }}</p>
                                 </div>
                                 <div>
-                                    <Label class="text-sm font-medium text-muted-foreground">Username</Label>
+                                    <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide">Username</p>
                                     <p class="text-foreground mt-1">@{{ user.username }}</p>
                                 </div>
                                 <div>
-                                    <Label class="text-sm font-medium text-muted-foreground">Email Address</Label>
-                                    <div class="flex items-center space-x-2 mt-1">
-                                        <p class="text-foreground">{{ user.email }}</p>
-                                        <CheckCircle v-if="user.verified" class="h-4 w-4 text-green-500" />
-                                        <AlertCircle v-else class="h-4 w-4 text-yellow-500" />
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="space-y-4">
-                                <div>
-                                    <Label class="text-sm font-medium text-muted-foreground">Role</Label>
-                                    <div class="mt-1">
-                                        <span 
-                                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                                            :class="getRoleBadgeClass(user.role)"
-                                        >
-                                            {{ user.role }}
-                                        </span>
-                                    </div>
+                                    <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide">Email</p>
+                                    <p class="text-foreground mt-1">{{ user.email }}</p>
                                 </div>
                                 <div>
-                                    <Label class="text-sm font-medium text-muted-foreground">Verification Status</Label>
-                                    <div class="mt-1">
-                                        <span 
-                                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                                            :class="user.verified 
-                                                ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' 
-                                                : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'"
-                                        >
-                                            {{ user.verified ? 'Verified' : 'Unverified' }}
-                                        </span>
-                                    </div>
+                                    <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide">Peran</p>
+                                    <span
+                                        class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium mt-1"
+                                        :class="getRoleBadgeClass(user.role)"
+                                    >
+                                        {{ getRoleLabel(user.role) }}
+                                    </span>
                                 </div>
                                 <div>
-                                    <Label class="text-sm font-medium text-muted-foreground">Account Status</Label>
+                                    <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide">Verifikasi Email</p>
+                                    <div class="flex items-center gap-1.5 mt-1">
+                                        <CheckCircle v-if="isVerified(user.verified)" class="h-4 w-4 text-green-500 shrink-0" />
+                                        <AlertCircle v-else class="h-4 w-4 text-yellow-500 shrink-0" />
+                                        <span class="text-sm text-foreground">{{ isVerified(user.verified) ? 'Terverifikasi' : 'Belum Diverifikasi' }}</span>
+                                    </div>
+                                    <p v-if="isVerified(user.verified)" class="text-xs text-muted-foreground mt-0.5 ml-5">
+                                        {{ formatDate(user.verified!) }}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide">Status Akun</p>
                                     <div class="mt-1">
-                                        <Badge variant="outline" class="text-xs text-green-600">
-                                            Active
-                                        </Badge>
+                                        <AccountStatusBadge :user="user" />
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </CardContent>
-                </Card>
+                    </div>
+                </div>
 
-                <!-- Account Timeline -->
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Account Timeline</CardTitle>
-                        <CardDescription>Important dates and milestones</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div class="space-y-4">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
-                                <div>
-                                    <p class="text-sm font-medium text-foreground">Account Created</p>
-                                    <p class="text-xs text-muted-foreground">{{ formatDate(user.created) }}</p>
-                                </div>
-                            </div>
-                            <div class="flex items-center space-x-3">
-                                <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
-                                <div>
-                                    <p class="text-sm font-medium text-foreground">Last Updated</p>
-                                    <p class="text-xs text-muted-foreground">{{ formatDate(user.updated) }}</p>
-                                </div>
-                            </div>
-                            <div v-if="user.verified" class="flex items-center space-x-3">
-                                <div class="w-2 h-2 bg-purple-500 rounded-full"></div>
-                                <div>
-                                    <p class="text-sm font-medium text-foreground">Email Verified</p>
-                                    <p class="text-xs text-muted-foreground">{{ formatDate(user.verified) }}</p>
-                                </div>
+                <!-- Timeline Card -->
+                <div class="border border-border rounded-lg bg-card">
+                    <div class="p-4 border-b border-border">
+                        <h2 class="font-semibold text-foreground">Timeline Akun</h2>
+                        <p class="text-xs text-muted-foreground">Tanggal penting dan riwayat akun</p>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-2 h-2 bg-green-500 rounded-full shrink-0" />
+                            <div>
+                                <p class="text-sm font-medium text-foreground">Akun Dibuat</p>
+                                <p class="text-xs text-muted-foreground">{{ formatDate(user.created) }}</p>
                             </div>
                         </div>
-                    </CardContent>
-                </Card>
-
-                <!-- Recent Activity -->
-                <Card>
-                    <CardHeader class="flex flex-row items-center justify-between">
-                        <div>
-                            <CardTitle>Recent Activity</CardTitle>
-                            <CardDescription>User's latest actions and changes</CardDescription>
-                        </div>
-                        <Button variant="outline" size="sm" @click="fetchActivities" class="border-border text-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
-                            <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loadingActivities }" />
-                        </Button>
-                    </CardHeader>
-                    <CardContent>
-                        <div v-if="loadingActivities" class="flex items-center justify-center py-6">
-                            <Loader2 class="h-6 w-6 animate-spin text-primary" />
-                        </div>
-                        <div v-else-if="activities.length === 0" class="text-center py-6">
-                            <Clock class="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                            <p class="text-muted-foreground">No recent activity</p>
-                        </div>
-                        <div v-else class="space-y-3">
-                            <div 
-                                v-for="activity in activities" 
-                                :key="activity.id"
-                                class="flex items-start space-x-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
-                            >
-                                <div class="w-2 h-2 bg-primary rounded-full mt-2"></div>
-                                <div class="flex-1">
-                                    <p class="text-sm text-foreground">{{ activity.action }}</p>
-                                    <p class="text-xs text-muted-foreground">{{ activity.details }}</p>
-                                    <p class="text-xs text-muted-foreground mt-1">{{ formatDate(activity.timestamp) }}</p>
-                                </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-2 h-2 bg-blue-500 rounded-full shrink-0" />
+                            <div>
+                                <p class="text-sm font-medium text-foreground">Terakhir Diperbarui</p>
+                                <p class="text-xs text-muted-foreground">{{ formatDate(user.updated) }}</p>
                             </div>
                         </div>
-                    </CardContent>
-                </Card>
+                        <div v-if="isVerified(user.verified)" class="flex items-center gap-3">
+                            <div class="w-2 h-2 bg-purple-500 rounded-full shrink-0" />
+                            <div>
+                                <p class="text-sm font-medium text-foreground">Email Diverifikasi</p>
+                                <p class="text-xs text-muted-foreground">{{ formatDate(user.verified!) }}</p>
+                            </div>
+                        </div>
+                        <div v-if="user.suspended" class="flex items-center gap-3">
+                            <div class="w-2 h-2 bg-orange-500 rounded-full shrink-0" />
+                            <div>
+                                <p class="text-sm font-medium text-orange-600">Akun Ditangguhkan</p>
+                                <p class="text-xs text-muted-foreground">{{ formatDate(user.suspended) }}</p>
+                            </div>
+                        </div>
+                        <div v-if="user.deleted" class="flex items-center gap-3">
+                            <div class="w-2 h-2 bg-red-500 rounded-full shrink-0" />
+                            <div>
+                                <p class="text-sm font-medium text-red-600">Akun Dihapus</p>
+                                <p class="text-xs text-muted-foreground">{{ formatDate(user.deleted) }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Sidebar -->
             <div class="space-y-6">
-                <!-- Avatar & Quick Info -->
-                <Card>
-                    <CardContent class="p-6">
-                        <div class="text-center space-y-4">
-                            <div class="relative mx-auto w-32 h-32">
-                                <img 
-                                    v-if="user.avatar" 
-                                    :src="user.avatar" 
-                                    :alt="user.name"
-                                    class="w-32 h-32 rounded-full object-cover border-4 border-border"
-                                />
-                                <div v-else class="w-32 h-32 bg-muted rounded-full flex items-center justify-center border-4 border-border">
-                                    <UserIcon class="h-16 w-16 text-muted-foreground" />
-                                </div>
-                            </div>
-                            <div>
-                                <h3 class="text-lg font-semibold text-foreground">{{ user.name }}</h3>
-                                <p class="text-muted-foreground">@{{ user.username }}</p>
-                                <p class="text-sm text-muted-foreground mt-1">{{ user.email }}</p>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
+                <!-- Avatar Card -->
+                <div class="border border-border rounded-lg bg-card p-6 text-center">
+                    <div class="flex justify-center mb-4">
+                        <UserAvatar :user="user" size="2xl" :show-verification-status="true" :show-role-badge="true" />
+                    </div>
+                    <h3 class="font-semibold text-foreground">{{ user.name }}</h3>
+                    <p class="text-sm text-muted-foreground">@{{ user.username }}</p>
+                    <p class="text-xs text-muted-foreground mt-0.5">{{ user.email }}</p>
+                    <div class="flex items-center justify-center gap-2 mt-3 flex-wrap">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium" :class="getRoleBadgeClass(user.role)">
+                            {{ getRoleLabel(user.role) }}
+                        </span>
+                        <AccountStatusBadge :user="user" />
+                    </div>
+                </div>
 
                 <!-- Quick Actions -->
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Quick Actions</CardTitle>
-                    </CardHeader>
-                    <CardContent class="space-y-2">
-                        <Button 
-                            variant="outline" 
-                            class="w-full justify-start border-border text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+                <div class="border border-border rounded-lg bg-card">
+                    <div class="p-4 border-b border-border">
+                        <h2 class="text-sm font-semibold text-foreground">Aksi Cepat</h2>
+                    </div>
+                    <div class="p-4 space-y-2">
+                        <Button
+                            variant="outline"
+                            class="w-full justify-start border-border hover:bg-accent transition-colors"
                             @click="toggleVerification"
                             :disabled="updatingUser"
                         >
                             <Loader2 v-if="updatingUser" class="mr-2 h-4 w-4 animate-spin" />
-                            <UserCheck v-else-if="!user.verified" class="mr-2 h-4 w-4" />
-                            <UserX v-else class="mr-2 h-4 w-4" />
-                            {{ user.verified ? 'Unverify User' : 'Verify User' }}
+                            <UserCheck v-else-if="!isVerified(user.verified)" class="mr-2 h-4 w-4 text-green-600" />
+                            <UserX v-else class="mr-2 h-4 w-4 text-yellow-600" />
+                            {{ isVerified(user.verified) ? 'Hapus Verifikasi' : 'Verifikasi Akun' }}
                         </Button>
-                        
-                        <Button 
-                            variant="outline" 
-                            class="w-full justify-start border-border text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
-                            @click="sendEmail"
+                        <Button
+                            variant="outline"
+                            class="w-full justify-start border-border hover:bg-accent transition-colors"
+                            @click="navigateTo(`/admin/users/${userId}/edit`)"
                         >
-                            <Mail class="mr-2 h-4 w-4" />
-                            Send Email
+                            <Edit class="mr-2 h-4 w-4" />
+                            Edit Pengguna
                         </Button>
-                        
-                        <Button 
-                            variant="outline" 
-                            class="w-full justify-start border-border text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
-                            @click="resetPassword"
-                        >
-                            <Key class="mr-2 h-4 w-4" />
-                            Reset Password
-                        </Button>
-                    </CardContent>
-                </Card>
+                    </div>
+                </div>
 
-                <!-- User Statistics -->
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Statistics</CardTitle>
-                    </CardHeader>
-                    <CardContent class="space-y-3">
-                        <div class="flex items-center justify-between">
-                            <span class="text-sm text-muted-foreground">Login Count</span>
-                            <Badge variant="secondary">{{ stats.loginCount || 0 }}</Badge>
+                <!-- Identifikasi -->
+                <div class="border border-border rounded-lg bg-card">
+                    <div class="p-4 border-b border-border">
+                        <h2 class="text-sm font-semibold text-foreground">Identifikasi</h2>
+                    </div>
+                    <div class="p-4 space-y-3">
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-muted-foreground">User ID</span>
+                            <span class="text-xs font-mono text-foreground bg-muted px-2 py-0.5 rounded">{{ user.id.slice(0, 8) }}...</span>
                         </div>
-                        <div class="flex items-center justify-between">
-                            <span class="text-sm text-muted-foreground">Content Created</span>
-                            <Badge variant="secondary">{{ stats.contentCount || 0 }}</Badge>
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-muted-foreground">Bergabung</span>
+                            <span class="text-xs text-foreground">{{ formatDateShort(user.created) }}</span>
                         </div>
-                        <div class="flex items-center justify-between">
-                            <span class="text-sm text-muted-foreground">Last Login</span>
-                            <span class="text-xs text-foreground">{{ stats.lastLogin ? formatDate(stats.lastLogin) : 'Never' }}</span>
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-muted-foreground">Diperbarui</span>
+                            <span class="text-xs text-foreground">{{ formatDateShort(user.updated) }}</span>
                         </div>
-                    </CardContent>
-                </Card>
-
-                <!-- Permissions -->
-                <Card v-if="permissions.length > 0">
-                    <CardHeader>
-                        <CardTitle>Permissions</CardTitle>
-                        <CardDescription>User's current permissions</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div class="space-y-2">
-                            <div 
-                                v-for="permission in permissions" 
-                                :key="permission"
-                                class="flex items-center justify-between text-sm"
-                            >
-                                <span class="text-muted-foreground">{{ formatPermission(permission) }}</span>
-                                <CheckCircle class="h-3 w-3 text-green-500" />
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
-import { 
-    ArrowLeft, Edit, Loader2, AlertCircle, RefreshCw, UserIcon, 
-    CheckCircle, Clock, UserCheck, UserX, Mail, Key
-} from 'lucide-vue-next'
+import { ref, onMounted } from 'vue'
+import { ArrowLeft, Edit, Loader2, AlertCircle, RefreshCw, CheckCircle, UserCheck, UserX } from 'lucide-vue-next'
 import { Button } from '~/components/ui/button'
-import { Label } from '~/components/ui/label'
-import { Badge } from '~/components/ui/badge'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
+import UserAvatar from '~/components/UserAvatar.vue'
+import AccountStatusBadge from '~/components/admin/users/AccountStatusBadge.vue'
+import { isVerified, createVerificationDate } from '~/utils/verification'
+import type { User, UserRole, UserResponse } from '~/types'
 
-// Import User Types
-import type { 
-    User, 
-    UserRole, 
-    UserResponse,
-    UserActivity,
-    Permission
-} from '~/types'
-import { ROLE_PERMISSIONS } from '~/types'
-
-// Get route parameters
 const route = useRoute()
-const router = useRouter()
 const userId = route.params.id as string
 
-// Reactive data
 const user = ref<User | null>(null)
-const isLoading = ref<boolean>(true)
-const loadingActivities = ref<boolean>(false)
-const updatingUser = ref<boolean>(false)
-const error = ref<string>('')
-const activities = ref<UserActivity[]>([])
-const stats = ref({
-    loginCount: 0,
-    contentCount: 0,
-    lastLogin: null as string | null
-})
+const isLoading = ref(true)
+const updatingUser = ref(false)
+const error = ref('')
 
-// Computed properties
-const permissions = computed((): Permission[] => {
-    if (!user.value) return []
-    return ROLE_PERMISSIONS[user.value.role] || []
-})
-
-// Methods
-const fetchUser = async (): Promise<void> => {
+const fetchUser = async () => {
     try {
         isLoading.value = true
         error.value = ''
-        
         const response = await $fetch<UserResponse>(`/api/admin/users/${userId}`)
-        
         if (response.success && response.user) {
             user.value = response.user
-            
-            // Mock stats data
-            stats.value = {
-                loginCount: Math.floor(Math.random() * 100) + 1,
-                contentCount: Math.floor(Math.random() * 50),
-                lastLogin: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString()
-            }
-            
-            await fetchActivities()
         } else {
-            error.value = response.error || 'Failed to fetch user'
+            error.value = response.error || 'Gagal memuat data pengguna'
         }
     } catch (err: any) {
-        error.value = err.data?.message || err.message || 'Failed to fetch user'
+        error.value = err.data?.message || err.message || 'Gagal memuat data pengguna'
     } finally {
         isLoading.value = false
     }
 }
 
-const fetchActivities = async (): Promise<void> => {
+const toggleVerification = async () => {
     if (!user.value) return
-    
-    try {
-        loadingActivities.value = true
-        
-        // Mock activities data
-        activities.value = [
-            {
-                id: '1',
-                userId: user.value.id,
-                action: 'Profile updated',
-                details: 'User updated their profile information',
-                ipAddress: '192.168.1.1',
-                userAgent: 'Mozilla/5.0...',
-                timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
-            },
-            {
-                id: '2',
-                userId: user.value.id,
-                action: 'Login successful',
-                details: 'User logged in from desktop browser',
-                ipAddress: '192.168.1.1',
-                userAgent: 'Mozilla/5.0...',
-                timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString()
-            },
-            {
-                id: '3',
-                userId: user.value.id,
-                action: 'Password changed',
-                details: 'User successfully changed their password',
-                ipAddress: '192.168.1.1',
-                userAgent: 'Mozilla/5.0...',
-                timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
-            }
-        ]
-    } catch (err) {
-        console.error('Failed to fetch activities:', err)
-    } finally {
-        loadingActivities.value = false
-    }
-}
-
-const toggleVerification = async (): Promise<void> => {
-    if (!user.value) return
-    
     try {
         updatingUser.value = true
-        
-        const currentlyVerified = user.value.verified !== null && user.value.verified !== undefined
-        const shouldVerify = !currentlyVerified
-        
-        const response = await $fetch<{ success: boolean; error?: string }>(`/api/admin/users/${userId}/verify`, {
+        const shouldVerify = !isVerified(user.value.verified)
+        const response = await $fetch<{ success: boolean }>(`/api/admin/users/${userId}/verify`, {
             method: 'POST',
-            body: {
-                verified: shouldVerify
-            }
+            body: { verified: shouldVerify }
         })
-        
         if (response.success) {
-            // If verifying, set current date; if unverifying, set null
-            user.value.verified = shouldVerify ? new Date().toISOString() : null
-        } else {
-            console.error('Failed to toggle verification:', response.error)
+            user.value.verified = shouldVerify ? createVerificationDate() : null
+            useToaster('success', shouldVerify ? 'Akun berhasil diverifikasi' : 'Verifikasi berhasil dihapus')
         }
-    } catch (error) {
-        console.error('Error toggling verification:', error)
+    } catch {
+        useToaster('error', 'Gagal mengubah status verifikasi')
     } finally {
         updatingUser.value = false
     }
 }
 
-const sendEmail = (): void => {
-    // Implementation for sending email
-    console.log('Send email to user')
-}
-
-const resetPassword = (): void => {
-    // Implementation for password reset
-    console.log('Reset password for user')
-}
-
-const goBack = (): void => {
-    router.push('/admin/users')
-}
-
-const editUser = (): void => {
-    router.push(`/admin/users/${userId}/edit`)
-}
-
-const getRoleBadgeClass = (role: UserRole): string => {
+const getRoleBadgeClass = (role: UserRole) => {
     switch (role) {
-        case 'superadmin':
-            return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
-        case 'creator':
-            return 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400'
-        case 'user':
-        default:
-            return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
+        case 'superadmin': return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+        case 'creator': return 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
+        default: return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
     }
 }
 
-const formatDate = (dateString: string): string => {
-    return new Date(dateString).toLocaleDateString('id-ID', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    })
+const getRoleLabel = (role: UserRole) => {
+    const map: Record<string, string> = { superadmin: 'Superadmin', creator: 'Kreator', user: 'Pengguna' }
+    return map[role] ?? role
 }
 
-const formatPermission = (permission: Permission): string => {
-    return permission.replace(/\./g, ' ').replace(/\b\w/g, l => l.toUpperCase())
-}
+const formatDate = (dateString: string) =>
+    new Date(dateString).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })
 
-// Lifecycle
-onMounted(() => {
-    fetchUser()
-})
+const formatDateShort = (dateString: string) =>
+    new Date(dateString).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' })
 
-// Page meta
+onMounted(() => fetchUser())
+
 definePageMeta({
     middleware: 'superadmin',
     layout: 'superadmin'

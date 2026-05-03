@@ -39,21 +39,21 @@ const statusInfo = computed(() => {
                 ...baseInfo,
                 icon: CheckCircle,
                 badgeClass: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400 border border-green-200',
-                tooltip: 'User account is active and can login normally'
+                tooltip: 'Akun aktif dan dapat login'
             }
         case 'suspended':
             return {
                 ...baseInfo,
                 icon: AlertTriangle,
                 badgeClass: 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400 border border-orange-200',
-                tooltip: 'User account is suspended and cannot login'
+                tooltip: 'Akun ditangguhkan dan tidak dapat login'
             }
         case 'deleted':
             return {
                 ...baseInfo,
                 icon: Trash2,
                 badgeClass: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400 border border-red-200',
-                tooltip: `Account was deleted${baseInfo.deletedDate ? ` on ${baseInfo.deletedDate}` : ''} and can be recovered`
+                tooltip: `Akun dihapus${baseInfo.deletedDate ? ` pada ${baseInfo.deletedDate}` : ''} dan dapat dipulihkan`
             }
         default:
             return {

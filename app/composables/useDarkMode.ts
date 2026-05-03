@@ -11,8 +11,8 @@ export const useDarkMode = () => {
       if (stored !== null) {
         isDarkMode.value = JSON.parse(stored)
       } else {
-        // Gunakan system preference sebagai default
-        isDarkMode.value = window.matchMedia('(prefers-color-scheme: dark)').matches
+        // Default: light mode
+        isDarkMode.value = false
       }
       
       // Apply ke document class

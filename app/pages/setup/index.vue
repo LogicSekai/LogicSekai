@@ -1,183 +1,232 @@
 <template>
-    <section class="bg-background py-20 lg:py-[120px] min-h-screen flex items-center transition-colors">
-        <div class="container mx-auto">
-            <div class="flex flex-wrap -mx-4">
-                <div class="w-full px-4">
-                    <div class="relative mx-auto max-w-[525px] overflow-hidden rounded-lg bg-card py-16 px-10 text-center sm:px-12 md:px-[60px] transition-colors">
+  <div class="min-h-screen bg-white dark:bg-[#030308] flex flex-col">
 
-                        <div class="mb-10 text-center md:mb-16">
-                            <NuxtLink href="/" class="mx-auto inline-block max-w-[220px]">
-                                <img src="/img/logic_sekai.svg" alt="logo" class="dark:filter dark:brightness-0 dark:invert transition-all"/>
-                            </NuxtLink>
-                        </div>
+    <!-- Top bar -->
+    <div class="border-b border-gray-100 dark:border-white/6">
+      <div class="container mx-auto px-6 lg:px-10 h-14 flex items-center justify-between">
+        <NuxtLink to="/">
+          <img src="/img/logic_sekai.svg" alt="Logic Sekai" class="h-6 w-auto dark:filter dark:brightness-0 dark:invert" />
+        </NuxtLink>
+        <p class="font-mono text-xs tracking-[0.2em] uppercase text-indigo-600">// SETUP</p>
+      </div>
+    </div>
 
-                        <Card class="bg-transparent border-0 shadow-none">
-                            <CardHeader class="text-center">
-                                <CardTitle class="text-2xl font-bold text-card-foreground">
-                                    Setup Superadmin
-                                </CardTitle>
-                                <CardDescription class="text-muted-foreground">
-                                    Buat akun superadmin untuk mengakses admin panel
-                                </CardDescription>
-                            </CardHeader>
-                            
-                            <CardContent>
-                                <form @submit="onSubmit" class="space-y-4">
-                                    <FormField v-slot="{ componentField }" name="email">
-                                    <FormItem>
-                                        <FormLabel class="text-card-foreground">Email Superadmin</FormLabel>
-                                        <FormControl>
-                                        <Input
-                                            type="email"
-                                            placeholder="superadmin@example.com"
-                                            v-bind="componentField"
-                                            class="bg-background border-border text-foreground placeholder-muted-foreground focus:ring-ring transition-colors"
-                                        />
-                                        </FormControl>
-                                        <FormMessage class="text-left" />
-                                    </FormItem>
-                                    </FormField>
+    <!-- Content -->
+    <div class="flex-1 flex items-center justify-center px-6 py-12">
+      <div class="w-full max-w-md">
 
-                                    <FormField v-slot="{ componentField }" name="password">
-                                    <FormItem>
-                                        <FormLabel class="text-card-foreground">Password</FormLabel>
-                                        <FormControl>
-                                        <Input
-                                            type="password"
-                                            placeholder="Password yang kuat"
-                                            v-bind="componentField"
-                                            class="bg-background border-border text-foreground placeholder-muted-foreground focus:ring-ring transition-colors"
-                                        />
-                                        </FormControl>
-                                        <FormMessage class="text-left" />
-                                    </FormItem>
-                                    </FormField>
-
-                                    <FormField v-slot="{ componentField }" name="confirmPassword">
-                                    <FormItem>
-                                        <FormLabel class="text-card-foreground">Konfirmasi Password</FormLabel>
-                                        <FormControl>
-                                        <Input
-                                            type="password"
-                                            placeholder="Ulangi password"
-                                            v-bind="componentField"
-                                            class="bg-background border-border text-foreground placeholder-muted-foreground focus:ring-ring transition-colors"
-                                        />
-                                        </FormControl>
-                                        <FormMessage class="text-left" />
-                                    </FormItem>
-                                    </FormField>
-
-                                    <FormField v-slot="{ componentField }" name="secret">
-                                    <FormItem>
-                                        <FormLabel class="text-card-foreground">Secret Key</FormLabel>
-                                        <FormControl>
-                                        <Input
-                                            type="password"
-                                            placeholder="Secret key untuk setup"
-                                            v-bind="componentField"
-                                            class="bg-background border-border text-foreground placeholder-muted-foreground focus:ring-ring transition-colors"
-                                        />
-                                        </FormControl>
-                                        <FormDescription class="text-xs text-muted-foreground">
-                                        Hubungi administrator untuk mendapatkan secret key
-                                        </FormDescription>
-                                        <FormMessage class="text-left" />
-                                    </FormItem>
-                                    </FormField>
-
-                                    <Button
-                                    type="submit"
-                                    class="w-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-                                    :disabled="isSubmitting"
-                                    >
-                                    <Loader2 v-if="isSubmitting" class="mr-2 h-4 w-4 animate-spin" />
-                                    Buat Superadmin
-                                    </Button>
-                                </form>
-
-                                <div v-if="error" class="mt-4 p-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg">
-                                    {{ error }}
-                                </div>
-
-                                <div v-if="success" class="mt-4 p-3 bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 rounded-lg">
-                                    {{ success }}
-                                </div>
-                            </CardContent>
-
-                            <CardFooter class="flex justify-center">
-                                <p class="text-sm text-muted-foreground">
-                                    Sudah ada akun superadmin?
-                                    <NuxtLink to="/auth/login"
-                                    class="font-medium text-primary hover:text-primary/80 transition-colors">
-                                        Login sekarang
-                                    </NuxtLink>
-                                </p>
-                            </CardFooter>
-                        </Card>
-                    </div>
-                </div>
-            </div>
+        <!-- Success state -->
+        <div v-if="success" class="border border-gray-100 dark:border-white/6 p-10 text-center">
+          <div class="w-12 h-12 bg-green-600/10 flex items-center justify-center mx-auto mb-5">
+            <CheckCircle class="w-6 h-6 text-green-600 dark:text-green-400" />
+          </div>
+          <p class="font-black uppercase tracking-tight text-gray-900 dark:text-white text-sm mb-2">Superadmin Dibuat!</p>
+          <p class="font-mono text-[10px] text-gray-400 mb-1">{{ success }}</p>
+          <p class="font-mono text-[10px] text-gray-400">Mengalihkan ke halaman login...</p>
         </div>
-    </section>
+
+        <!-- Form -->
+        <div v-else class="border border-gray-100 dark:border-white/6">
+
+          <!-- Header -->
+          <div class="px-6 py-5 border-b border-gray-100 dark:border-white/6 flex items-center gap-4">
+            <div class="w-10 h-10 bg-indigo-600/10 flex items-center justify-center shrink-0">
+              <ShieldCheck class="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+            </div>
+            <div>
+              <h1 class="font-black uppercase tracking-tight text-gray-900 dark:text-white text-sm">Setup Superadmin</h1>
+              <p class="font-mono text-[10px] text-gray-400 mt-0.5">Buat akun superadmin pertama kali</p>
+            </div>
+          </div>
+
+          <!-- Form body -->
+          <div class="px-6 py-5 space-y-4">
+            <p class="font-mono text-xs uppercase tracking-[0.15em] text-gray-400">// KREDENSIAL</p>
+
+            <!-- Email -->
+            <div class="space-y-1.5">
+              <label class="font-mono text-[10px] uppercase tracking-widest text-gray-500 dark:text-gray-400">Email</label>
+              <input
+                v-model="form.email"
+                type="email"
+                placeholder="superadmin@example.com"
+                autocomplete="email"
+                class="w-full px-3 py-2.5 bg-white dark:bg-transparent border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-300 dark:placeholder-white/20 font-mono text-xs focus:outline-none focus:border-indigo-500 dark:focus:border-indigo-400 transition-colors"
+                :class="{ 'border-red-400 dark:border-red-500': errors.email }"
+              />
+              <p v-if="errors.email" class="font-mono text-[10px] text-red-500">{{ errors.email }}</p>
+            </div>
+
+            <!-- Password -->
+            <div class="space-y-1.5">
+              <label class="font-mono text-[10px] uppercase tracking-widest text-gray-500 dark:text-gray-400">Password</label>
+              <input
+                v-model="form.password"
+                type="password"
+                placeholder="Minimal 8 karakter"
+                autocomplete="new-password"
+                class="w-full px-3 py-2.5 bg-white dark:bg-transparent border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-300 dark:placeholder-white/20 font-mono text-xs focus:outline-none focus:border-indigo-500 dark:focus:border-indigo-400 transition-colors"
+                :class="{ 'border-red-400 dark:border-red-500': errors.password }"
+              />
+              <p v-if="errors.password" class="font-mono text-[10px] text-red-500">{{ errors.password }}</p>
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="space-y-1.5">
+              <label class="font-mono text-[10px] uppercase tracking-widest text-gray-500 dark:text-gray-400">Konfirmasi Password</label>
+              <input
+                v-model="form.confirmPassword"
+                type="password"
+                placeholder="Ulangi password"
+                autocomplete="new-password"
+                class="w-full px-3 py-2.5 bg-white dark:bg-transparent border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-300 dark:placeholder-white/20 font-mono text-xs focus:outline-none focus:border-indigo-500 dark:focus:border-indigo-400 transition-colors"
+                :class="{ 'border-red-400 dark:border-red-500': errors.confirmPassword }"
+              />
+              <p v-if="errors.confirmPassword" class="font-mono text-[10px] text-red-500">{{ errors.confirmPassword }}</p>
+            </div>
+
+            <!-- Divider -->
+            <div class="pt-2 border-t border-gray-100 dark:border-white/6">
+              <p class="font-mono text-xs uppercase tracking-[0.15em] text-gray-400 mb-4">// VERIFIKASI</p>
+            </div>
+
+            <!-- Secret key -->
+            <div class="space-y-1.5">
+              <label class="font-mono text-[10px] uppercase tracking-widest text-gray-500 dark:text-gray-400">Secret Key</label>
+              <input
+                v-model="form.secret"
+                type="password"
+                placeholder="Secret key dari environment"
+                autocomplete="off"
+                class="w-full px-3 py-2.5 bg-white dark:bg-transparent border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-300 dark:placeholder-white/20 font-mono text-xs focus:outline-none focus:border-indigo-500 dark:focus:border-indigo-400 transition-colors"
+                :class="{ 'border-red-400 dark:border-red-500': errors.secret }"
+              />
+              <p class="font-mono text-[10px] text-gray-400">Nilai dari env <span class="text-indigo-500">SUPERADMIN_SETUP_SECRET</span></p>
+              <p v-if="errors.secret" class="font-mono text-[10px] text-red-500">{{ errors.secret }}</p>
+            </div>
+
+            <!-- Error message -->
+            <div v-if="submitError" class="flex items-start gap-2 px-3 py-2.5 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30">
+              <span class="font-mono text-[10px] text-red-600 dark:text-red-400">{{ submitError }}</span>
+            </div>
+
+            <!-- Submit -->
+            <button
+              @click="handleSubmit"
+              :disabled="isSubmitting"
+              class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-xs tracking-[0.15em] uppercase transition-colors flex items-center justify-center gap-2"
+            >
+              <Loader2 v-if="isSubmitting" class="w-4 h-4 animate-spin" />
+              <ShieldCheck v-else class="w-4 h-4" />
+              {{ isSubmitting ? 'Membuat Akun...' : 'Buat Superadmin' }}
+            </button>
+          </div>
+
+          <!-- Footer -->
+          <div class="px-6 py-4 border-t border-gray-100 dark:border-white/6 text-center">
+            <p class="font-mono text-[10px] text-gray-400">
+              Sudah ada akun?
+              <NuxtLink to="/auth/login" class="text-indigo-600 dark:text-indigo-400 hover:underline ml-1">Login sekarang</NuxtLink>
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { useForm } from 'vee-validate'
-import { toTypedSchema } from '@vee-validate/zod'
-import { z } from 'zod'
-import { Loader2 } from 'lucide-vue-next'
+import { Loader2, ShieldCheck, CheckCircle } from 'lucide-vue-next'
 
 definePageMeta({
-    title: 'Setup Superadmin - Logic Sekai',
-    description: 'Halaman setup superadmin untuk mengakses admin panel Logic Sekai',
-    layout: false
+  layout: 'empty'
 })
 
-const setupFormSchema = toTypedSchema(z.object({
-    email: z.string().min(1, 'Email harus diisi').email('Email tidak valid'),
-    password: z.string().min(1, 'Password harus diisi').min(8, 'Password minimal 8 karakter'),
-    confirmPassword: z.string().min(1, 'Konfirmasi password harus diisi'),
-    secret: z.string().min(1, 'Secret key harus diisi'),
-}).refine((data) => data.password === data.confirmPassword, {
-    message: 'Password tidak cocok',
-    path: ['confirmPassword'],
-}))
+const form = reactive({
+  email: '',
+  password: '',
+  confirmPassword: '',
+  secret: '',
+})
 
-const form = useForm({
-    validationSchema: setupFormSchema,
+const errors = reactive({
+  email: '',
+  password: '',
+  confirmPassword: '',
+  secret: '',
 })
 
 const isSubmitting = ref(false)
-const error = ref('')
+const submitError = ref('')
 const success = ref('')
 
-const onSubmit = form.handleSubmit(async (values) => {
-    isSubmitting.value = true
-    error.value = ''
-    success.value = ''
-    
-    try {
-        const result: any = await $fetch('/api/setup/superadmin', {
-            method: 'POST',
-            body: {
-                email: values.email,
-                password: values.password,
-                confirmPassword: values.confirmPassword,
-                secret: values.secret,
-            }
-        })
+function validate() {
+  let valid = true
+  errors.email = ''
+  errors.password = ''
+  errors.confirmPassword = ''
+  errors.secret = ''
 
-        if (result?.success) {
-            success.value = result.message || 'Superadmin berhasil dibuat!'
-            setTimeout(() => {
-                navigateTo('/auth/login')
-            }, 2000)
-        }
-    } catch (err: any) {
-        error.value = err.data?.message || err.message || 'Terjadi kesalahan'
-    } finally {
-        isSubmitting.value = false
+  if (!form.email) { errors.email = 'Email harus diisi'; valid = false }
+  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) { errors.email = 'Email tidak valid'; valid = false }
+
+  if (!form.password) { errors.password = 'Password harus diisi'; valid = false }
+  else if (form.password.length < 8) { errors.password = 'Password minimal 8 karakter'; valid = false }
+
+  if (!form.confirmPassword) { errors.confirmPassword = 'Konfirmasi password harus diisi'; valid = false }
+  else if (form.password !== form.confirmPassword) { errors.confirmPassword = 'Password tidak cocok'; valid = false }
+
+  if (!form.secret) { errors.secret = 'Secret key harus diisi'; valid = false }
+
+  return valid
+}
+
+async function handleSubmit() {
+  if (!validate()) return
+
+  isSubmitting.value = true
+  submitError.value = ''
+
+  try {
+    const result: any = await $fetch('/api/setup/superadmin', {
+      method: 'POST',
+      body: {
+        email: form.email,
+        password: form.password,
+        confirmPassword: form.confirmPassword,
+        secret: form.secret,
+      }
+    })
+
+    if (result?.success) {
+      success.value = result.message || 'Superadmin berhasil dibuat!'
+      setTimeout(() => navigateTo('/auth/login'), 2500)
     }
+  } catch (err: any) {
+    submitError.value = err.data?.message || err.message || 'Terjadi kesalahan'
+  } finally {
+    isSubmitting.value = false
+  }
+}
+
+useHead({
+  title: 'Setup Superadmin - Logic Sekai',
+  meta: [
+    { name: 'description', content: 'Halaman setup awal untuk membuat akun superadmin' },
+    { name: 'robots', content: 'noindex, nofollow' }
+  ]
+})
+
+onMounted(async () => {
+  try {
+    const status = await $fetch<{ exists: boolean }>('/api/setup/status')
+    if (status.exists) {
+      throw createError({ statusCode: 404, statusMessage: 'Not Found' })
+    }
+  } catch (err: any) {
+    if (err.statusCode === 404) throw err
+    // DB not ready yet — allow the page to show
+  }
 })
 </script>

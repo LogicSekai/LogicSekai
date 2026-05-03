@@ -18,7 +18,10 @@ import {
     Cog, 
     Lock, 
     Database,
-    HelpCircle
+    HelpCircle,
+    Mail,
+    Flag,
+    MessageSquare,
 } from 'lucide-vue-next'
 
 export const adminMenuItems: readonly MenuItem[] = Object.freeze([
@@ -53,39 +56,39 @@ export const adminMenuItems: readonly MenuItem[] = Object.freeze([
                 permission: Object.freeze(['products.categories.view']),
                 roles: Object.freeze(['superadmin', 'admin', 'editor'])
             },
+            {
+                id: 'products-reports',
+                name: 'Laporan Produk',
+                icon: Flag,
+                url: '/admin/reports',
+                permission: Object.freeze(['products.reports.view']),
+                roles: Object.freeze(['superadmin', 'admin'])
+            },
         ])
     },
     {
-        id: 'content',
-        name: 'Manajemen Konten',
-        icon: FileText,
+        id: 'articles',
+        name: 'Artikel & Postingan',
+        icon: Edit,
         permission: Object.freeze(['content.view']),
         roles: Object.freeze(['superadmin', 'admin', 'editor']),
         child: Object.freeze([
             {
-                id: 'content-posts',
-                name: 'Postingan',
-                icon: Edit,
-                url: '/admin/content/posts',
-                permission: Object.freeze(['content.posts.view']),
+                id: 'articles-list',
+                name: 'Semua Artikel',
+                icon: FileText,
+                url: '/admin/articles',
+                permission: Object.freeze(['content.view']),
                 roles: Object.freeze(['superadmin', 'admin', 'editor'])
             },
             {
-                id: 'content-categories',
-                name: 'Kategori',
-                icon: Folder,
-                url: '/admin/content/categories',
-                permission: Object.freeze(['content.categories.view']),
-                roles: Object.freeze(['superadmin', 'admin', 'editor'])
+                id: 'articles-comments',
+                name: 'Komentar Artikel',
+                icon: MessageSquare,
+                url: '/admin/articles/comments',
+                permission: Object.freeze(['content.view']),
+                roles: Object.freeze(['superadmin', 'admin'])
             },
-            {
-                id: 'content-media',
-                name: 'Perpustakaan Media',
-                icon: Image,
-                url: '/admin/content/media',
-                permission: Object.freeze(['content.media.view']),
-                roles: Object.freeze(['superadmin', 'admin', 'editor'])
-            }
         ])
     },
     {
@@ -153,6 +156,22 @@ export const adminMenuItems: readonly MenuItem[] = Object.freeze([
             roles: Object.freeze(['superadmin', 'admin'])
         }
         ])
+    },
+    {
+        id: 'contacts',
+        name: 'Pesan Kontak',
+        icon: Mail,
+        url: '/admin/contacts',
+        permission: Object.freeze(['contacts.view']),
+        roles: Object.freeze(['superadmin', 'admin'])
+    },
+    {
+        id: 'gallery',
+        name: 'Galeri',
+        icon: Image,
+        url: '/admin/gallery',
+        permission: Object.freeze(['gallery.view']),
+        roles: Object.freeze(['superadmin'])
     },
     {
         id: 'settings',

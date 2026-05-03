@@ -23,7 +23,22 @@ logs
 .env.*
 !.env.example
 
-
 # Product Workflow
 documents
+
+# SQLite dev database
 dev.db
+
+# Wrangler local state (miniflare cache, local D1)
+.wrangler
+dev.db-wal
+dev.db-shm
+dev.db-journal
+
+# User uploaded files (generated at runtime, not source code)
+public/uploads/avatars/*
+public/uploads/gallery/*
+public/uploads/preview/*
+public/uploads/product/*
+public/uploads/thumbnail/*
+!public/uploads/**/.gitkeep

@@ -1,90 +1,77 @@
 <template>
-    <!-- Modal Overlay -->
     <Teleport to="body">
         <div v-if="open" class="fixed inset-0 z-50 flex items-center justify-center">
             <!-- Backdrop -->
-            <div 
-                class="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            <div
+                class="absolute inset-0 bg-black/60"
                 @click="$emit('update:open', false)"
             ></div>
-            
-            <!-- Modal Content -->
-            <div class="relative bg-background border border-border rounded-lg shadow-lg max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
-                <div class="p-6">
-                    <!-- Header -->
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <h2 class="text-lg font-semibold text-foreground">Upload Avatar</h2>
-                            <p class="text-sm text-muted-foreground mt-1">
-                                Select an image to use as your avatar. You can crop and adjust it before uploading.
-                            </p>
-                        </div>
-                        <Button 
-                            variant="outline" 
-                            size="sm"
-                            @click="$emit('update:open', false)"
-                            class="h-8 w-8 p-0"
-                        >
-                            <X class="h-4 w-4" />
-                        </Button>
-                    </div>
 
-            <div class="space-y-4">
-                <!-- File Input -->
-                <div v-if="!selectedImage" class="space-y-2">
-                    <Label>Select Image</Label>
-                    <div 
-                        ref="dropZone"
-                        class="border-2 border-dashed border-border rounded-lg p-8 text-center transition-colors cursor-pointer"
-                        :class="{
-                            'border-primary bg-primary/5': isDragOver,
-                            'hover:border-primary/50 hover:bg-muted/30': !isDragOver
-                        }"
-                        @click="triggerFileSelect"
-                        @drop="handleDrop"
-                        @dragover.prevent="handleDragOver"
-                        @dragleave="handleDragLeave"
-                        @dragenter.prevent
-                    >
-                        <input
-                            ref="fileInput"
-                            type="file"
-                            accept="image/*"
-                            @change="handleFileSelect"
-                            class="hidden"
-                        />
-                        
-                        <div class="flex flex-col items-center space-y-2">
-                            <Upload class="h-12 w-12 text-muted-foreground" />
-                            <div>
-                                <Button
-                                    variant="outline"
-                                    type="button"
-                                    class="mb-2"
-                                    @click.stop="triggerFileSelect"
-                                >
-                                    Choose Image
-                                </Button>
-                                <p class="text-sm text-muted-foreground">
-                                    or drag and drop your image here
-                                </p>
-                            </div>
-                            <p class="text-xs text-muted-foreground">
-                                Supported formats: JPG, PNG, GIF, WebP (max 5MB)
-                            </p>
-                        </div>
+            <!-- Modal -->
+            <div class="relative bg-white dark:bg-[#030308] border border-gray-100 dark:border-white/6 shadow-xl max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
+                <!-- Header -->
+                <div class="flex items-start justify-between px-6 py-4 border-b border-gray-100 dark:border-white/6">
+                    <div>
+                        <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-indigo-600">// FOTO PROFIL</p>
+                        <p class="text-xs text-gray-400 mt-1">Pilih & crop foto untuk dijadikan avatar Anda.</p>
                     </div>
+                    <button
+                        type="button"
+                        @click="$emit('update:open', false)"
+                        class="p-1.5 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                    >
+                        <X class="h-4 w-4" />
+                    </button>
                 </div>
 
-                <!-- Image Cropper -->
-                <div v-if="selectedImage && !croppedImage" class="space-y-4">
-                    <Label>Crop Avatar</Label>
-                    <div class="relative">
-                        <div class="border border-border rounded-lg overflow-hidden bg-background">
+                <div class="p-6 space-y-5">
+                    <!-- Step 1: File drop zone -->
+                    <div v-if="!selectedImage">
+                        <label class="font-mono text-[10px] uppercase tracking-widest text-gray-400 block mb-2">Pilih Gambar</label>
+                        <div
+                            ref="dropZone"
+                            class="border border-dashed border-gray-200 dark:border-white/10 p-8 text-center cursor-pointer transition-colors"
+                            :class="{
+                                'border-indigo-500 bg-indigo-50/5 dark:bg-indigo-600/5': isDragOver,
+                                'hover:border-gray-400 dark:hover:border-white/30': !isDragOver
+                            }"
+                            @click="triggerFileSelect"
+                            @drop="handleDrop"
+                            @dragover.prevent="handleDragOver"
+                            @dragleave="handleDragLeave"
+                            @dragenter.prevent
+                        >
+                            <input
+                                ref="fileInput"
+                                type="file"
+                                accept="image/*"
+                                @change="handleFileSelect"
+                                class="hidden"
+                            />
+                            <div class="flex flex-col items-center gap-3">
+                                <Upload class="h-8 w-8 text-gray-300 dark:text-gray-600" />
+                                <div>
+                                    <button
+                                        type="button"
+                                        class="px-4 py-1.5 border border-gray-200 dark:border-white/10 font-mono text-xs uppercase tracking-widest text-gray-600 dark:text-gray-300 hover:border-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                                        @click.stop="triggerFileSelect"
+                                    >
+                                        Pilih File
+                                    </button>
+                                    <p class="text-xs text-gray-400 mt-2">atau drag &amp; drop gambar di sini</p>
+                                </div>
+                                <p class="font-mono text-[10px] text-gray-400">JPG, PNG, GIF, WebP — maks. 5MB</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Cropper -->
+                    <div v-if="selectedImage && !croppedImage">
+                        <label class="font-mono text-[10px] uppercase tracking-widest text-gray-400 block mb-2">Crop Gambar</label>
+                        <div class="border border-gray-100 dark:border-white/6 overflow-hidden bg-gray-50 dark:bg-white/4">
                             <Cropper
                                 ref="cropperRef"
                                 :src="selectedImage"
-                                :stencil-component="CircleStencil"
                                 :stencil-props="{
                                     aspectRatio: 1,
                                     resizable: true,
@@ -96,74 +83,86 @@
                                     minWidth: 100,
                                     minHeight: 100
                                 }"
-                                :default-size="{
-                                    width: 300,
-                                    height: 300
-                                }"
-                                class="cropper-custom-theme"
+                                :default-size="{ width: 300, height: 300 }"
                                 style="height: 300px;"
-                                background-class="cropper-background"
                             />
                         </div>
-                        <div class="flex justify-between mt-4">
-                            <Button variant="outline" @click="resetCrop">
-                                <RotateCcw class="h-4 w-4 mr-2" />
+                        <div class="flex justify-between mt-3">
+                            <button
+                                type="button"
+                                @click="resetCrop"
+                                class="flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 dark:border-white/10 font-mono text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-white/30 transition-colors"
+                            >
+                                <RotateCcw class="h-3 w-3" />
                                 Reset
-                            </Button>
-                            <Button @click="cropImage">
-                                <Crop class="h-4 w-4 mr-2" />
-                                Crop Image
-                            </Button>
+                            </button>
+                            <button
+                                type="button"
+                                @click="cropImage"
+                                class="flex items-center gap-1.5 px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs tracking-[0.15em] uppercase transition-colors"
+                            >
+                                <Crop class="h-3 w-3" />
+                                Crop
+                            </button>
                         </div>
                     </div>
-                </div>
 
-                <!-- Preview -->
-                <div v-if="croppedImage" class="space-y-4">
-                    <Label>Preview</Label>
-                    <div class="flex items-center space-x-4">
-                        <div class="relative">
-                            <img
-                                :src="croppedImage"
-                                class="w-24 h-24 rounded-full object-cover border-2 border-border"
-                                alt="Avatar preview"
-                            />
-                        </div>
-                        <div class="flex-1">
-                            <p class="text-sm text-muted-foreground">
-                                Your new avatar looks great! Click upload to save it.
-                            </p>
-                            <div class="flex space-x-2 mt-2">
-                                <Button variant="outline" size="sm" @click="goBack">
-                                    <ArrowLeft class="h-4 w-4 mr-1" />
-                                    Back
-                                </Button>
-                                <Button variant="outline" size="sm" @click="resetAll">
-                                    <RotateCcw class="h-4 w-4 mr-1" />
-                                    Start Over
-                                </Button>
+                    <!-- Step 3: Preview -->
+                    <div v-if="croppedImage">
+                        <label class="font-mono text-[10px] uppercase tracking-widest text-gray-400 block mb-2">Pratinjau</label>
+                        <div class="flex items-center gap-4">
+                            <div class="w-20 h-20 shrink-0 overflow-hidden border border-gray-100 dark:border-white/6">
+                                <img
+                                    :src="croppedImage"
+                                    class="w-full h-full object-cover"
+                                    alt="Avatar preview"
+                                />
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">Avatar Anda siap diupload.</p>
+                                <div class="flex gap-2">
+                                    <button
+                                        type="button"
+                                        @click="goBack"
+                                        class="flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 dark:border-white/10 font-mono text-[10px] uppercase tracking-widest text-gray-500 dark:text-gray-400 hover:border-gray-400 transition-colors"
+                                    >
+                                        <ArrowLeft class="h-3 w-3" />
+                                        Kembali
+                                    </button>
+                                    <button
+                                        type="button"
+                                        @click="resetAll"
+                                        class="flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 dark:border-white/10 font-mono text-[10px] uppercase tracking-widest text-gray-500 dark:text-gray-400 hover:border-gray-400 transition-colors"
+                                    >
+                                        <RotateCcw class="h-3 w-3" />
+                                        Mulai Ulang
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-                    <!-- Footer -->
-                    <div class="flex justify-between mt-6 pt-4 border-t border-border">
-                        <Button variant="outline" @click="$emit('update:open', false)">
-                            Cancel
-                        </Button>
-                        <Button 
-                            v-if="croppedImage"
-                            @click="uploadImage"
-                            :disabled="isUploading"
-                            class="bg-primary text-primary-foreground hover:bg-primary/90"
-                        >
-                            <Loader2 v-if="isUploading" class="h-4 w-4 mr-2 animate-spin" />
-                            <Upload v-else class="h-4 w-4 mr-2" />
-                            Upload Avatar
-                        </Button>
-                    </div>
+                <!-- Footer -->
+                <div class="flex justify-between px-6 py-4 border-t border-gray-100 dark:border-white/6">
+                    <button
+                        type="button"
+                        @click="$emit('update:open', false)"
+                        class="px-4 py-2 border border-gray-200 dark:border-white/10 font-mono text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-white/30 transition-colors"
+                    >
+                        Batal
+                    </button>
+                    <button
+                        v-if="croppedImage"
+                        type="button"
+                        @click="uploadImage"
+                        :disabled="isUploading"
+                        class="flex items-center gap-2 px-5 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-xs tracking-[0.15em] uppercase transition-colors"
+                    >
+                        <Loader2 v-if="isUploading" class="h-3.5 w-3.5 animate-spin" />
+                        <Upload v-else class="h-3.5 w-3.5" />
+                        {{ isUploading ? 'Mengupload...' : 'Upload Avatar' }}
+                    </button>
                 </div>
             </div>
         </div>
@@ -173,11 +172,8 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { Upload, RotateCcw, Crop, ArrowLeft, Loader2, X } from 'lucide-vue-next'
-import { Button } from '~/components/ui/button'
-import { Label } from '~/components/ui/label'
-import { Cropper, CircleStencil } from 'vue-advanced-cropper'
+import { Cropper } from 'vue-advanced-cropper'
 import 'vue-advanced-cropper/dist/style.css'
-// Dialog functionality is implemented using Teleport and custom modal
 
 // Props & Emits
 interface Props {
@@ -330,8 +326,8 @@ const uploadImage = async (): Promise<void> => {
         formData.append('avatar', blob, 'avatar.jpg')
         
         // Upload to server - determine endpoint based on context
-        const endpoint = props.uploadEndpoint || 
-                        (props.isAdminContext ? `/api/admin/users/${userId}/avatar` : '/api/auth/avatar')
+        const endpoint = props.uploadEndpoint ||
+                        (props.isAdminContext ? `/api/admin/users/${props.userId}/avatar` : '/api/auth/avatar')
         
         const uploadResponse = await $fetch<{ success: boolean, avatarUrl?: string, avatar?: string, error?: string }>(endpoint, {
             method: 'POST',
@@ -354,9 +350,6 @@ const uploadImage = async (): Promise<void> => {
     }
 }
 
-// Extract userId from props
-const { userId } = props
-
 // Watch for modal open/close to reset state
 watch(() => props.open, (isOpen) => {
     if (!isOpen) {
@@ -367,71 +360,21 @@ watch(() => props.open, (isOpen) => {
 </script>
 
 <style>
-/* Vue Advanced Cropper Theme Customization */
-.cropper-custom-theme {
-    --cropper-background-color: hsl(var(--muted));
-    --cropper-foreground-color: hsl(var(--foreground));
-}
-
-.cropper-background {
-    background-color: hsl(var(--background));
-}
-
-/* Stencil styling */
 .vue-advanced-cropper__stencil {
-    border: 2px solid hsl(var(--primary));
-    box-shadow: 0 0 0 1px hsl(var(--background));
+    border: 2px solid #4f46e5;
 }
 
-/* Handle styling */
 .vue-advanced-cropper__handle {
-    background: hsl(var(--primary));
-    border: 2px solid hsl(var(--background));
-    border-radius: 50%;
-    transition: all 0.2s ease;
+    background: #4f46e5;
+    border: 2px solid white;
+    border-radius: 0;
 }
 
-.vue-advanced-cropper__handle:hover {
-    transform: scale(1.1);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-/* Line styling */
 .vue-advanced-cropper__line {
-    background: hsl(var(--primary) / 0.3);
+    background: rgba(79, 70, 229, 0.4);
 }
 
-/* Grid lines */
-.vue-advanced-cropper__grid-line {
-    border-color: hsl(var(--primary) / 0.2);
-}
-
-/* Background overlay */
 .vue-advanced-cropper__background {
-    background: hsl(var(--background));
-}
-
-.vue-advanced-cropper__image {
-    opacity: 1;
-}
-
-.vue-advanced-cropper__area {
-    background: rgba(0, 0, 0, 0.5);
-}
-
-/* Dark mode adjustments */
-@media (prefers-color-scheme: dark) {
-    .vue-advanced-cropper__area {
-        background: rgba(0, 0, 0, 0.7);
-    }
-}
-
-/* Custom theme for dark/light mode */
-.dark .vue-advanced-cropper__area {
-    background: rgba(0, 0, 0, 0.7);
-}
-
-.dark .vue-advanced-cropper__stencil {
-    box-shadow: 0 0 0 1px hsl(var(--background));
+    background: #030308;
 }
 </style>

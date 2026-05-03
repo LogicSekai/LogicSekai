@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-6">
+  <div class="p-6 space-y-8">
       <div>
         <h1 class="text-2xl font-bold text-gray-900">System Settings</h1>
         <p class="text-gray-600 mt-1">Configure general system preferences</p>

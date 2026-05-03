@@ -1,5 +1,5 @@
 import { getDB, initializeDB } from '~/lib/db/connection'
-import { transactions, transactionItems, products } from '~/lib/db/schema'
+import { transactions, transactionItems, products, users } from '~/lib/db/schema'
 import { eq, desc, and, sql, count } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
@@ -10,8 +10,13 @@ export default defineEventHandler(async (event) => {
       db = initializeDB()
     }
 
+    const authContext = event.context.auth
+    if (!authContext || !authContext.isAuthenticated) {
+      throw createError({ statusCode: 401, statusMessage: 'Authentication required' })
+    }
+    const userId = authContext.user!.id
+
     const query = getQuery(event)
-    const userId = query.userId as string || 'user-1' // TODO: Get from auth session
     const status = query.status as string
     const page = parseInt(query.page as string) || 1
     const limit = parseInt(query.limit as string) || 10
@@ -46,11 +51,14 @@ export default defineEventHandler(async (event) => {
         // Product fields
         productTitle: products.title,
         productSlug: products.slug,
-        productImages: products.previewImages,
-        productVersion: products.version
+        productThumbnail: products.thumbnailImage,
+        productVersion: products.version,
+        // Creator fields
+        creatorUsername: users.username
       })
       .from(transactions)
       .leftJoin(products, eq(transactions.productId, products.id))
+      .leftJoin(users, eq(products.userId, users.id))
       .where(whereConditions)
       .orderBy(desc(transactions.createdAt))
       .limit(limit)
@@ -63,7 +71,8 @@ export default defineEventHandler(async (event) => {
         id: transaction.productId,
         title: transaction.productTitle,
         slug: transaction.productSlug,
-        image: transaction.productImages ? JSON.parse(transaction.productImages)[0] : null,
+        creatorUsername: transaction.creatorUsername,
+        image: transaction.productThumbnail || null,
         version: transaction.productVersion
       },
       transactionType: transaction.transactionType,
