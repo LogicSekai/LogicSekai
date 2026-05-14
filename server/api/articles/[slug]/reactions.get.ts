@@ -1,5 +1,4 @@
-import { drizzle } from 'drizzle-orm/better-sqlite3'
-import Database from 'better-sqlite3'
+import { getDB } from '~/lib/db/connection'
 import { articles, articleReactions } from '~/lib/db/schema'
 import { eq, and, sql } from 'drizzle-orm'
 
@@ -8,8 +7,8 @@ export default defineEventHandler(async (event) => {
     const slug = getRouterParam(event, 'slug')
     if (!slug) throw createError({ statusCode: 400, statusMessage: 'Slug is required' })
 
-    const sqlite = new Database('./dev.db')
-    const db = drizzle(sqlite, { schema: { articles, articleReactions } })
+    const db = getDB()
+    if (!db) throw createError({ statusCode: 503, statusMessage: 'Database not available' })
 
     // Get article id
     const articleResult = await db
@@ -49,8 +48,6 @@ export default defineEventHandler(async (event) => {
         }
       } catch {}
     }
-
-    sqlite.close()
 
     const totals: Record<string, number> = { like: 0, love: 0, insightful: 0, bookmark: 0 }
     for (const row of counts) totals[row.type] = Number(row.count)

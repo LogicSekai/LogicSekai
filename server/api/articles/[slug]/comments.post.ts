@@ -1,5 +1,4 @@
-import { drizzle } from 'drizzle-orm/better-sqlite3'
-import Database from 'better-sqlite3'
+import { getDB } from '~/lib/db/connection'
 import { articles, articleComments } from '~/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import { createId } from '@paralleldrive/cuid2'
@@ -30,8 +29,8 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 400, statusMessage: 'Comment too long (max 2000 chars)' })
     }
 
-    const sqlite = new Database('./dev.db')
-    const db = drizzle(sqlite, { schema: { articles, articleComments } })
+    const db = getDB()
+    if (!db) throw createError({ statusCode: 503, statusMessage: 'Database not available' })
 
     // Get article
     const articleResult = await db
@@ -41,7 +40,6 @@ export default defineEventHandler(async (event) => {
       .limit(1)
 
     if (!articleResult.length || articleResult[0].status !== 'published') {
-      sqlite.close()
       throw createError({ statusCode: 404, statusMessage: 'Article not found' })
     }
     const articleId = articleResult[0].id
@@ -56,7 +54,6 @@ export default defineEventHandler(async (event) => {
 
       if (!parent.length || parent[0].parentId) {
         // Only allow one level of nesting
-        sqlite.close()
         throw createError({ statusCode: 400, statusMessage: 'Invalid parent comment' })
       }
     }
@@ -74,7 +71,6 @@ export default defineEventHandler(async (event) => {
     }
 
     await db.insert(articleComments).values(comment)
-    sqlite.close()
 
     return { success: true, data: { id: comment.id, content, createdAt: now } }
   } catch (error: any) {

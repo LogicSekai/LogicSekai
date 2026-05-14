@@ -1,7 +1,6 @@
 ﻿import { eq, or } from 'drizzle-orm'
-import { drizzle } from 'drizzle-orm/better-sqlite3'
-import Database from 'better-sqlite3'
-import { users } from '../../../app/lib/db/schema'
+import { getDB } from '~/lib/db/connection'
+import { users } from '~/lib/db/schema'
 
 export default defineEventHandler(async (event) => {
     try {
@@ -64,8 +63,8 @@ export default defineEventHandler(async (event) => {
         }
 
         // Initialize database
-        const sqlite = new Database('dev.db')
-        const db = drizzle(sqlite, { schema: { users } })
+        const db = getDB()
+        if (!db) throw createError({ statusCode: 503, statusMessage: 'Database not available' })
 
         // Check if username or email already exists (excluding current user)
         const existingUser = await db

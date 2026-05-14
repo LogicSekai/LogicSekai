@@ -1,5 +1,4 @@
-import { drizzle } from 'drizzle-orm/better-sqlite3'
-import Database from 'better-sqlite3'
+import { getDB } from '~/lib/db/connection'
 import { articleComments } from '~/lib/db/schema'
 import { eq } from 'drizzle-orm'
 
@@ -22,8 +21,8 @@ export default defineEventHandler(async (event) => {
     const body = await readBody(event)
     const isHidden = Boolean(body?.isHidden)
 
-    const sqlite = new Database('./dev.db')
-    const db = drizzle(sqlite, { schema: { articleComments } })
+    const db = getDB()
+    if (!db) throw createError({ statusCode: 503, statusMessage: 'Database not available' })
 
     const result = await db
       .select({ id: articleComments.id })
@@ -32,7 +31,6 @@ export default defineEventHandler(async (event) => {
       .limit(1)
 
     if (!result.length) {
-      sqlite.close()
       throw createError({ statusCode: 404, statusMessage: 'Comment not found' })
     }
 
@@ -40,8 +38,6 @@ export default defineEventHandler(async (event) => {
       .update(articleComments)
       .set({ isHidden, updatedAt: new Date() })
       .where(eq(articleComments.id, id))
-
-    sqlite.close()
 
     return { success: true, isHidden }
   } catch (error: any) {

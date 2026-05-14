@@ -1,11 +1,10 @@
-import { drizzle } from 'drizzle-orm/better-sqlite3'
-import Database from 'better-sqlite3'
+import { getDB } from '~/lib/db/connection'
 import { gallery } from '~/lib/db/schema'
 import { eq, and, asc, desc } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
-    const sqlite = new Database('./dev.db')
-    const db = drizzle(sqlite, { schema: { gallery } })
+    const db = getDB()
+    if (!db) throw createError({ statusCode: 503, statusMessage: 'Database not available' })
 
     const query = getQuery(event)
     const type = query.type as string | undefined

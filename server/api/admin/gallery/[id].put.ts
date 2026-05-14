@@ -1,5 +1,4 @@
-import { drizzle } from 'drizzle-orm/better-sqlite3'
-import Database from 'better-sqlite3'
+import { getDB } from '~/lib/db/connection'
 import { gallery } from '~/lib/db/schema'
 import { eq } from 'drizzle-orm'
 
@@ -24,11 +23,8 @@ export default defineEventHandler(async (event) => {
 
     const body = await readBody(event)
 
-    const sqlite = new Database('./dev.db')
-    const db = drizzle(sqlite, { schema: { gallery } })
-    // Add display_date column if missing (migration)
-    try { sqlite.exec(`ALTER TABLE gallery ADD COLUMN display_date INTEGER`) } catch {}
-
+    const db = getDB()
+    if (!db) throw createError({ statusCode: 503, statusMessage: 'Database not available' })
     const displayDate = body.displayDate ? new Date(body.displayDate) : new Date()
 
     const updated = await db.update(gallery)

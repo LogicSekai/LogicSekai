@@ -1,7 +1,6 @@
 ﻿import { eq } from 'drizzle-orm'
-import { drizzle } from 'drizzle-orm/better-sqlite3'
-import Database from 'better-sqlite3'
-import { users } from '../../../app/lib/db/schema'
+import { getDB } from '~/lib/db/connection'
+import { users } from '~/lib/db/schema'
 import { createId } from '@paralleldrive/cuid2'
 import { promises as fs } from 'fs'
 import path from 'path'
@@ -92,8 +91,8 @@ export default defineEventHandler(async (event) => {
             await fs.writeFile(filePath, file.data)
 
             // Update user avatar in database
-            const sqlite = new Database('dev.db')
-            const db = drizzle(sqlite, { schema: { users } })
+            const db = getDB()
+            if (!db) throw createError({ statusCode: 503, statusMessage: 'Database not available' })
 
             const avatarUrl = `/uploads/avatars/${fileName}`
 
@@ -113,8 +112,8 @@ export default defineEventHandler(async (event) => {
 
         } else if (method === 'DELETE') {
             // Handle avatar removal
-            const sqlite = new Database('dev.db')
-            const db = drizzle(sqlite, { schema: { users } })
+            const db = getDB()
+            if (!db) throw createError({ statusCode: 503, statusMessage: 'Database not available' })
 
             // Get current avatar to delete file
             const user = await db

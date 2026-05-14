@@ -1,5 +1,4 @@
-import { drizzle } from 'drizzle-orm/better-sqlite3'
-import Database from 'better-sqlite3'
+import { getDB } from '~/lib/db/connection'
 import { articles, articleReactions } from '~/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
 import { createId } from '@paralleldrive/cuid2'
@@ -26,8 +25,8 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 400, statusMessage: 'Invalid reaction type' })
     }
 
-    const sqlite = new Database('./dev.db')
-    const db = drizzle(sqlite, { schema: { articles, articleReactions } })
+    const db = getDB()
+    if (!db) throw createError({ statusCode: 503, statusMessage: 'Database not available' })
 
     // Get article
     const articleResult = await db
@@ -37,7 +36,6 @@ export default defineEventHandler(async (event) => {
       .limit(1)
 
     if (!articleResult.length || articleResult[0].status !== 'published') {
-      sqlite.close()
       throw createError({ statusCode: 404, statusMessage: 'Article not found' })
     }
     const articleId = articleResult[0].id
@@ -58,7 +56,6 @@ export default defineEventHandler(async (event) => {
       await db
         .delete(articleReactions)
         .where(eq(articleReactions.id, existing[0].id))
-      sqlite.close()
       return { success: true, action: 'removed', type }
     } else {
       // Add reaction
@@ -69,7 +66,6 @@ export default defineEventHandler(async (event) => {
         type: type as any,
         createdAt: new Date(),
       })
-      sqlite.close()
       return { success: true, action: 'added', type }
     }
   } catch (error: any) {

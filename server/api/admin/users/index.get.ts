@@ -1,5 +1,4 @@
-﻿import { drizzle } from 'drizzle-orm/better-sqlite3'
-import Database from 'better-sqlite3'
+﻿import { getDB } from '~/lib/db/connection'
 import { users } from '~/lib/db/schema'
 import { desc } from 'drizzle-orm'
 
@@ -34,8 +33,8 @@ export default defineEventHandler(async (event) => {
     }
 
     // Initialize database
-    const sqlite = new Database('./dev.db')
-    const db = drizzle(sqlite, { schema: { users } })
+    const db = getDB()
+    if (!db) throw createError({ statusCode: 503, statusMessage: 'Database not available' })
 
     // Fetch all users ordered by creation date (newest first)
     const allUsers = await db

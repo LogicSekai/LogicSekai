@@ -1,17 +1,6 @@
 ﻿import { eq } from 'drizzle-orm'
-import { drizzle } from 'drizzle-orm/better-sqlite3'
-import Database from 'better-sqlite3'
+import { getDB } from '~/lib/db/connection'
 import { users } from '~/lib/db/schema'
-
-function getDatabase() {
-    if (process.env.NODE_ENV === 'development') {
-        const sqlite = new Database('./dev.db')
-        return drizzle(sqlite, { schema: { users } })
-    } else {
-        return drizzle((globalThis as any).DB, { schema: { users } })
-    }
-}
-
 export default defineEventHandler(async (event) => {
     try {
         // Only allow POST requests
@@ -105,7 +94,8 @@ export default defineEventHandler(async (event) => {
         }
 
         // Get database connection
-        const db = getDatabase()
+        const db = getDB()
+        if (!db) throw createError({ statusCode: 503, statusMessage: 'Database not available' })
 
         // Check if user exists
         const [existingUser] = await db

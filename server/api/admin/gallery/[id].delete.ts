@@ -1,5 +1,4 @@
-import { drizzle } from 'drizzle-orm/better-sqlite3'
-import Database from 'better-sqlite3'
+import { getDB } from '~/lib/db/connection'
 import { gallery } from '~/lib/db/schema'
 import { eq } from 'drizzle-orm'
 
@@ -22,8 +21,8 @@ export default defineEventHandler(async (event) => {
     const id = getRouterParam(event, 'id')
     if (!id) throw createError({ statusCode: 400, statusMessage: 'Missing id' })
 
-    const sqlite = new Database('./dev.db')
-    const db = drizzle(sqlite, { schema: { gallery } })
+    const db = getDB()
+    if (!db) throw createError({ statusCode: 503, statusMessage: 'Database not available' })
 
     const deleted = await db.delete(gallery).where(eq(gallery.id, id)).returning()
     if (!deleted.length) throw createError({ statusCode: 404, statusMessage: 'Not found' })

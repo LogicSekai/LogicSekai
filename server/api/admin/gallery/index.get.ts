@@ -1,5 +1,4 @@
-import { drizzle } from 'drizzle-orm/better-sqlite3'
-import Database from 'better-sqlite3'
+import { getDB } from '~/lib/db/connection'
 import { gallery } from '~/lib/db/schema'
 import { desc } from 'drizzle-orm'
 
@@ -19,8 +18,8 @@ function requireSuperAdmin(event: any) {
 export default defineEventHandler(async (event) => {
     requireSuperAdmin(event)
 
-    const sqlite = new Database('./dev.db')
-    const db = drizzle(sqlite, { schema: { gallery } })
+    const db = getDB()
+    if (!db) throw createError({ statusCode: 503, statusMessage: 'Database not available' })
 
     const items = await db.select().from(gallery).orderBy(desc(gallery.createdAt))
 

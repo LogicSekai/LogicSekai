@@ -1,5 +1,4 @@
-import { drizzle } from 'drizzle-orm/better-sqlite3'
-import Database from 'better-sqlite3'
+import { getDB } from '~/lib/db/connection'
 import { articleComments } from '~/lib/db/schema'
 import { eq } from 'drizzle-orm'
 
@@ -19,8 +18,8 @@ export default defineEventHandler(async (event) => {
     const id = getRouterParam(event, 'id')
     if (!id) throw createError({ statusCode: 400, statusMessage: 'ID required' })
 
-    const sqlite = new Database('./dev.db')
-    const db = drizzle(sqlite, { schema: { articleComments } })
+    const db = getDB()
+    if (!db) throw createError({ statusCode: 503, statusMessage: 'Database not available' })
 
     const result = await db
       .select({ id: articleComments.id })
@@ -29,14 +28,11 @@ export default defineEventHandler(async (event) => {
       .limit(1)
 
     if (!result.length) {
-      sqlite.close()
       throw createError({ statusCode: 404, statusMessage: 'Comment not found' })
     }
 
     // Delete comment and its replies (cascade handled by DB)
     await db.delete(articleComments).where(eq(articleComments.id, id))
-
-    sqlite.close()
 
     return { success: true }
   } catch (error: any) {

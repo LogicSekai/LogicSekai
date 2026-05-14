@@ -1,5 +1,4 @@
-import { drizzle } from 'drizzle-orm/better-sqlite3'
-import Database from 'better-sqlite3'
+import { getDB } from '~/lib/db/connection'
 import { articles, articleComments, users } from '~/lib/db/schema'
 import { eq, and, or, like, desc, sql, isNull, isNotNull } from 'drizzle-orm'
 
@@ -24,8 +23,8 @@ export default defineEventHandler(async (event) => {
     const hidden = query.hidden as string // 'all' | 'hidden' | 'visible'
     const articleId = query.articleId as string
 
-    const sqlite = new Database('./dev.db')
-    const db = drizzle(sqlite, { schema: { articles, articleComments, users } })
+    const db = getDB()
+    if (!db) throw createError({ statusCode: 503, statusMessage: 'Database not available' })
 
     const conditions: any[] = [isNull(articleComments.parentId)] // only top-level by default unless filtered
 
@@ -90,8 +89,6 @@ export default defineEventHandler(async (event) => {
     for (const row of replyCountsRaw) {
       if (row.parentId) replyCounts[row.parentId] = Number(row.count)
     }
-
-    sqlite.close()
 
     return {
       success: true,

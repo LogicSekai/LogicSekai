@@ -1,5 +1,4 @@
-import { drizzle } from 'drizzle-orm/better-sqlite3'
-import Database from 'better-sqlite3'
+import { getDB } from '~/lib/db/connection'
 import { articles, users } from '~/lib/db/schema'
 import { createId } from '@paralleldrive/cuid2'
 import slugify from 'slugify'
@@ -23,8 +22,8 @@ export default defineEventHandler(async (event) => {
     if (!title?.trim()) throw createError({ statusCode: 400, statusMessage: 'Title is required' })
     if (!content?.trim()) throw createError({ statusCode: 400, statusMessage: 'Content is required' })
 
-    const sqlite = new Database('./dev.db')
-    const db = drizzle(sqlite, { schema: { articles, users } })
+    const db = getDB()
+    if (!db) throw createError({ statusCode: 503, statusMessage: 'Database not available' })
 
     const slug = slugify(title, { lower: true, strict: true })
 
@@ -49,7 +48,6 @@ export default defineEventHandler(async (event) => {
     }
 
     await db.insert(articles).values(newArticle)
-    sqlite.close()
 
     return { success: true, article: newArticle }
   } catch (error: any) {

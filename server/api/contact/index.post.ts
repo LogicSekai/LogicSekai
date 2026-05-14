@@ -1,5 +1,4 @@
-﻿import { drizzle } from 'drizzle-orm/better-sqlite3'
-import Database from 'better-sqlite3'
+﻿import { getDB } from '~/lib/db/connection'
 import { contactMessages } from '~/lib/db/schema'
 
 export default defineEventHandler(async (event) => {
@@ -38,8 +37,8 @@ export default defineEventHandler(async (event) => {
     const userAgent = getHeader(event, 'user-agent') ?? null
 
     try {
-        const sqlite = new Database('./dev.db')
-        const db = drizzle(sqlite, { schema: { contactMessages } })
+        const db = getDB()
+        if (!db) throw createError({ statusCode: 503, statusMessage: 'Database not available' })
 
         const [inserted] = await db.insert(contactMessages).values({
             name: name.trim(),
@@ -50,8 +49,6 @@ export default defineEventHandler(async (event) => {
             ipAddress,
             userAgent,
         }).returning({ id: contactMessages.id })
-
-        sqlite.close()
 
         return { success: true, id: inserted.id }
     } catch (error: any) {

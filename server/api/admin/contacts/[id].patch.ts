@@ -1,5 +1,4 @@
-import { drizzle } from 'drizzle-orm/better-sqlite3'
-import Database from 'better-sqlite3'
+import { getDB } from '~/lib/db/connection'
 import { contactMessages } from '~/lib/db/schema'
 import { eq } from 'drizzle-orm'
 
@@ -28,8 +27,8 @@ export default defineEventHandler(async (event) => {
     }
 
     try {
-        const sqlite = new Database('./dev.db')
-        const db = drizzle(sqlite, { schema: { contactMessages } })
+        const db = getDB()
+        if (!db) throw createError({ statusCode: 503, statusMessage: 'Database not available' })
 
         const updateData: Record<string, any> = {
             updatedAt: new Date(),
@@ -54,8 +53,6 @@ export default defineEventHandler(async (event) => {
             .set(updateData)
             .where(eq(contactMessages.id, id))
             .returning()
-
-        sqlite.close()
 
         if (!updated) throw createError({ statusCode: 404, statusMessage: 'Pesan tidak ditemukan' })
 

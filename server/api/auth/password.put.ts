@@ -1,8 +1,7 @@
 ﻿import { eq } from 'drizzle-orm'
-import { drizzle } from 'drizzle-orm/better-sqlite3'
-import Database from 'better-sqlite3'
+import { getDB } from '~/lib/db/connection'
 import bcrypt from 'bcryptjs'
-import { users } from '../../../app/lib/db/schema'
+import { users } from '~/lib/db/schema'
 
 export default defineEventHandler(async (event) => {
     try {
@@ -62,8 +61,8 @@ export default defineEventHandler(async (event) => {
         }
 
         // Initialize database
-        const sqlite = new Database('dev.db')
-        const db = drizzle(sqlite, { schema: { users } })
+        const db = getDB()
+        if (!db) throw createError({ statusCode: 503, statusMessage: 'Database not available' })
 
         // Get current user with password
         const user = await db

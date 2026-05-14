@@ -1,5 +1,4 @@
-import { drizzle } from 'drizzle-orm/better-sqlite3'
-import Database from 'better-sqlite3'
+import { getDB } from '~/lib/db/connection'
 import { articles } from '~/lib/db/schema'
 import { eq } from 'drizzle-orm'
 
@@ -25,8 +24,8 @@ export default defineEventHandler(async (event) => {
     if (!title?.trim()) throw createError({ statusCode: 400, statusMessage: 'Title is required' })
     if (!content?.trim()) throw createError({ statusCode: 400, statusMessage: 'Content is required' })
 
-    const sqlite = new Database('./dev.db')
-    const db = drizzle(sqlite, { schema: { articles } })
+    const db = getDB()
+    if (!db) throw createError({ statusCode: 503, statusMessage: 'Database not available' })
 
     const existing = await db.select().from(articles).where(eq(articles.id, id)).limit(1)
     if (!existing.length) throw createError({ statusCode: 404, statusMessage: 'Article not found' })
@@ -45,8 +44,6 @@ export default defineEventHandler(async (event) => {
       publishedAt: isPublishing ? new Date() : existing[0].publishedAt,
       updatedAt: new Date(),
     }).where(eq(articles.id, id))
-
-    sqlite.close()
 
     return { success: true }
   } catch (error: any) {

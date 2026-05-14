@@ -1,5 +1,4 @@
-import { drizzle } from 'drizzle-orm/better-sqlite3'
-import Database from 'better-sqlite3'
+import { getDB } from '~/lib/db/connection'
 import { articles, users } from '~/lib/db/schema'
 import { eq, and, or, like, desc, sql } from 'drizzle-orm'
 
@@ -16,8 +15,8 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 403, statusMessage: 'Forbidden' })
     }
 
-    const sqlite = new Database('./dev.db')
-    const db = drizzle(sqlite, { schema: { articles, users } })
+    const db = getDB()
+    if (!db) throw createError({ statusCode: 503, statusMessage: 'Database not available' })
 
     const query = getQuery(event)
     const page = parseInt(query.page as string) || 1
@@ -66,8 +65,6 @@ export default defineEventHandler(async (event) => {
       .orderBy(desc(articles.createdAt))
       .limit(limit)
       .offset(offset)
-
-    sqlite.close()
 
     return {
       articles: articleList,

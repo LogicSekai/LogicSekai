@@ -1,5 +1,4 @@
-import { drizzle } from 'drizzle-orm/better-sqlite3'
-import Database from 'better-sqlite3'
+import { getDB } from '~/lib/db/connection'
 import { articles } from '~/lib/db/schema'
 import { eq, sql } from 'drizzle-orm'
 
@@ -16,8 +15,8 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 403, statusMessage: 'Forbidden' })
     }
 
-    const sqlite = new Database('./dev.db')
-    const db = drizzle(sqlite, { schema: { articles } })
+    const db = getDB()
+    if (!db) throw createError({ statusCode: 503, statusMessage: 'Database not available' })
 
     const [total, published, draft, views] = await Promise.all([
       db.select({ count: sql<number>`count(*)` }).from(articles),
@@ -25,8 +24,6 @@ export default defineEventHandler(async (event) => {
       db.select({ count: sql<number>`count(*)` }).from(articles).where(eq(articles.status, 'draft')),
       db.select({ total: sql<number>`sum(total_views)` }).from(articles),
     ])
-
-    sqlite.close()
 
     return {
       total: Number(total[0]?.count ?? 0),

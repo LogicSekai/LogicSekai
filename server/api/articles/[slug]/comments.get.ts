@@ -1,5 +1,4 @@
-import { drizzle } from 'drizzle-orm/better-sqlite3'
-import Database from 'better-sqlite3'
+import { getDB } from '~/lib/db/connection'
 import { articles, articleComments, users } from '~/lib/db/schema'
 import { eq, and, isNull, asc, desc, sql } from 'drizzle-orm'
 
@@ -13,8 +12,8 @@ export default defineEventHandler(async (event) => {
     const limit = Math.min(parseInt(query.limit as string) || 20, 50)
     const offset = (page - 1) * limit
 
-    const sqlite = new Database('./dev.db')
-    const db = drizzle(sqlite, { schema: { articles, articleComments, users } })
+    const db = getDB()
+    if (!db) throw createError({ statusCode: 503, statusMessage: 'Database not available' })
 
     // Get article
     const articleResult = await db
@@ -24,7 +23,6 @@ export default defineEventHandler(async (event) => {
       .limit(1)
 
     if (!articleResult.length || articleResult[0].status !== 'published') {
-      sqlite.close()
       throw createError({ statusCode: 404, statusMessage: 'Article not found' })
     }
     const articleId = articleResult[0].id
@@ -93,8 +91,6 @@ export default defineEventHandler(async (event) => {
       // Filter replies (has parentId that is in commentIds)
       replies = allReplies.filter(r => r.parentId && commentIds.includes(r.parentId))
     }
-
-    sqlite.close()
 
     const commentsWithReplies = comments.map(comment => ({
       ...comment,

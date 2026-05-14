@@ -1,17 +1,6 @@
 ﻿import { eq } from 'drizzle-orm'
-import { drizzle } from 'drizzle-orm/better-sqlite3'
-import Database from 'better-sqlite3'
+import { getDB } from '~/lib/db/connection'
 import { users } from '~/lib/db/schema'
-
-function getDatabase() {
-    if (process.env.NODE_ENV === 'development') {
-        const sqlite = new Database('./dev.db')
-        return drizzle(sqlite, { schema: { users } })
-    } else {
-        return drizzle((globalThis as any).DB, { schema: { users } })
-    }
-}
-
 export default defineEventHandler(async (event) => {
     if (getMethod(event) !== 'GET') {
         throw createError({
@@ -59,7 +48,8 @@ export default defineEventHandler(async (event) => {
         }
 
         // Get authenticated user from database to check permissions
-        const db = getDatabase()
+        const db = getDB()
+        if (!db) return { success: false, error: 'Database not available' }
         const authUserResult = await db.select({
             id: users.id,
             role: users.role,
