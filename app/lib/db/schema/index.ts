@@ -30,6 +30,19 @@ export {
     downloadHistoryRelations 
 } from './transactions';
 export { gallery } from './gallery';
+export { creatorProfiles } from './creator-profiles';
+export {
+    supportTickets,
+    supportTicketReplies,
+    supportTicketsRelations,
+    supportTicketRepliesRelations,
+} from './support-tickets';
+export {
+    paymentAccounts,
+    paymentAuditLogs,
+    paymentAccountsRelations,
+    paymentAuditLogsRelations,
+} from './payment-accounts';
 
 // Define cross-table relations here to avoid circular imports
 import { relations } from 'drizzle-orm';

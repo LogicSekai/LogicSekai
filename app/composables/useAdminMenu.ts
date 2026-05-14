@@ -12,16 +12,13 @@ import {
     Image,
     BarChart3, 
     TrendingUp, 
-    Globe, 
-    Zap,
     Settings, 
     Cog, 
-    Lock, 
-    Database,
     HelpCircle,
     Mail,
     Flag,
     MessageSquare,
+    Receipt,
 } from 'lucide-vue-next'
 
 export const adminMenuItems: readonly MenuItem[] = Object.freeze([
@@ -125,6 +122,14 @@ export const adminMenuItems: readonly MenuItem[] = Object.freeze([
         ])
     },
     {
+        id: 'transactions',
+        name: 'Transaksi',
+        icon: Receipt,
+        url: '/admin/transactions',
+        permission: Object.freeze(['analytics.view']),
+        roles: Object.freeze(['superadmin', 'admin'])
+    },
+    {
         id: 'analytics',
         name: 'Analitik & Laporan',
         icon: BarChart3,
@@ -137,22 +142,6 @@ export const adminMenuItems: readonly MenuItem[] = Object.freeze([
             icon: TrendingUp,
             url: '/admin/analytics/overview',
             permission: Object.freeze(['analytics.overview.view']),
-            roles: Object.freeze(['superadmin', 'admin'])
-        },
-        {
-            id: 'analytics-traffic',
-            name: 'Analisis Traffic',
-            icon: Globe,
-            url: '/admin/analytics/traffic',
-            permission: Object.freeze(['analytics.traffic.view']),
-            roles: Object.freeze(['superadmin', 'admin'])
-        },
-        {
-            id: 'analytics-performance',
-            name: 'Performa',
-            icon: Zap,
-            url: '/admin/analytics/performance',
-            permission: Object.freeze(['analytics.performance.view']),
             roles: Object.freeze(['superadmin', 'admin'])
         }
         ])
@@ -186,22 +175,6 @@ export const adminMenuItems: readonly MenuItem[] = Object.freeze([
             icon: Cog,
             url: '/admin/settings/general',
             permission: Object.freeze(['settings.general.view']),
-            roles: Object.freeze(['superadmin'])
-        },
-        {
-            id: 'settings-security',
-            name: 'Keamanan',
-            icon: Lock,
-            url: '/admin/settings/security',
-            permission: Object.freeze(['settings.security.view']),
-            roles: Object.freeze(['superadmin'])
-        },
-        {
-            id: 'settings-backup',
-            name: 'Backup & Restore',
-            icon: Database,
-            url: '/admin/settings/backup',
-            permission: Object.freeze(['settings.backup.view']),
             roles: Object.freeze(['superadmin'])
         }
         ])

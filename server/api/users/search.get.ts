@@ -1,4 +1,4 @@
-import { initializeDB } from '~/lib/db/connection';
+﻿import { initializeDB } from '~/lib/db/connection';
 import { users } from '~/lib/db/schema/users';
 import { eq, or, like } from 'drizzle-orm';
 
@@ -75,7 +75,6 @@ export default defineEventHandler(async (event) => {
     };
 
   } catch (error: any) {
-    console.error('User search error:', error);
     throw createError({
       statusCode: 500,
       statusMessage: 'Failed to search users'

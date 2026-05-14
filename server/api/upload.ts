@@ -1,4 +1,4 @@
-import { createWriteStream, existsSync, mkdirSync, writeFileSync, unlinkSync } from 'fs'
+﻿import { createWriteStream, existsSync, mkdirSync, writeFileSync, unlinkSync } from 'fs'
 import { join } from 'path'
 import { pipeline } from 'stream/promises'
 import { randomUUID } from 'crypto'
@@ -68,7 +68,6 @@ export default defineEventHandler(async (event) => {
       })
     }
   } catch (error: any) {
-    console.error('Upload API error:', error)
     throw createError({
       statusCode: error.statusCode || 500,
       statusMessage: error.statusMessage || 'Internal server error'
@@ -132,7 +131,6 @@ async function handleFileUpload(event: any, userId: string) {
       }
     }
   } catch (error: any) {
-    console.error('File upload error:', error)
     throw createError({
       statusCode: error.statusCode || 500,
       statusMessage: error.statusMessage || 'Upload failed'
@@ -164,7 +162,6 @@ async function handleFileDelete(event: any) {
       message: 'File deleted successfully'
     }
   } catch (error: any) {
-    console.error('File delete error:', error)
     throw createError({
       statusCode: error.statusCode || 500,
       statusMessage: error.statusMessage || 'Delete failed'
@@ -178,6 +175,7 @@ function validateUploadedFile(fileBuffer: Buffer, filename: string, type: string
     product: 100 * 1024 * 1024, // 100MB
     preview: 10 * 1024 * 1024, // 10MB
     gallery: 200 * 1024 * 1024, // 200MB (foto + video)
+    support: 5 * 1024 * 1024, // 5MB
   }
 
   const allowedExtensions = {
@@ -185,6 +183,7 @@ function validateUploadedFile(fileBuffer: Buffer, filename: string, type: string
     product: ['pdf', 'zip', 'xlsx', 'xls', 'docx', 'doc', 'txt', 'jpg', 'jpeg', 'png', 'webp', 'mp4', 'webm', 'mp3', 'wav'],
     preview: ['jpg', 'jpeg', 'png', 'webp', 'mp4', 'webm'],
     gallery: ['jpg', 'jpeg', 'png', 'webp', 'gif', 'mp4', 'webm', 'mov'],
+    support: ['jpg', 'jpeg', 'png', 'webp', 'gif'],
   }
 
   const maxSize = maxSizes[type as keyof typeof maxSizes] || maxSizes.product

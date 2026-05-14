@@ -1,4 +1,4 @@
-import { initializeDB } from '~/lib/db/connection';
+﻿import { initializeDB } from '~/lib/db/connection';
 import { productCategories } from '~/lib/db/schema/product-categories';
 import { users } from '~/lib/db/schema/users';
 import { eq, and } from 'drizzle-orm';
@@ -133,11 +133,8 @@ async function getCreatorCategory(db: any, categoryId: string, userId: string) {
 
 async function updateCreatorCategory(db: any, event: any, categoryId: string, userId: string) {
   try {
-    console.log('=== UPDATE CATEGORY START ===');
-    console.log('Updating category ID:', categoryId, 'for user:', userId);
     
     const body = await readBody(event);
-    console.log('Update request body:', JSON.stringify(body, null, 2));
     
     const { name, slug, description, parentId, image, isActive, sortOrder } = body;
 
@@ -151,10 +148,8 @@ async function updateCreatorCategory(db: any, event: any, categoryId: string, us
       ))
       .limit(1);
 
-    console.log('Existing category found:', existingCategory.length > 0);
 
     if (existingCategory.length === 0) {
-      console.log('Error: Category not found or not owned by user');
       throw createError({
         statusCode: 404,
         statusMessage: 'Category not found'
@@ -163,7 +158,6 @@ async function updateCreatorCategory(db: any, event: any, categoryId: string, us
 
     // Check if slug conflicts with another category (for this user)
     if (slug && slug !== existingCategory[0].slug) {
-      console.log('Checking slug conflict for:', slug);
       const conflictingCategory = await db
         .select()
         .from(productCategories)
@@ -174,7 +168,6 @@ async function updateCreatorCategory(db: any, event: any, categoryId: string, us
         .limit(1);
 
       if (conflictingCategory.length > 0) {
-        console.log('Error: Slug already exists for another category');
         throw createError({
           statusCode: 409,
           statusMessage: 'Category with this slug already exists'
@@ -194,7 +187,6 @@ async function updateCreatorCategory(db: any, event: any, categoryId: string, us
     if (isActive !== undefined) updateData.isActive = isActive;
     if (sortOrder !== undefined) updateData.sortOrder = sortOrder;
 
-    console.log('Update data to apply:', JSON.stringify(updateData, null, 2));
 
     const result = await db
       .update(productCategories)
@@ -205,8 +197,6 @@ async function updateCreatorCategory(db: any, event: any, categoryId: string, us
       ))
       .returning();
 
-    console.log('Update result:', JSON.stringify(result, null, 2));
-    console.log('=== UPDATE CATEGORY SUCCESS ===');
 
     return {
       success: true,
@@ -214,11 +204,6 @@ async function updateCreatorCategory(db: any, event: any, categoryId: string, us
       data: result[0]
     };
   } catch (error: any) {
-    console.log('=== UPDATE CATEGORY ERROR ===');
-    console.error('Error updating category:', error);
-    console.error('Error message:', error.message);
-    console.error('Error status:', error.statusCode);
-    console.log('=== END ERROR ===');
     
     if (error.statusCode) {
       throw error;

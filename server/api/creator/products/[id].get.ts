@@ -1,4 +1,4 @@
-import { initializeDB } from '~/lib/db/connection';
+﻿import { initializeDB } from '~/lib/db/connection';
 import { products, productContributors } from '~/lib/db/schema/products';
 import { users } from '~/lib/db/schema/users';
 import { eq } from 'drizzle-orm';
@@ -85,7 +85,6 @@ export default defineEventHandler(async (event) => {
     };
 
   } catch (error: any) {
-    console.error('Error fetching product:', error);
     
     if (error.statusCode) {
       throw error;

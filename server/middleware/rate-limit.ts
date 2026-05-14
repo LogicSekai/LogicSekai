@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Simple rate limiting middleware
  * Limits requests per IP address
  */
@@ -61,7 +61,6 @@ export default defineEventHandler(async (event) => {
   if (entry.count > maxRequests) {
     const remainingTime = Math.ceil((entry.resetTime - now) / 1000)
     
-    console.log(`🚫 Rate limit exceeded for IP: ${clientIP} (${entry.count}/${maxRequests})`)
     
     throw createError({
       statusCode: 429,
@@ -81,6 +80,5 @@ export default defineEventHandler(async (event) => {
 
   // Log suspicious activity (high request count)
   if (entry.count > maxRequests * 0.8) {
-    console.warn(`⚠️ High request count from IP: ${clientIP} (${entry.count}/${maxRequests})`)
   }
 })

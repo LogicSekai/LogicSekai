@@ -1,4 +1,4 @@
-import { getDB, initializeDB } from '~/lib/db/connection'
+﻿import { getDB, initializeDB } from '~/lib/db/connection'
 import { products, users, transactions } from '~/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
 
@@ -147,7 +147,6 @@ export default defineEventHandler(async (event) => {
     }
 
   } catch (error: any) {
-    console.error('Error checking ownership:', error)
     
     if (error.statusCode) {
       throw error

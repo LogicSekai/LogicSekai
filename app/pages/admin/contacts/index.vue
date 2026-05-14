@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import {
     Mail,
@@ -73,7 +73,6 @@ const fetchMessages = async () => {
         unreadCount.value = data.unreadCount
         pagination.value = { ...pagination.value, ...data.pagination }
     } catch (e) {
-        console.error(e)
     } finally {
         isLoading.value = false
     }
@@ -148,7 +147,6 @@ const updateStatus = async (msg: ContactMessage, status: string, closeAfter = tr
         }
         if (closeAfter) closeDetail()
     } catch (e) {
-        console.error(e)
     } finally {
         isUpdatingStatus.value = false
     }
@@ -166,7 +164,6 @@ const saveNote = async () => {
         if (idx !== -1) messages.value[idx] = updated.message
         selectedMessage.value = updated.message
     } catch (e) {
-        console.error(e)
     } finally {
         isSavingNote.value = false
     }

@@ -1,4 +1,4 @@
-import { eq, or } from 'drizzle-orm'
+﻿import { eq, or } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/better-sqlite3'
 import Database from 'better-sqlite3'
 import { users } from '../../../app/lib/db/schema'
@@ -147,7 +147,6 @@ export default defineEventHandler(async (event) => {
         }
 
     } catch (error: any) {
-        console.error('Error updating profile:', error)
         
         if (error.statusCode) {
             throw error

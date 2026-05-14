@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm'
+﻿import { eq } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/better-sqlite3'
 import Database from 'better-sqlite3'
 import bcrypt from 'bcryptjs'
@@ -121,7 +121,6 @@ export default defineEventHandler(async (event) => {
         }
 
     } catch (error: any) {
-        console.error('Error updating password:', error)
         
         if (error.statusCode) {
             throw error

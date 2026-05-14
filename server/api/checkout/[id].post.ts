@@ -1,11 +1,11 @@
-import { getDB, initializeDB } from '~/lib/db/connection'
-import { transactions, transactionItems, products } from '~/lib/db/schema'
+﻿import { getDB, initializeDB } from '~/lib/db/connection'
+import { transactions, transactionItems, products, paymentAccounts } from '~/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
 import { createId } from '@paralleldrive/cuid2'
+import { createMidtransSnap } from '~~/server/utils/midtrans'
 
 export default defineEventHandler(async (event) => {
   try {
-    console.log('=== NEW CHECKOUT API START ===')
     
     // Set proper headers
     setHeader(event, 'content-type', 'application/json')
@@ -15,13 +15,10 @@ export default defineEventHandler(async (event) => {
     if (!db) {
       db = initializeDB()
     }
-    console.log('Database initialized:', !!db)
 
     const productId = getRouterParam(event, 'id')
-    console.log('Product ID:', productId)
     
     if (!productId) {
-      console.log('❌ Missing product ID')
       throw createError({
         statusCode: 400,
         statusMessage: 'Product ID is required'
@@ -32,7 +29,6 @@ export default defineEventHandler(async (event) => {
     const authContext = event.context.auth
     
     if (!authContext || !authContext.isAuthenticated) {
-      console.log('❌ User not authenticated')
       throw createError({
         statusCode: 401,
         statusMessage: 'Authentication required'
@@ -40,10 +36,8 @@ export default defineEventHandler(async (event) => {
     }
 
     const userData = authContext.user
-    console.log('✅ User authenticated:', { id: userData?.id, username: userData?.username })
 
     // Get product details
-    console.log('🔍 Finding product by ID:', productId)
     const productData = await db
       .select({
         id: products.id,
@@ -71,7 +65,6 @@ export default defineEventHandler(async (event) => {
       .limit(1)
 
     if (!productData.length) {
-      console.log('❌ Product not found or not available')
       throw createError({
         statusCode: 404,
         statusMessage: 'Product not found or not available'
@@ -79,12 +72,10 @@ export default defineEventHandler(async (event) => {
     }
 
     const product = productData[0]
-    console.log('✅ Product found:', product.title, 'Price:', product.basePrice)
 
     // Calculate final price
     const now = new Date()
     let finalPrice = product.basePrice || 0
-    console.log('💰 Calculating price - Base:', finalPrice)
 
     if (
       product.discountType &&
@@ -92,7 +83,6 @@ export default defineEventHandler(async (event) => {
       (!product.discountStartDate || product.discountStartDate <= now) &&
       (!product.discountEndDate || product.discountEndDate >= now)
     ) {
-      console.log('🏷️ Applying discount:', product.discountType, product.discountValue)
       
       if (product.discountType === 'percentage') {
         finalPrice = Math.max(0, finalPrice - (finalPrice * product.discountValue / 100))
@@ -101,15 +91,14 @@ export default defineEventHandler(async (event) => {
       }
     }
     
-    console.log('💰 Final price calculated:', finalPrice)
 
     // Check if user already has a transaction for this product
-    console.log('🔍 Checking existing transactions for user:', userData!.id, 'product:', product.id)
     const existingTransaction = await db
       .select({
         id: transactions.id,
         status: transactions.status,
         finalPrice: transactions.finalPrice,
+        gatewayResponse: transactions.gatewayResponse,
         createdAt: transactions.createdAt
       })
       .from(transactions)
@@ -121,11 +110,9 @@ export default defineEventHandler(async (event) => {
       )
       .limit(1)
 
-    console.log('📋 Existing transactions found:', existingTransaction.length)
 
     // If user already has a paid/completed transaction
     if (existingTransaction.length > 0 && existingTransaction[0].status === 'completed') {
-      console.log('✅ Product already owned')
       const response = {
         success: true,
         status: 'already_owned',
@@ -133,8 +120,37 @@ export default defineEventHandler(async (event) => {
         message: 'You already own this product',
         transactionId: existingTransaction[0].id
       }
-      console.log('📤 Already owned response:', response)
       return response
+    }
+
+    // If there's already a pending transaction with a valid Midtrans snap token, reuse it
+    // (Midtrans rejects duplicate order_id, so we must not call their API again)
+    if (existingTransaction.length > 0 && existingTransaction[0].status === 'pending' && finalPrice > 0) {
+      try {
+        const gw = JSON.parse(existingTransaction[0].gatewayResponse ?? '')
+        if (gw?.snapToken && gw?.paymentUrl) {
+          return {
+            success:       true,
+            status:        'pending',
+            transactionId: existingTransaction[0].id,
+            amount:        existingTransaction[0].finalPrice,
+            currency:      product.currency || 'IDR',
+            snapToken:     gw.snapToken,
+            paymentUrl:    `/payment/${existingTransaction[0].id}`,
+            message:       'Lanjutkan pembayaran yang tertunda.',
+            canDownload:   false,
+          }
+        }
+      } catch { /* no cached token — fall through to create new one */ }
+    }
+
+    // If existing transaction is failed, cancelled, or refunded — treat as fresh checkout.
+    // We must NOT reuse the same transactionId as Midtrans order_id because Midtrans will
+    // reject a duplicate order_id that already has a terminal status.
+    const terminalStatuses = ['failed', 'cancelled', 'refunded']
+    const existingIsTerminal =
+      existingTransaction.length > 0 && terminalStatuses.includes(existingTransaction[0].status)
+    if (existingIsTerminal) {
     }
 
     const clientIP = getHeader(event, 'x-forwarded-for') || 
@@ -143,14 +159,14 @@ export default defineEventHandler(async (event) => {
                     '127.0.0.1'
     const transactionType = 'purchase'
     const transactionStatus = finalPrice === 0 ? 'completed' : 'pending'
-    console.log('📊 Transaction details:', { clientIP, transactionType, transactionStatus, finalPrice })
 
     let transactionId: string
 
-    // If user has an existing transaction (not paid), update it to pending
-    if (existingTransaction.length > 0) {
+    // If user has an existing (non-terminal, non-completed) pending transaction without a snap
+    // token, update it. If the existing transaction is terminal (failed/cancelled/refunded),
+    // always create a fresh one so Midtrans gets a brand-new order_id.
+    if (existingTransaction.length > 0 && !existingIsTerminal) {
       transactionId = existingTransaction[0].id
-      console.log('🔄 Updating existing transaction to pending:', transactionId)
       
       try {
         await db
@@ -168,7 +184,6 @@ export default defineEventHandler(async (event) => {
           })
           .where(eq(transactions.id, transactionId))
         
-        console.log('✅ Transaction updated successfully')
 
         // Update transaction item
         await db
@@ -180,10 +195,8 @@ export default defineEventHandler(async (event) => {
           })
           .where(eq(transactionItems.transactionId, transactionId))
         
-        console.log('✅ Transaction item updated successfully')
         
       } catch (dbError) {
-        console.error('❌ Database error during transaction update:', dbError)
         throw createError({
           statusCode: 500,
           statusMessage: 'Failed to update transaction'
@@ -193,7 +206,6 @@ export default defineEventHandler(async (event) => {
     } else {
       // Create new transaction
       transactionId = createId()
-      console.log('📝 Creating new transaction:', transactionId)
 
       try {
         const transactionData = {
@@ -214,9 +226,7 @@ export default defineEventHandler(async (event) => {
           completedAt: finalPrice === 0 ? new Date() : null
         }
 
-        console.log('💾 Inserting transaction:', transactionData)
         await db.insert(transactions).values(transactionData)
-        console.log('✅ Transaction created successfully')
 
         // Create transaction item
         const transactionItemData = {
@@ -231,12 +241,9 @@ export default defineEventHandler(async (event) => {
           createdAt: new Date()
         }
         
-        console.log('💾 Inserting transaction item:', transactionItemData)
         await db.insert(transactionItems).values(transactionItemData)
-        console.log('✅ Transaction item created successfully')
         
       } catch (dbError) {
-        console.error('❌ Database error during transaction creation:', dbError)
         throw createError({
           statusCode: 500,
           statusMessage: 'Failed to create transaction'
@@ -255,9 +262,7 @@ export default defineEventHandler(async (event) => {
           })
           .where(eq(products.id, product.id))
         
-        console.log('✅ Sales count updated for free product')
       } catch (dbError) {
-        console.log('⚠️ Failed to update sales count, but transaction completed')
       }
 
       const response = {
@@ -267,26 +272,92 @@ export default defineEventHandler(async (event) => {
         message: 'Free product acquired successfully',
         canDownload: true
       }
-      console.log('📤 Free product response:', response)
       return response
     }
 
-    // Paid product - return pending status
-    const response = {
-      success: true,
-      status: 'pending',
-      transactionId,
-      amount: finalPrice,
-      currency: product.currency || 'IDR',
-      paymentUrl: `/payment/${transactionId}`,
-      message: 'Transaction created, please proceed to payment',
-      canDownload: false
+    // Paid product - call Midtrans Snap to create payment session
+    const origin = (() => {
+      const host  = getHeader(event, 'host') ?? 'localhost:3001'
+      const proto = getHeader(event, 'x-forwarded-proto')
+        ?? (process.env.NODE_ENV === 'production' ? 'https' : 'http')
+      return `${proto}://${host}`
+    })()
+
+    // Look up creator's active Midtrans payment account
+    const [paymentAccount] = await db
+      .select({
+        id:                 paymentAccounts.id,
+        encryptedServerKey: paymentAccounts.encryptedServerKey,
+        mode:               paymentAccounts.mode,
+        callbackToken:      paymentAccounts.callbackToken,
+      })
+      .from(paymentAccounts)
+      .where(and(
+        eq(paymentAccounts.userId,     product.userId),
+        eq(paymentAccounts.provider,   'midtrans'),
+        eq(paymentAccounts.isActive,   true),
+      ))
+      .limit(1)
+
+    if (!paymentAccount?.encryptedServerKey || !paymentAccount.callbackToken) {
+      throw createError({
+        statusCode: 503,
+        statusMessage: 'Payment gateway belum dikonfigurasi. Hubungi creator produk ini.',
+      })
     }
-    console.log('📤 Paid product response:', response)
-    return response
+
+    try {
+      const snap = await createMidtransSnap(
+        paymentAccount.encryptedServerKey,
+        paymentAccount.mode,
+        {
+          transactionId,
+          grossAmount:   finalPrice,
+          currency:      product.currency || 'IDR',
+          customerName:  userData!.username || 'Customer',
+          customerEmail: '',
+          productId:     product.id,
+          productTitle:  product.title,
+          callbackToken: paymentAccount.callbackToken,
+          origin,
+        },
+      )
+
+      // Persist snap token + payment URL so the payment page can retrieve them
+      await db
+        .update(transactions)
+        .set({
+          gatewayTransactionId: transactionId,
+          paymentGateway:       'midtrans',
+          gatewayResponse: JSON.stringify({
+            snapToken:  snap.snapToken,
+            paymentUrl: snap.paymentUrl,
+            mode:       paymentAccount.mode,
+          }),
+          updatedAt: new Date(),
+        })
+        .where(eq(transactions.id, transactionId))
+
+
+      return {
+        success:       true,
+        status:        'pending',
+        transactionId,
+        amount:        finalPrice,
+        currency:      product.currency || 'IDR',
+        snapToken:     snap.snapToken,
+        paymentUrl:    `/payment/${transactionId}`,
+        message:       'Transaksi dibuat, lanjutkan pembayaran.',
+        canDownload:   false,
+      }
+    } catch (snapErr: any) {
+      throw createError({
+        statusCode: 502,
+        statusMessage: 'Gagal menghubungi payment gateway. Coba lagi beberapa saat.',
+      })
+    }
 
   } catch (error: any) {
-    console.error('❌ Error in checkout API:', error)
     
     // Set proper headers for error response
     setHeader(event, 'content-type', 'application/json')

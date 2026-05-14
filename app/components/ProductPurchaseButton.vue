@@ -130,10 +130,17 @@ const handlePurchase = async () => {
 
     const response: any = await $fetch(`/api/checkout/${props.productId}`, { method: 'POST' })
     transactionResult.value = response
-    showSuccessModal.value = true
 
     if (response.success) {
+      if (response.status === 'pending' && response.transactionId) {
+        // Paid product — navigate to our payment page (Snap popup)
+        await navigateTo(`/payment/${response.transactionId}`)
+        return
+      }
+      showSuccessModal.value = true
       await checkOwnership()
+    } else {
+      showSuccessModal.value = true
     }
   } catch (error: any) {
     if (error.status === 401) {
@@ -144,7 +151,7 @@ const handlePurchase = async () => {
       errorMessage.value = 'Anda sudah memiliki produk ini'
       await checkOwnership()
     } else {
-      errorMessage.value = error.data?.message || 'Terjadi kesalahan saat memproses pembelian'
+      errorMessage.value = error.data?.error || error.data?.message || 'Terjadi kesalahan saat memproses pembelian'
     }
   } finally {
     isProcessing.value = false

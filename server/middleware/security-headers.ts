@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Security headers middleware
  * Adds security headers to all API responses
  */
@@ -81,6 +81,5 @@ export default defineEventHandler(async (event) => {
   
   // Log API access (in development)
   if (process.env.NODE_ENV === 'development') {
-    console.log(`🌐 API ${method} ${pathname} [${requestId}]`)
   }
 })

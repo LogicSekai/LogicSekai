@@ -14,7 +14,8 @@
                     class="mt-5 font-black uppercase tracking-tight leading-[0.9] text-gray-900 dark:text-white"
                     style="font-size: clamp(2.5rem, 7vw, 5.5rem)"
                 >
-                    YUSUF<br />IKHWANUL<br />KARIM.
+                    <!-- YUSUF<br />IKHWANUL<br />KARIM. -->
+                    KWAII
                 </h1>
                 <p class="mt-6 font-mono text-xs tracking-[0.14em] uppercase text-indigo-500 dark:text-indigo-400">
                     Full-Stack Web Developer &amp; UI/UX Designer
@@ -42,13 +43,13 @@
                         GitHub
                     </a>
                     <a
-                        href="mailto:samehikari@gmail.com"
+                        href="mailto:logicsekai@gmail.com"
                         class="inline-flex items-center gap-2 px-5 py-2.5 border border-gray-200 dark:border-white/12 text-gray-700 dark:text-gray-300 text-sm font-medium hover:border-gray-400 dark:hover:border-white/30 transition-colors"
                     >
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
                         </svg>
-                        samehikari@gmail.com
+                        logicsekai@gmail.com
                     </a>
                 </div>
                 </div><!-- end text col -->
@@ -246,7 +247,7 @@
                 </p>
                 <div class="mt-8 flex items-center gap-4 flex-wrap">
                     <a
-                        href="mailto:samehikari@gmail.com"
+                        href="mailto:logicsekai@gmail.com"
                         class="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition-colors"
                     >
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -304,20 +305,20 @@ const projects = [
         url: null,
         thumbnail: '/img/portfolio/taszela.jpg',
     },
-    {
-        name: 'Mikpos',
-        description: 'Sistem manajemen pengguna dan pembayaran HotSpot serta PPP pada MikroTik RouterOS. Memudahkan pengelolaan akses internet berbasis voucher dan paket.',
-        tech: ['MikroTik API', 'RouterOS', 'Web Dashboard'],
-        url: null,
-        thumbnail: '/img/portfolio/mikpos.jpg',
-    },
-    {
-        name: 'Ares',
-        description: 'Macropad custom berbasis Arduino dengan firmware buatan sendiri. Dikontrol melalui aplikasi desktop Electron untuk konfigurasi tombol dan makro secara visual.',
-        tech: ['C/C++', 'Arduino', 'Electron.js'],
-        url: null,
-        thumbnail: '/img/portfolio/ares.jpg',
-    },
+    // {
+    //     name: 'Mikpos',
+    //     description: 'Sistem manajemen pengguna dan pembayaran HotSpot serta PPP pada MikroTik RouterOS. Memudahkan pengelolaan akses internet berbasis voucher dan paket.',
+    //     tech: ['MikroTik API', 'RouterOS', 'Web Dashboard'],
+    //     url: null,
+    //     thumbnail: '/img/portfolio/mikpos.jpg',
+    // },
+    // {
+    //     name: 'Ares',
+    //     description: 'Macropad custom berbasis Arduino dengan firmware buatan sendiri. Dikontrol melalui aplikasi desktop Electron untuk konfigurasi tombol dan makro secara visual.',
+    //     tech: ['C/C++', 'Arduino', 'Electron.js'],
+    //     url: null,
+    //     thumbnail: '/img/portfolio/ares.jpg',
+    // },
 ]
 
 const experience = [

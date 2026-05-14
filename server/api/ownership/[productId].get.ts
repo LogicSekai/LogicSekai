@@ -1,10 +1,9 @@
-import { getDB, initializeDB } from '~/lib/db/connection'
+﻿import { getDB, initializeDB } from '~/lib/db/connection'
 import { transactions, products } from '~/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   try {
-    console.log('🔍 Ownership API called for productId:', getRouterParam(event, 'productId'))
     
     // Set proper headers
     setHeader(event, 'content-type', 'application/json')
@@ -12,16 +11,13 @@ export default defineEventHandler(async (event) => {
     // Initialize database if not already done
     let db = getDB()
     if (!db) {
-      console.log('📊 Initializing database...')
       db = initializeDB()
     }
 
     // Get user from auth context (set by middleware)
     const authContext = event.context.auth
-    console.log('👤 Auth context exists:', !!authContext)
     
     if (!authContext || !authContext.isAuthenticated) {
-      console.log('❌ User not authenticated')
       return {
         success: true,
         isOwned: false,
@@ -32,13 +28,10 @@ export default defineEventHandler(async (event) => {
     }
 
     const userId = authContext.user!.id
-    console.log('👤 User ID from auth context:', userId)
 
     const productId = getRouterParam(event, 'productId')
-    console.log('📦 Product ID from params:', productId)
     
     if (!productId) {
-      console.log('❌ No product ID provided')
       throw createError({
         statusCode: 400,
         statusMessage: 'Product ID is required'
@@ -46,7 +39,6 @@ export default defineEventHandler(async (event) => {
     }
 
     // Check if product exists and get its info
-    console.log('🔍 Querying product info...')
     const productInfo = await db
       .select({
         id: products.id,
@@ -59,10 +51,8 @@ export default defineEventHandler(async (event) => {
       .where(eq(products.id, productId))
       .limit(1)
 
-    console.log('📦 Product query result:', productInfo)
 
     if (!productInfo.length) {
-      console.log('❌ Product not found')
       throw createError({
         statusCode: 404,
         statusMessage: 'Product not found'
@@ -70,10 +60,8 @@ export default defineEventHandler(async (event) => {
     }
 
     const product = productInfo[0]
-    console.log('✅ Product found:', product.title, 'Price:', product.basePrice)
 
     // Check if user owns this product (has completed transaction)
-    console.log('🔍 Checking user transactions...')
     const userTransaction = await db
       .select({
         id: transactions.id,
@@ -93,13 +81,11 @@ export default defineEventHandler(async (event) => {
       )
       .limit(1)
 
-    console.log('💳 User transactions found:', userTransaction)
 
     const isOwned = userTransaction.length > 0
     const isFree = product.basePrice === 0
     const canPurchase = product.isAvailable && product.status === 'published' && !isOwned
     
-    console.log('📊 Ownership status:', { isOwned, isFree, canPurchase })
 
     let ownership = null
     if (isOwned) {
@@ -135,11 +121,9 @@ export default defineEventHandler(async (event) => {
           : 'Product not available for purchase'
     }
 
-    console.log('✅ Sending response:', response)
     return response
 
   } catch (error: any) {
-    console.error('❌ Error in ownership API:', error)
     
     // Set proper headers for error response
     setHeader(event, 'content-type', 'application/json')

@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="p-6 space-y-8">
     <!-- Header -->
     <div class="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
@@ -300,7 +300,6 @@ const fetchCategories = async () => {
     const response = await $fetch<{ success: boolean; data: { categories: Category[] } }>('/api/creator/categories')
     categories.value = response.data.categories || []
   } catch (error) {
-    console.error('Failed to fetch categories:', error)
     // Show toast error
   } finally {
     isLoading.value = false
@@ -359,7 +358,6 @@ const toggleCategoryStatus = async (category: any) => {
       categories.value[index].isActive = !categories.value[index].isActive
     }
   } catch (error) {
-    console.error('Failed to update category status:', error)
   }
 }
 
@@ -377,7 +375,6 @@ const deleteCategory = async (category: any) => {
     categories.value = categories.value.filter(c => c.id !== category.id)
     selectedCategories.value = selectedCategories.value.filter(id => id !== category.id)
   } catch (error) {
-    console.error('Failed to delete category:', error)
   }
 }
 

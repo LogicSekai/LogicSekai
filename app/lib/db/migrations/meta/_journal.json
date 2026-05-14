@@ -57,6 +57,48 @@
       "when": 1777200000000,
       "tag": "0007_product_reports",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1746921600000,
+      "tag": "0008_creator_profiles",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1747008000000,
+      "tag": "0009_creator_contact_links",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1778700545272,
+      "tag": "0010_support_tickets",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1778800000000,
+      "tag": "0011_payment_accounts",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1778900000000,
+      "tag": "0012_payment_tripay_callback",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "6",
+      "when": 1778741056332,
+      "tag": "0013_faithful_war_machine",
+      "breakpoints": true
     }
   ]
 }

@@ -1,4 +1,4 @@
-import { getDB, initializeDB } from '~/lib/db/connection'
+﻿import { getDB, initializeDB } from '~/lib/db/connection'
 import { users } from '~/lib/db/schema'
 import { eq } from 'drizzle-orm'
 
@@ -82,7 +82,6 @@ export default defineEventHandler(async (event) => {
         }
         sessionData = JSON.parse(sessionString)
       } catch (error) {
-        console.warn('Failed to parse user session:', error)
         if (!isPublicPath) {
           throw createError({
             statusCode: 401,
@@ -167,7 +166,6 @@ export default defineEventHandler(async (event) => {
       }
     }
   } catch (error) {
-    console.error('Auth middleware error:', error)
     if (!isPublicPath) {
       throw error
     }
@@ -175,14 +173,4 @@ export default defineEventHandler(async (event) => {
 
   // Add auth context to event
   event.context.auth = authContext
-
-  // For debugging
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`🔐 Auth for ${pathname}:`, {
-      isPublic: isPublicPath,
-      isAuthenticated: authContext.isAuthenticated,
-      user: authContext.user?.username,
-      role: authContext.user?.role
-    })
-  }
 })

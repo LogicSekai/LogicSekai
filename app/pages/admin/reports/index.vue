@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="p-6 space-y-8">
 
     <!-- Page Header -->
@@ -399,7 +399,6 @@ async function fetchReports() {
       pagination.value = res.pagination
     }
   } catch (err) {
-    console.error('Error fetching reports:', err)
   } finally {
     loading.value = false
   }

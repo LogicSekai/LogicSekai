@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm'
+﻿import { eq } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/better-sqlite3'
 import Database from 'better-sqlite3'
 import { users } from '../../../app/lib/db/schema'
@@ -130,7 +130,6 @@ export default defineEventHandler(async (event) => {
                     await fs.unlink(oldAvatarPath)
                 } catch (error) {
                     // File might not exist, continue anyway
-                    console.log('Could not delete old avatar file:', error)
                 }
             }
 
@@ -156,7 +155,6 @@ export default defineEventHandler(async (event) => {
         }
 
     } catch (error: any) {
-        console.error('Error handling avatar:', error)
         
         if (error.statusCode) {
             throw error

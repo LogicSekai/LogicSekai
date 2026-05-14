@@ -29,6 +29,9 @@
                 </div>
             </div>
 
+            <!-- Required field legend -->
+            <p class="font-mono text-[10px] text-gray-400 mb-4"><span class="text-red-500">*</span> = wajib diisi</p>
+
             <!-- Form -->
             <form @submit.prevent="handleSubmit" class="space-y-6">
 
@@ -109,7 +112,7 @@
                                     :key="index"
                                     class="inline-flex items-center gap-1 px-2 py-0.5 border border-indigo-400/40 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 font-mono text-[10px] uppercase tracking-widest">
                                     {{ tag }}
-                                    <button type="button" @click="removeTag(index)" class="hover:text-red-500 transition-colors">Ã—</button>
+                                    <button type="button" @click="removeTag(index)" class="hover:text-red-500 transition-colors">×</button>
                                 </span>
                             </div>
                             <div class="flex items-center gap-2">
@@ -296,7 +299,7 @@
                                         placeholder="0"
                                         class="flex-1 px-3 py-2 bg-transparent border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:border-indigo-500 transition-colors" />
                                 </div>
-                                <p class="mt-1 font-mono text-[10px] text-gray-400">{{ formatCurrency(formData.basePrice || 0, formData.currency) }}</p>
+                                <p class="mt-1 font-mono text-[10px] text-gray-400">{{ formatCurrency(formData.basePrice || 0, formData.currency) }} &mdash; isi <span class="text-emerald-500">0</span> untuk produk gratis</p>
                             </div>
 
                             <!-- Stock Type -->
@@ -432,7 +435,7 @@
                         <!-- Preview Images -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Preview Images</label>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Upload screenshots to showcase your product â€” PNG, JPG, WEBP up to 10MB each</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Upload screenshots to showcase your product — PNG, JPG, WEBP up to 10MB each</p>
                             <div class="border border-dashed border-gray-300 dark:border-white/10 p-6 text-center">
                                 <svg class="mx-auto h-10 w-10 text-gray-300 dark:text-white/10 mb-3" stroke="currentColor" fill="none" viewBox="0 0 48 48">
                                     <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
@@ -657,7 +660,6 @@ const handleThumbnailUpload = async (event: Event) => {
             const result = await uploadFile(file, 'thumbnail')
             formData.thumbnailImage = result.url
         } catch (err) {
-            console.error('Failed to upload thumbnail:', err)
         }
     }
 }
@@ -679,7 +681,6 @@ const handleProductFilesUpload = async (event: Event) => {
                 })
             }
         } catch (err) {
-            console.error('Failed to upload product files:', err)
         }
     }
 }
@@ -698,7 +699,6 @@ const handlePreviewImagesUpload = async (event: Event) => {
                 formData.previewImages.push(result.url)
             }
         } catch (err) {
-            console.error('Failed to upload preview images:', err)
         }
     }
 }
@@ -708,8 +708,8 @@ const removePreviewImage = (index: number) => {
 }
 
 const isFormValid = computed(() => {
-    return formData.title.trim() && 
-        formData.basePrice > 0 && 
+    return formData.title.trim() &&
+        formData.basePrice >= 0 &&
         formData.productFiles.length > 0
 })
 
@@ -729,7 +729,6 @@ const handleSubmit = async () => {
         await createProduct(cleanData)
         router.push('/creator/products')
     } catch (err) {
-        console.error('Failed to create product:', err)
     }
 }
 
@@ -740,7 +739,6 @@ onMounted(async () => {
             availableCategories.value = categories.data
         }
     } catch (err) {
-        console.error('Failed to load categories:', err)
     }
 })
 </script>

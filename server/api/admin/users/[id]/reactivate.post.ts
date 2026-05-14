@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+﻿import { eq } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import Database from 'better-sqlite3';
 import * as schema from '~/lib/db/schema';
@@ -62,7 +62,6 @@ export default defineEventHandler(async (event) => {
             throw error;
         }
 
-        console.error('Error reactivating user:', error);
         throw createError({
             statusCode: 500,
             statusMessage: 'Terjadi kesalahan saat mengaktifkan user'

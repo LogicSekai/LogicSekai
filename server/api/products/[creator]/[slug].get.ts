@@ -1,5 +1,5 @@
-import { getDB, initializeDB } from '~/lib/db/connection'
-import { products, users, productContributors, productCategories, productCategoryMappings } from '~/lib/db/schema'
+﻿import { getDB, initializeDB } from '~/lib/db/connection'
+import { products, users, productContributors, productCategories, productCategoryMappings, creatorProfiles } from '~/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
@@ -60,10 +60,12 @@ export default defineEventHandler(async (event) => {
           username: users.username,
           name: users.name,
           avatar: users.avatar
-        }
+        },
+        creatorContactLinks: creatorProfiles.contactLinks,
       })
       .from(products)
       .leftJoin(users, eq(products.userId, users.id))
+      .leftJoin(creatorProfiles, eq(creatorProfiles.userId, users.id))
       .where(
         and(
           eq(products.slug, productSlug),
@@ -155,7 +157,10 @@ export default defineEventHandler(async (event) => {
       averageRating: product.averageRating || 0,
       totalReviews: product.totalReviews || 0,
       updated: product.updated?.toISOString(),
-      creator: product.creator,
+      creator: {
+        ...product.creator,
+        contactLinks: product.creatorContactLinks ? JSON.parse(product.creatorContactLinks) : {},
+      },
       contributors: contributorsData.map((c: any) => ({
         id: c.id,
         username: c.username,
@@ -170,7 +175,6 @@ export default defineEventHandler(async (event) => {
       data: formattedProduct
     }
   } catch (error: any) {
-    console.error('Error fetching product:', error)
     
     if (error.statusCode) {
       throw error

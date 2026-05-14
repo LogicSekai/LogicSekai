@@ -1,4 +1,4 @@
-import { getDB, initializeDB } from '~/lib/db/connection'
+﻿import { getDB, initializeDB } from '~/lib/db/connection'
 import { products, users } from '~/lib/db/schema'
 import { eq, and, or, desc, gte } from 'drizzle-orm'
 
@@ -79,7 +79,6 @@ export default defineEventHandler(async (event) => {
       }
     }
   } catch (error) {
-    console.error('Error fetching featured products:', error)
     throw createError({
       statusCode: 500,
       statusMessage: 'Failed to fetch featured products'

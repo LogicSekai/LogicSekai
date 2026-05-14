@@ -47,9 +47,9 @@
                         <p class="font-mono text-xs tracking-[0.15em] uppercase text-gray-400 mb-5">// RESOURCES</p>
                         <ul class="space-y-3">
                             <li><NuxtLink to="/tentang-kami" class="text-sm text-gray-500 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">Tentang Kami</NuxtLink></li>
-                            <li><a href="/faq" class="text-sm text-gray-500 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">FAQ</a></li>
-                            <li><a href="/dokumentasi" class="text-sm text-gray-500 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">Dokumentasi</a></li>
-                            <li><a href="/hubungi" class="text-sm text-gray-500 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">Hubungi Kami</a></li>
+                            <li><NuxtLink to="/faq" class="text-sm text-gray-500 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">FAQ</NuxtLink></li>
+                            <li><NuxtLink to="/dokumentasi" class="text-sm text-gray-500 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">Dokumentasi</NuxtLink></li>
+                            <li><NuxtLink to="/kontak" class="text-sm text-gray-500 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">Hubungi Kami</NuxtLink></li>
                         </ul>
                     </div>
 
@@ -76,14 +76,14 @@
             <!-- Bottom bar -->
             <div class="py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <p class="font-mono text-xs text-gray-400 dark:text-gray-600">
-                    Â© 2020 â€“ {{ new Date().getFullYear() }}
+                    © 2020 – {{ new Date().getFullYear() }}
                     <span class="text-gray-700 dark:text-gray-400">Logic Sekai Community</span>.
                     All rights reserved.
                 </p>
                 <div class="flex items-center gap-6">
                     <NuxtLink to="/kebijakan-privasi" class="font-mono text-xs text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors uppercase tracking-widest">Privacy</NuxtLink>
                     <NuxtLink to="/syarat-ketentuan" class="font-mono text-xs text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors uppercase tracking-widest">Terms</NuxtLink>
-                    <a href="#" class="font-mono text-xs text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors uppercase tracking-widest">Cookies</a>
+                    <NuxtLink to="/kebijakan-privasi" class="font-mono text-xs text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors uppercase tracking-widest">Cookies</NuxtLink>
                 </div>
             </div>
         </div>

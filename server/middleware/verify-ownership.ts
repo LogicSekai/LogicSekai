@@ -1,4 +1,4 @@
-import { getDB, initializeDB } from '~/lib/db/connection'
+﻿import { getDB, initializeDB } from '~/lib/db/connection'
 import { products, users } from '~/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
 
@@ -34,7 +34,6 @@ export default defineEventHandler(async (event) => {
 
   // Admin can access everything
   if (authContext.isAdmin()) {
-    console.log(`👑 Admin ${authContext.user?.username} bypassing ownership check for ${pathname}`)
     return
   }
 
@@ -114,21 +113,18 @@ export default defineEventHandler(async (event) => {
 
     // Verify ownership
     if (productOwnerId !== authContext.user?.id) {
-      console.log(`🚫 Ownership violation: ${authContext.user?.username} attempting to access product owned by ${productOwnerId}`)
       throw createError({
         statusCode: 403,
         statusMessage: 'You do not have permission to access this resource'
       })
     }
 
-    console.log(`✅ Ownership verified: ${authContext.user?.username} owns the resource`)
 
   } catch (error: any) {
     if (error.statusCode) {
       throw error
     }
     
-    console.error('Ownership verification error:', error)
     throw createError({
       statusCode: 500,
       statusMessage: 'Failed to verify ownership'

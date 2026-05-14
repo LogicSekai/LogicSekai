@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <div class="p-6 space-y-8">
         <div class="flex items-center justify-between">
             <div>
@@ -352,7 +352,6 @@ const onSubmit = form.handleSubmit(async (values) => {
             useToaster('error', errorMsg)
         }
     } catch (error: any) {
-        console.error('Error creating user:', error)
         
         let errorMsg = 'An unexpected error occurred. Please try again.'
         

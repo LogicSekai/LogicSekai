@@ -1,4 +1,4 @@
-import { drizzle } from 'drizzle-orm/better-sqlite3'
+﻿import { drizzle } from 'drizzle-orm/better-sqlite3'
 import Database from 'better-sqlite3'
 import { users } from '~/lib/db/schema'
 import { eq } from 'drizzle-orm'
@@ -79,7 +79,6 @@ export default defineEventHandler(async (event) => {
     }
 
   } catch (error: any) {
-    console.error('Error deleting user:', error)
     
     if (error.statusCode) {
       throw error

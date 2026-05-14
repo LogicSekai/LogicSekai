@@ -1,4 +1,4 @@
-import { eq, or } from 'drizzle-orm'
+﻿import { eq, or } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/better-sqlite3'
 import Database from 'better-sqlite3'
 import bcrypt from 'bcryptjs'
@@ -141,7 +141,6 @@ export default defineEventHandler(async (event) => {
         // TODO: Implement welcome email sending if sendWelcomeEmail is true
         if (sendWelcomeEmail) {
         // You can implement email sending logic here
-        console.log(`Welcome email should be sent to: ${email}`)
         }
 
         return {
@@ -151,7 +150,6 @@ export default defineEventHandler(async (event) => {
         }
 
     } catch (error: any) {
-        console.error('Error creating user:', error)
         
         if (error.statusCode) {
         throw error

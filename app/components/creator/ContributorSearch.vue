@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="relative">
     <div class="flex items-center space-x-2">
       <div class="flex-1 relative">
@@ -153,7 +153,6 @@ const performSearch = async () => {
       searchResults.value = []
     }
   } catch (error) {
-    console.error('Error searching users:', error)
     searchResults.value = []
   } finally {
     loading.value = false

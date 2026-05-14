@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <AlertDialog v-model:open="showDialog">
         <AlertDialogContent>
             <AlertDialogHeader>
@@ -134,7 +134,6 @@ const handleRecover = async () => {
             errorMessage.value = response.message || 'Failed to recover user account'
         }
     } catch (error: any) {
-        console.error('Recovery error:', error)
         errorMessage.value = error?.data?.statusMessage || 'An error occurred while recovering the user account'
     } finally {
         loading.value = false

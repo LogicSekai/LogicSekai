@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="p-6 space-y-8">
 
     <!-- Page Header -->
@@ -368,7 +368,6 @@ async function fetchActivity() {
       statsLoading.value = false
     }
   } catch (err) {
-    console.error('Error fetching activity:', err)
   } finally {
     loading.value = false
   }

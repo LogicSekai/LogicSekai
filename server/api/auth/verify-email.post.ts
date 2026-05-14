@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm'
+﻿import { eq } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/better-sqlite3'
 import Database from 'better-sqlite3'
 import { users } from '../../../app/lib/db/schema'
@@ -67,7 +67,6 @@ export default defineEventHandler(async (event) => {
 
         // TODO: Implement actual email sending logic here
         // For now, we'll just simulate sending the email
-        console.log(`Verification email should be sent to: ${userData.email}`)
         
         // In a real implementation, you would:
         // 1. Generate a verification token
@@ -81,7 +80,6 @@ export default defineEventHandler(async (event) => {
         }
 
     } catch (error: any) {
-        console.error('Error sending verification email:', error)
         
         if (error.statusCode) {
             throw error

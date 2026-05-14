@@ -1,4 +1,4 @@
-export default defineEventHandler(async (event) => {
+﻿export default defineEventHandler(async (event) => {
     try {
         // Check if user is authenticated
         const session = getCookie(event, 'user-session')
@@ -62,7 +62,6 @@ export default defineEventHandler(async (event) => {
         }
 
     } catch (error: any) {
-        console.error('Error updating preferences:', error)
         
         if (error.statusCode) {
             throw error

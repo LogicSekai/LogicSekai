@@ -32,8 +32,30 @@
 
         <!-- Transactions list -->
         <div v-else class="border border-gray-100 dark:border-white/6 divide-y divide-gray-100 dark:divide-white/6">
-            <div v-for="transaction in transactions" :key="transaction.id"
-                class="flex items-start gap-4 px-6 py-5 hover:bg-gray-50 dark:hover:bg-white/2 transition-colors">
+            <template v-for="(transaction, index) in sortedTransactions" :key="transaction.id">
+            <!-- Active group header -->
+            <div v-if="showGroups && index === 0"
+                class="px-6 py-2.5 bg-amber-50 dark:bg-amber-500/5 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <svg class="w-3.5 h-3.5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p class="font-mono text-[9px] uppercase tracking-[0.2em] text-amber-600 dark:text-amber-400">Perlu Tindakan</p>
+                </div>
+                <span class="font-mono text-[9px] text-amber-500/70 dark:text-amber-400/50">{{ activeCount }} transaksi</span>
+            </div>
+            <!-- Completed group header -->
+            <div v-if="showGroups && transaction.status === 'completed' && (index === 0 || sortedTransactions[index - 1]?.status !== 'completed')"
+                class="px-6 py-2.5 bg-emerald-50 dark:bg-emerald-500/5 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <p class="font-mono text-[9px] uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400">Selesai</p>
+                </div>
+                <span class="font-mono text-[9px] text-emerald-500/70 dark:text-emerald-400/50">{{ completedCount }} transaksi</span>
+            </div>
+            <div class="flex items-start gap-4 px-6 py-5 hover:bg-gray-50 dark:hover:bg-white/2 transition-colors">
 
                 <!-- Product image -->
                 <div class="w-14 h-14 shrink-0 bg-gray-100 dark:bg-white/4 overflow-hidden">
@@ -139,20 +161,21 @@
                     </div>
 
                     <!-- Review detail (expandable) -->
-                    <div v-if="reviewedProductIds.has(transaction.product.id) && expandedReviewIds.has(transaction.product.id) && userReviewsMap[transaction.product.id]"
+                    <template v-if="reviewedProductIds.has(transaction.product.id) && expandedReviewIds.has(transaction.product.id) && userReviewsMap[transaction.product.id]">
+                    <div v-for="reviewEntry in [userReviewsMap[transaction.product.id]!]" :key="reviewEntry.id"
                         class="mt-3 pt-3 border-t border-gray-100 dark:border-white/6">
                         <div class="flex items-start gap-3">
                             <div class="flex items-center gap-0.5 shrink-0 mt-0.5">
                                 <svg v-for="i in 5" :key="i" class="w-3 h-3"
-                                    :class="i <= userReviewsMap[transaction.product.id].rating ? 'text-amber-400' : 'text-gray-200 dark:text-white/10'"
+                                    :class="i <= reviewEntry.rating ? 'text-amber-400' : 'text-gray-200 dark:text-white/10'"
                                     viewBox="0 0 20 20" fill="currentColor">
                                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                 </svg>
                             </div>
                             <div class="flex-1 min-w-0">
-                                <p v-if="userReviewsMap[transaction.product.id].review" class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">{{ userReviewsMap[transaction.product.id].review }}</p>
+                                <p v-if="reviewEntry.review" class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">{{ reviewEntry.review }}</p>
                                 <p v-else class="text-xs text-gray-400 italic">Tidak ada teks ulasan.</p>
-                                <p class="font-mono text-[9px] text-gray-400 mt-1">{{ formatDate(userReviewsMap[transaction.product.id].created) }}</p>
+                                <p class="font-mono text-[9px] text-gray-400 mt-1">{{ formatDate(reviewEntry.created) }}</p>
                             </div>
                             <button @click="openEditReviewModal(transaction)"
                                 class="shrink-0 font-mono text-[9px] uppercase tracking-widest text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 border border-indigo-300 dark:border-indigo-500/40 px-2 py-1 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition-colors flex items-center gap-1">
@@ -161,6 +184,7 @@
                             </button>
                         </div>
                     </div>
+                    </template>
 
                     <!-- Payment method -->
                     <div v-if="transaction.payment.gateway" class="mt-2 pt-2 border-t border-gray-100 dark:border-white/6 flex items-center gap-1.5">
@@ -173,6 +197,7 @@
                     </div>
                 </div>
             </div>
+            </template>
         </div>
 
         <!-- Pagination -->
@@ -526,7 +551,8 @@ const saveEditReview = async () => {
     })
     const pid = editingTransaction.value.product.id
     userReviewsMap.value[pid] = {
-      ...userReviewsMap.value[pid],
+      id: userReviewsMap.value[pid]?.id ?? pid,
+      created: userReviewsMap.value[pid]?.created,
       rating: editReviewForm.rating,
       review: editReviewForm.text || null,
     }
@@ -573,6 +599,18 @@ const submitReview = async () => {
   }
 }
 
+const activeCount = computed(() => transactions.value.filter(t => t.status !== 'completed').length)
+const completedCount = computed(() => transactions.value.filter(t => t.status === 'completed').length)
+const sortedTransactions = computed(() => {
+  const statusOrder: Record<string, number> = { pending: 0, failed: 1, refunded: 2, completed: 3 }
+  return [...transactions.value].sort((a, b) =>
+    (statusOrder[a.status] ?? 99) - (statusOrder[b.status] ?? 99)
+  )
+})
+const showGroups = computed(() =>
+  !selectedStatus.value && activeCount.value > 0 && completedCount.value > 0
+)
+
 const loadTransactions = async (page = 1) => {
   try {
     loading.value = true
@@ -582,7 +620,6 @@ const loadTransactions = async (page = 1) => {
     transactions.value = response.transactions
     pagination.value = response.pagination
   } catch (error) {
-    console.error('Failed to load transactions:', error)
   } finally {
     loading.value = false
   }
@@ -609,7 +646,6 @@ const downloadProduct = async (transaction: Transaction) => {
       )
     }
   } catch (err: any) {
-    console.error('Download error:', err)
   }
 }
 

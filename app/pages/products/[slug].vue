@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="min-h-screen bg-gray-50">
     <!-- Loading State -->
     <div v-if="loading" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -468,7 +468,6 @@ const fetchProduct = async () => {
       product.value = null
     }
   } catch (error) {
-    console.error('Error fetching product:', error)
     product.value = null
   } finally {
     loading.value = false
@@ -488,7 +487,6 @@ const checkUserOwnership = async () => {
       userOwnsProduct.value = response.owns
     }
   } catch (error) {
-    console.error('Error checking ownership:', error)
   }
 }
 
@@ -566,7 +564,6 @@ const handlePurchase = async () => {
       }
     }
   } catch (error) {
-    console.error('Error creating transaction:', error)
   } finally {
     purchaseLoading.value = false
   }
@@ -593,7 +590,6 @@ const handleDownload = async () => {
       document.body.removeChild(link)
     }
   } catch (error) {
-    console.error('Error downloading product:', error)
   } finally {
     downloadLoading.value = false
   }
@@ -619,7 +615,6 @@ const copyProductLink = async () => {
     await navigator.clipboard.writeText(window.location.href)
     // Show toast notification
   } catch (error) {
-    console.error('Error copying link:', error)
   }
 }
 

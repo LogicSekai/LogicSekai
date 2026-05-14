@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+﻿import { ref } from 'vue'
 import type { FileUploadResult } from '~/types/product'
 
 interface UploadProgress {
@@ -38,7 +38,6 @@ export const useFileUpload = () => {
     } catch (err: any) {
       error.value = err.data?.message || err.message || 'Upload failed'
       delete progress.value[fileId]
-      console.error('Error uploading file:', err)
       throw err
     } finally {
       uploading.value = Object.keys(progress.value).length > 0
@@ -126,7 +125,6 @@ export const useFileUpload = () => {
       return response.success
     } catch (err: any) {
       error.value = err.data?.message || err.message || 'Failed to delete file'
-      console.error('Error deleting file:', err)
       return false
     }
   }

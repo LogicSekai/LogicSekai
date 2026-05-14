@@ -1,4 +1,4 @@
-import { getDB, initializeDB } from '~/lib/db/connection'
+﻿import { getDB, initializeDB } from '~/lib/db/connection'
 import { transactions, transactionItems, products } from '~/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
@@ -105,7 +105,6 @@ export default defineEventHandler(async (event) => {
       }
     }
   } catch (error: any) {
-    console.error('Error creating transaction:', error)
     
     if (error.statusCode) {
       throw error

@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <div class="min-h-screen bg-white dark:bg-[#030308]">
         <!-- Header -->
         <div class="border-b border-gray-100 dark:border-white/6">
@@ -125,7 +125,6 @@ const fetchCurrentUser = async () => {
             currentUser.value = response.user
         }
     } catch (error: any) {
-        console.error('Error fetching user:', error)
         useToaster('error', 'Failed to load user data')
     } finally {
         isLoading.value = false
@@ -148,7 +147,6 @@ const updateProfile = async (profileData: { name: string; username: string; emai
             useToaster('error', response.error || 'Failed to update profile')
         }
     } catch (error: any) {
-        console.error('Error updating profile:', error)
         useToaster('error', error.data?.message || 'Failed to update profile')
     } finally {
         isUpdatingProfile.value = false
@@ -174,7 +172,6 @@ const updatePassword = async (passwordData: { currentPassword: string; newPasswo
             useToaster('error', response.error || 'Failed to update password')
         }
     } catch (error: any) {
-        console.error('Error updating password:', error)
         useToaster('error', error.data?.message || 'Failed to update password')
     } finally {
         isUpdatingPassword.value = false
@@ -202,7 +199,6 @@ const updatePreferences = async (data: { theme: string; notifications: Record<st
             useToaster('error', response.error || 'Failed to save preferences')
         }
     } catch (error: any) {
-        console.error('Error updating preferences:', error)
         useToaster('error', error.data?.message || 'Failed to save preferences')
     } finally {
         isUpdatingPreferences.value = false
@@ -232,7 +228,6 @@ const removeAvatar = async () => {
             useToaster('error', response.error || 'Failed to remove avatar')
         }
     } catch (error: any) {
-        console.error('Error removing avatar:', error)
         useToaster('error', error.data?.message || 'Failed to remove avatar')
     }
 }
@@ -251,7 +246,6 @@ const sendVerificationEmail = async () => {
             useToaster('error', response.error || 'Failed to send verification email')
         }
     } catch (error: any) {
-        console.error('Error sending verification email:', error)
         useToaster('error', error.data?.message || 'Failed to send verification email')
     } finally {
         isLoading.value = false

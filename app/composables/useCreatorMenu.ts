@@ -4,21 +4,16 @@ import {
   LayoutDashboard, 
   Users, 
   UserCheck, 
-  Shield, 
-  Activity,
   FileText, 
   Edit, 
-  Folder, 
-  Image,
+  Folder,
   BarChart3, 
   TrendingUp, 
-  Globe, 
-  Zap,
-  Settings, 
-  Cog, 
-  Lock, 
-  Database,
-  HelpCircle
+  Activity,
+  Settings,
+  CreditCard,
+  HelpCircle,
+  Receipt
 } from 'lucide-vue-next'
 
 export const creatorMenuItems: readonly MenuItem[] = Object.freeze([
@@ -64,45 +59,12 @@ export const creatorMenuItems: readonly MenuItem[] = Object.freeze([
     ])
   },
   {
-    id: 'blog',
-    name: 'Blog/Postingan',
-    icon: FileText,
-    permission: Object.freeze(['blog.view']),
-    roles: Object.freeze(['superadmin', 'admin', 'creator']),
-    child: Object.freeze([
-      {
-        id: 'blog-posts',
-        name: 'Semua Postingan',
-        icon: FileText,
-        url: '/creator/blog/posts',
-        permission: Object.freeze(['blog.posts.view']),
-        roles: Object.freeze(['superadmin', 'admin', 'creator'])
-      },
-      {
-        id: 'blog-create',
-        name: 'Buat Postingan',
-        icon: Edit,
-        url: '/creator/blog/create',
-        permission: Object.freeze(['blog.posts.create']),
-        roles: Object.freeze(['superadmin', 'admin', 'creator'])
-      },
-      {
-        id: 'blog-categories',
-        name: 'Kategori Blog',
-        icon: Folder,
-        url: '/creator/blog/categories',
-        permission: Object.freeze(['blog.categories.view']),
-        roles: Object.freeze(['superadmin', 'admin', 'creator'])
-      },
-      {
-        id: 'blog-media',
-        name: 'Perpustakaan Media',
-        icon: Image,
-        url: '/creator/blog/media',
-        permission: Object.freeze(['blog.media.view']),
-        roles: Object.freeze(['superadmin', 'admin', 'creator'])
-      }
-    ])
+    id: 'transactions',
+    name: 'Transaksi',
+    icon: Receipt,
+    url: '/creator/transactions',
+    permission: Object.freeze(['analytics.view']),
+    roles: Object.freeze(['superadmin', 'admin', 'creator'])
   },
   {
     id: 'analytics',
@@ -126,22 +88,6 @@ export const creatorMenuItems: readonly MenuItem[] = Object.freeze([
         url: '/creator/analytics/transactions',
         permission: Object.freeze(['analytics.transactions.view']),
         roles: Object.freeze(['superadmin', 'admin', 'creator'])
-      },
-      {
-        id: 'analytics-sales',
-        name: 'Analisis Penjualan',
-        icon: Globe,
-        url: '/creator/analytics/sales',
-        permission: Object.freeze(['analytics.sales.view']),
-        roles: Object.freeze(['superadmin', 'admin', 'creator'])
-      },
-      {
-        id: 'analytics-performance',
-        name: 'Performa Produk',
-        icon: Zap,
-        url: '/creator/analytics/performance',
-        permission: Object.freeze(['analytics.performance.view']),
-        roles: Object.freeze(['superadmin', 'admin', 'creator'])
       }
     ])
   },
@@ -149,34 +95,9 @@ export const creatorMenuItems: readonly MenuItem[] = Object.freeze([
     id: 'reviews',
     name: 'Review/Ulasan',
     icon: UserCheck,
+    url: '/creator/reviews',
     permission: Object.freeze(['reviews.view']),
-    roles: Object.freeze(['superadmin', 'admin', 'creator']),
-    child: Object.freeze([
-      {
-        id: 'reviews-list',
-        name: 'Semua Review',
-        icon: Users,
-        url: '/creator/reviews',
-        permission: Object.freeze(['reviews.view']),
-        roles: Object.freeze(['superadmin', 'admin', 'creator'])
-      },
-      {
-        id: 'reviews-moderation',
-        name: 'Moderasi Review',
-        icon: Shield,
-        url: '/creator/reviews/moderation',
-        permission: Object.freeze(['reviews.moderate']),
-        roles: Object.freeze(['superadmin', 'admin', 'creator'])
-      },
-      {
-        id: 'reviews-ratings',
-        name: 'Rating & Feedback',
-        icon: TrendingUp,
-        url: '/creator/reviews/ratings',
-        permission: Object.freeze(['reviews.ratings.view']),
-        roles: Object.freeze(['superadmin', 'admin', 'creator'])
-      }
-    ])
+    roles: Object.freeze(['superadmin', 'admin', 'creator'])
   },
   {
     id: 'settings',
@@ -187,36 +108,20 @@ export const creatorMenuItems: readonly MenuItem[] = Object.freeze([
     child: Object.freeze([
       {
         id: 'settings-profile',
-        name: 'Profil',
+        name: 'Umum',
         icon: Users,
         url: '/creator/settings/profile',
         permission: Object.freeze(['settings.profile.view']),
         roles: Object.freeze(['superadmin', 'admin', 'creator'])
       },
       {
-        id: 'settings-general',
-        name: 'Umum',
-        icon: Cog,
-        url: '/creator/settings/general',
-        permission: Object.freeze(['settings.general.view']),
-        roles: Object.freeze(['superadmin', 'admin'])
+        id: 'settings-payment',
+        name: 'Payment Gateway',
+        icon: CreditCard,
+        url: '/creator/settings/payment-gateway',
+        permission: Object.freeze(['settings.payment.view']),
+        roles: Object.freeze(['superadmin', 'admin', 'creator'])
       },
-      {
-        id: 'settings-security',
-        name: 'Keamanan',
-        icon: Lock,
-        url: '/creator/settings/security',
-        permission: Object.freeze(['settings.security.view']),
-        roles: Object.freeze(['superadmin'])
-      },
-      {
-        id: 'settings-backup',
-        name: 'Backup & Restore',
-        icon: Database,
-        url: '/creator/settings/backup',
-        permission: Object.freeze(['settings.backup.view']),
-        roles: Object.freeze(['superadmin'])
-      }
     ])
   },
   {

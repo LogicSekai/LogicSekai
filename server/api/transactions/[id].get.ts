@@ -1,5 +1,5 @@
-import { getDB, initializeDB } from '~/lib/db/connection'
-import { transactions, transactionItems, products } from '~/lib/db/schema'
+﻿import { getDB, initializeDB } from '~/lib/db/connection'
+import { transactions, transactionItems, products, users } from '~/lib/db/schema'
 import { eq } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
@@ -38,7 +38,9 @@ export default defineEventHandler(async (event) => {
         // Product details
         productTitle: products.title,
         productSlug: products.slug,
-        productImage: products.previewImages
+        productImage: products.previewImages,
+        productCreatorId: products.userId,
+        gatewayResponse: transactions.gatewayResponse
       })
       .from(transactions)
       .leftJoin(products, eq(transactions.productId, products.id))
@@ -53,6 +55,17 @@ export default defineEventHandler(async (event) => {
     }
 
     const transaction = transactionData[0]
+
+    // Get creator username for the product URL
+    let creatorUsername: string | null = null
+    if (transaction.productCreatorId) {
+      const creator = await db
+        .select({ username: users.username })
+        .from(users)
+        .where(eq(users.id, transaction.productCreatorId))
+        .limit(1)
+      creatorUsername = creator[0]?.username ?? null
+    }
 
     // Get transaction items
     const items = await db
@@ -73,12 +86,24 @@ export default defineEventHandler(async (event) => {
       },
       payment: {
         gateway: transaction.paymentGateway,
-        gatewayTransactionId: transaction.gatewayTransactionId
+        gatewayTransactionId: transaction.gatewayTransactionId,
+        ...(() => {
+          if (!transaction.gatewayResponse) return {}
+          try {
+            const g = JSON.parse(transaction.gatewayResponse)
+            return {
+              snapToken:  g.snapToken  ?? null,
+              paymentUrl: g.paymentUrl ?? null,
+              mode:       g.mode       ?? null,
+            }
+          } catch { return {} }
+        })(),
       },
       product: {
         title: transaction.productTitle,
         slug: transaction.productSlug,
-        image: transaction.productImage ? JSON.parse(transaction.productImage)[0] : null
+        image: transaction.productImage ? JSON.parse(transaction.productImage)[0] : null,
+        creatorUsername,
       },
       items,
       timestamps: {
@@ -88,7 +113,6 @@ export default defineEventHandler(async (event) => {
       }
     }
   } catch (error: any) {
-    console.error('Error fetching transaction:', error)
     
     if (error.statusCode) {
       throw error

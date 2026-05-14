@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue'
+﻿import { ref, computed } from 'vue'
 
 interface CreatorCategoryFormData {
   name: string
@@ -46,7 +46,6 @@ export const useCreatorCategories = () => {
       }
     } catch (err: any) {
       error.value = err.data?.message || err.message || 'Failed to fetch categories'
-      console.error('Error fetching creator categories:', err)
     } finally {
       loading.value = false
     }
@@ -71,7 +70,6 @@ export const useCreatorCategories = () => {
       }
     } catch (err: any) {
       error.value = err.data?.message || err.message || 'Failed to create category'
-      console.error('Error creating category:', err)
       throw err
     } finally {
       loading.value = false
@@ -100,7 +98,6 @@ export const useCreatorCategories = () => {
       }
     } catch (err: any) {
       error.value = err.data?.message || err.message || 'Failed to update category'
-      console.error('Error updating category:', err)
       throw err
     } finally {
       loading.value = false
@@ -124,7 +121,6 @@ export const useCreatorCategories = () => {
       }
     } catch (err: any) {
       error.value = err.data?.message || err.message || 'Failed to delete category'
-      console.error('Error deleting category:', err)
       throw err
     } finally {
       loading.value = false
@@ -146,7 +142,6 @@ export const useCreatorCategories = () => {
       }
     } catch (err: any) {
       error.value = err.data?.message || err.message || 'Failed to fetch category'
-      console.error('Error fetching category:', err)
       throw err
     } finally {
       loading.value = false

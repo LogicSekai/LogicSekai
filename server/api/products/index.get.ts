@@ -1,4 +1,4 @@
-import { getDB } from '~/lib/db/connection'
+﻿import { getDB } from '~/lib/db/connection'
 import { products, users, productCategories, productCategoryMappings } from '~/lib/db/schema'
 import { eq, and, or, like, desc, asc, sql, inArray } from 'drizzle-orm'
 
@@ -176,7 +176,6 @@ export default defineEventHandler(async (event) => {
       }
     }
   } catch (error) {
-    console.error('Error fetching products:', error)
     throw createError({
       statusCode: 500,
       statusMessage: 'Failed to fetch products'

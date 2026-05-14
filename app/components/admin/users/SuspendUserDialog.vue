@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <AlertDialog v-model:open="showDialog">
         <AlertDialogContent>
             <AlertDialogHeader>
@@ -177,7 +177,6 @@ const handleSuspend = async () => {
         }
     } catch (error: any) {
         const userIsSuspended = isSuspended(props.user)
-        console.error(`Error ${userIsSuspended ? 'reactivating' : 'suspending'} user:`, error)
         useToaster('error', error.message || `Failed to ${userIsSuspended ? 'reactivate' : 'suspend'} user`)
     } finally {
         isProcessing.value = false

@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="p-6 space-y-8">
 
     <!-- Header -->
@@ -404,7 +404,6 @@ async function fetchComments() {
     comments.value = res.data
     meta.value = { ...meta.value, ...res.meta }
   } catch (e) {
-    console.error(e)
   } finally {
     loading.value = false
   }
@@ -445,7 +444,6 @@ async function toggleHide(comment: Comment) {
     const idx = comments.value.findIndex(c => c.id === comment.id)
     if (idx !== -1) comments.value[idx].isHidden = !comment.isHidden
   } catch (e) {
-    console.error(e)
   } finally {
     actionId.value = null
   }
@@ -464,7 +462,6 @@ async function doDelete() {
     meta.value.total = Math.max(0, meta.value.total - 1)
     deleteTarget.value = null
   } catch (e) {
-    console.error(e)
   } finally {
     deleting.value = false
   }
@@ -512,7 +509,6 @@ async function submitReply() {
     replyTarget.value = null
     replyContent.value = ''
   } catch (e) {
-    console.error(e)
   } finally {
     submittingReply.value = false
   }

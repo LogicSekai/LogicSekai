@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <AlertDialog v-model:open="showDialog">
         <AlertDialogContent>
             <AlertDialogHeader>
@@ -146,7 +146,6 @@ const handleReactivate = async () => {
             useToaster('error', response.error || 'Failed to reactivate user')
         }
     } catch (error: any) {
-        console.error('Error reactivating user:', error)
         useToaster('error', error.message || 'Failed to reactivate user')
     } finally {
         isProcessing.value = false

@@ -1,4 +1,4 @@
-import { initializeDB } from '~/lib/db/connection';
+﻿import { initializeDB } from '~/lib/db/connection';
 import { products, productCategoryMappings, productContributors } from '~/lib/db/schema/products';
 import { users } from '~/lib/db/schema/users';
 import { productCategories } from '~/lib/db/schema/product-categories';
@@ -123,7 +123,6 @@ async function getCreatorProducts(db: any, event: any, userId: string) {
       data: userProducts
     };
   } catch (error) {
-    console.error('Error fetching creator products:', error);
     throw createError({
       statusCode: 500,
       statusMessage: 'Failed to fetch products'
@@ -133,11 +132,8 @@ async function getCreatorProducts(db: any, event: any, userId: string) {
 
 async function createCreatorProduct(db: any, event: any, userId: string) {
   try {
-    console.log('=== CREATE PRODUCT START ===');
-    console.log('Creating product for user:', userId);
     
     const body = await readBody(event);
-    console.log('Request body:', JSON.stringify(body, null, 2));
     
     const {
       title,
@@ -192,7 +188,6 @@ async function createCreatorProduct(db: any, event: any, userId: string) {
       .replace(/-+/g, '-')
       .trim();
 
-    console.log('Generated slug:', slug);
 
     // Check if slug already exists for this user
     const existingProduct = await db
@@ -245,7 +240,6 @@ async function createCreatorProduct(db: any, event: any, userId: string) {
       updated: new Date(),
     };
 
-    console.log('New product data to insert:', JSON.stringify(newProduct, null, 2));
 
     // Start transaction for product creation
     const result = await db
@@ -254,7 +248,6 @@ async function createCreatorProduct(db: any, event: any, userId: string) {
       .returning();
 
     const createdProduct = result[0];
-    console.log('Product created:', createdProduct.id);
 
     // Insert category mappings if provided
     if (categoryIds.length > 0) {
@@ -267,7 +260,6 @@ async function createCreatorProduct(db: any, event: any, userId: string) {
         .insert(productCategoryMappings)
         .values(categoryMappings);
 
-      console.log('Category mappings created:', categoryMappings.length);
     }
 
     // Insert contributors if provided
@@ -318,11 +310,9 @@ async function createCreatorProduct(db: any, event: any, userId: string) {
           .insert(productContributors)
           .values(contributorMappings);
 
-        console.log('Contributors added:', contributorMappings.length);
       }
     }
 
-    console.log('=== CREATE PRODUCT SUCCESS ===');
 
     return {
       success: true,
@@ -330,11 +320,6 @@ async function createCreatorProduct(db: any, event: any, userId: string) {
       data: createdProduct
     };
   } catch (error: any) {
-    console.log('=== CREATE PRODUCT ERROR ===');
-    console.error('Error creating product:', error);
-    console.error('Error message:', error.message);
-    console.error('Error status:', error.statusCode);
-    console.log('=== END ERROR ===');
     
     if (error.statusCode) {
       throw error;

@@ -16,7 +16,7 @@ const founder = {
     linkedin: '#',
     github: '#',
     twitter: '#',
-    email: 'hello@logicsekai.com',
+    email: 'logicsekai@gmail.com',
   },
 }
 

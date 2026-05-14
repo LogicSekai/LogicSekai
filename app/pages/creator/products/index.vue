@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <div class="p-6 space-y-8">
         <!-- Header -->
         <div class="flex items-start justify-between mb-8">
@@ -252,7 +252,6 @@ const toggleProductStatus = async (productId: string) => {
     try {
         await toggleStatus(productId)
     } catch (err) {
-        console.error('Failed to toggle product status:', err)
     }
 }
 
@@ -267,7 +266,6 @@ const deleteProduct = async () => {
         await removeProduct(productToDelete.value.id)
         productToDelete.value = null
     } catch (err) {
-        console.error('Failed to delete product:', err)
     }
 }
 

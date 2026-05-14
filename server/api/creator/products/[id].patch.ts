@@ -1,4 +1,4 @@
-import { initializeDB } from '~/lib/db/connection';
+﻿import { initializeDB } from '~/lib/db/connection';
 import { products } from '~/lib/db/schema/products';
 import { eq, and } from 'drizzle-orm';
 
@@ -72,11 +72,8 @@ export default defineEventHandler(async (event) => {
 
 async function toggleProductStatus(db: any, event: any, productId: string, userId: string) {
   try {
-    console.log('=== TOGGLE PRODUCT STATUS START ===');
-    console.log('Toggling status for product ID:', productId, 'for user:', userId);
     
     const body = await readBody(event);
-    console.log('Request body:', JSON.stringify(body, null, 2));
     
     const { action } = body;
     
@@ -97,10 +94,8 @@ async function toggleProductStatus(db: any, event: any, productId: string, userI
       ))
       .limit(1);
 
-    console.log('Existing product found:', existingProduct.length > 0);
 
     if (existingProduct.length === 0) {
-      console.log('Error: Product not found or not owned by user');
       throw createError({
         statusCode: 404,
         statusMessage: 'Product not found or access denied'
@@ -135,7 +130,6 @@ async function toggleProductStatus(db: any, event: any, productId: string, userI
         break;
     }
 
-    console.log('Status change:', currentProduct.status, '->', newStatus);
 
     // Update product status
     const result = await db
@@ -150,8 +144,6 @@ async function toggleProductStatus(db: any, event: any, productId: string, userI
       ))
       .returning();
 
-    console.log('Status update result:', JSON.stringify(result, null, 2));
-    console.log('=== TOGGLE PRODUCT STATUS SUCCESS ===');
 
     return {
       success: true,
@@ -164,11 +156,6 @@ async function toggleProductStatus(db: any, event: any, productId: string, userI
       }
     };
   } catch (error: any) {
-    console.log('=== TOGGLE PRODUCT STATUS ERROR ===');
-    console.error('Error toggling product status:', error);
-    console.error('Error message:', error.message);
-    console.error('Error status:', error.statusCode);
-    console.log('=== END ERROR ===');
     
     if (error.statusCode) {
       throw error;

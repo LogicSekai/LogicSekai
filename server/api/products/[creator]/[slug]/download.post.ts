@@ -1,11 +1,10 @@
-import { getDB, initializeDB } from '~/lib/db/connection'
+﻿import { getDB, initializeDB } from '~/lib/db/connection'
 import { products, users, transactions, transactionItems, downloadHistory } from '~/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
 import { createId } from '@paralleldrive/cuid2'
 
 export default defineEventHandler(async (event) => {
   try {
-    console.log('=== DOWNLOAD API START ===')
     
     // Set proper headers
     setHeader(event, 'content-type', 'application/json')
@@ -15,7 +14,6 @@ export default defineEventHandler(async (event) => {
     if (!db) {
       db = initializeDB()
     }
-    console.log('Database initialized:', !!db)
 
     const creatorUsername = getRouterParam(event, 'creator')
     const productSlug = getRouterParam(event, 'slug')
@@ -38,7 +36,6 @@ export default defineEventHandler(async (event) => {
     }
 
     const userData = authContext.user
-    console.log('User data from auth context:', { id: userData?.id, username: userData?.username })
 
     // Get product by creator and slug
     const productData = await db
@@ -187,7 +184,6 @@ export default defineEventHandler(async (event) => {
     }
 
   } catch (error: any) {
-    console.error('❌ Error in download API:', error)
     
     // Set proper headers for error response
     setHeader(event, 'content-type', 'application/json')

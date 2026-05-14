@@ -1,4 +1,4 @@
-import { getDB, initializeDB } from '~/lib/db/connection'
+﻿import { getDB, initializeDB } from '~/lib/db/connection'
 import { products, transactions, downloadHistory } from '~/lib/db/schema'
 import { eq, and, or } from 'drizzle-orm'
 
@@ -109,7 +109,6 @@ export default defineEventHandler(async (event) => {
           }
         })
       } catch (error) {
-        console.error('Failed to track download:', error)
         // Don't block the download for tracking errors
       }
     }
@@ -135,7 +134,6 @@ export default defineEventHandler(async (event) => {
     }
 
   } catch (error: any) {
-    console.error('Download error:', error)
     
     if (error.statusCode) {
       throw error

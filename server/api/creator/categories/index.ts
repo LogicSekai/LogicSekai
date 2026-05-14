@@ -1,4 +1,4 @@
-import { initializeDB, type ProductCategory, type NewProductCategory } from '~/lib/db/connection';
+﻿import { initializeDB, type ProductCategory, type NewProductCategory } from '~/lib/db/connection';
 import { productCategories } from '~/lib/db/schema/product-categories';
 import { users } from '~/lib/db/schema/users';
 import { eq, and, isNull, asc, ne } from 'drizzle-orm';
@@ -130,16 +130,12 @@ async function getCreatorCategories(db: any, event: any, userId: string) {
 
 async function createCreatorCategory(db: any, event: any, userId: string) {
   try {
-    console.log('=== CREATE CATEGORY START ===');
-    console.log('Creating category for user:', userId);
     
     const body = await readBody(event);
-    console.log('Request body:', JSON.stringify(body, null, 2));
     
     const { name, slug: providedSlug, description, parentId, image, isActive = true, sortOrder = 0 } = body;
 
     if (!name) {
-      console.log('Error: Name is missing');
       throw createError({
         statusCode: 400,
         statusMessage: 'Name is required'
@@ -157,7 +153,6 @@ async function createCreatorCategory(db: any, event: any, userId: string) {
         .trim();
     }
 
-    console.log('Generated slug:', slug);
 
     // Check if slug already exists for this user
     const existingCategory = await db
@@ -169,10 +164,8 @@ async function createCreatorCategory(db: any, event: any, userId: string) {
       ))
       .limit(1);
 
-    console.log('Existing categories found:', existingCategory.length);
 
     if (existingCategory.length > 0) {
-      console.log('Error: Slug already exists');
       throw createError({
         statusCode: 409,
         statusMessage: 'Category with this slug already exists'
@@ -192,15 +185,12 @@ async function createCreatorCategory(db: any, event: any, userId: string) {
       updated: new Date(),
     };
 
-    console.log('New category data to insert:', JSON.stringify(newCategory, null, 2));
 
     const result = await db
       .insert(productCategories)
       .values(newCategory)
       .returning();
 
-    console.log('Insert result:', JSON.stringify(result, null, 2));
-    console.log('=== CREATE CATEGORY SUCCESS ===');
 
     return {
       success: true,
@@ -208,11 +198,6 @@ async function createCreatorCategory(db: any, event: any, userId: string) {
       data: result[0]
     };
   } catch (error: any) {
-    console.log('=== CREATE CATEGORY ERROR ===');
-    console.error('Error creating category:', error);
-    console.error('Error message:', error.message);
-    console.error('Error status:', error.statusCode);
-    console.log('=== END ERROR ===');
     
     if (error.statusCode) {
       throw error;
@@ -226,16 +211,12 @@ async function createCreatorCategory(db: any, event: any, userId: string) {
 
 async function updateCreatorCategory(db: any, event: any, userId: string) {
   try {
-    console.log('=== UPDATE CATEGORY START ===');
-    console.log('Updating category for user:', userId);
     
     const body = await readBody(event);
-    console.log('Update request body:', JSON.stringify(body, null, 2));
     
     const { id, name, slug: providedSlug, description, parentId, image, isActive, sortOrder } = body;
 
     if (!id) {
-      console.log('Error: Category ID is missing');
       throw createError({
         statusCode: 400,
         statusMessage: 'Category ID is required'
@@ -243,7 +224,6 @@ async function updateCreatorCategory(db: any, event: any, userId: string) {
     }
 
     if (!name) {
-      console.log('Error: Name is missing');
       throw createError({
         statusCode: 400,
         statusMessage: 'Name is required'
@@ -261,7 +241,6 @@ async function updateCreatorCategory(db: any, event: any, userId: string) {
       .limit(1);
 
     if (existingCategory.length === 0) {
-      console.log('Error: Category not found or not owned by user');
       throw createError({
         statusCode: 404,
         statusMessage: 'Category not found'
@@ -279,7 +258,6 @@ async function updateCreatorCategory(db: any, event: any, userId: string) {
         .trim();
     }
 
-    console.log('Generated slug:', slug);
 
     // Check if slug already exists for this user (excluding current category)
     const slugCheck = await db
@@ -293,7 +271,6 @@ async function updateCreatorCategory(db: any, event: any, userId: string) {
       .limit(1);
 
     if (slugCheck.length > 0) {
-      console.log('Error: Slug already exists for another category');
       throw createError({
         statusCode: 409,
         statusMessage: 'Category with this slug already exists'
@@ -311,7 +288,6 @@ async function updateCreatorCategory(db: any, event: any, userId: string) {
       updated: new Date(),
     };
 
-    console.log('Update data:', JSON.stringify(updateData, null, 2));
 
     const result = await db
       .update(productCategories)
@@ -322,8 +298,6 @@ async function updateCreatorCategory(db: any, event: any, userId: string) {
       ))
       .returning();
 
-    console.log('Update result:', JSON.stringify(result, null, 2));
-    console.log('=== UPDATE CATEGORY SUCCESS ===');
 
     return {
       success: true,
@@ -331,11 +305,6 @@ async function updateCreatorCategory(db: any, event: any, userId: string) {
       data: result[0]
     };
   } catch (error: any) {
-    console.log('=== UPDATE CATEGORY ERROR ===');
-    console.error('Error updating category:', error);
-    console.error('Error message:', error.message);
-    console.error('Error status:', error.statusCode);
-    console.log('=== END ERROR ===');
     
     if (error.statusCode) {
       throw error;
@@ -349,16 +318,12 @@ async function updateCreatorCategory(db: any, event: any, userId: string) {
 
 async function deleteCreatorCategory(db: any, event: any, userId: string) {
   try {
-    console.log('=== DELETE CATEGORY START ===');
-    console.log('Deleting category for user:', userId);
     
     const body = await readBody(event);
-    console.log('Delete request body:', JSON.stringify(body, null, 2));
     
     const { id } = body;
 
     if (!id) {
-      console.log('Error: Category ID is missing');
       throw createError({
         statusCode: 400,
         statusMessage: 'Category ID is required'
@@ -376,14 +341,12 @@ async function deleteCreatorCategory(db: any, event: any, userId: string) {
       .limit(1);
 
     if (existingCategory.length === 0) {
-      console.log('Error: Category not found or not owned by user');
       throw createError({
         statusCode: 404,
         statusMessage: 'Category not found'
       });
     }
 
-    console.log('Deleting category:', existingCategory[0].name);
 
     const result = await db
       .delete(productCategories)
@@ -393,19 +356,12 @@ async function deleteCreatorCategory(db: any, event: any, userId: string) {
       ))
       .returning();
 
-    console.log('Delete result:', JSON.stringify(result, null, 2));
-    console.log('=== DELETE CATEGORY SUCCESS ===');
 
     return {
       success: true,
       message: 'Category deleted successfully'
     };
   } catch (error: any) {
-    console.log('=== DELETE CATEGORY ERROR ===');
-    console.error('Error deleting category:', error);
-    console.error('Error message:', error.message);
-    console.error('Error status:', error.statusCode);
-    console.log('=== END ERROR ===');
     
     if (error.statusCode) {
       throw error;

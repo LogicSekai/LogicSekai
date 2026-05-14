@@ -1,4 +1,4 @@
-import { initializeDB } from '~/lib/db/connection';
+﻿import { initializeDB } from '~/lib/db/connection';
 import { products, productCategoryMappings, productContributors } from '~/lib/db/schema/products';
 import { users } from '~/lib/db/schema/users';
 import { eq, and, ne, or } from 'drizzle-orm';
@@ -73,11 +73,8 @@ export default defineEventHandler(async (event) => {
 
 async function updateCreatorProduct(db: any, event: any, productId: string, userId: string) {
   try {
-    console.log('=== UPDATE PRODUCT START ===');
-    console.log('Updating product ID:', productId, 'for user:', userId);
     
     const body = await readBody(event);
-    console.log('Update request body:', JSON.stringify(body, null, 2));
     
     // Check if product exists and belongs to user
     const existingProduct = await db
@@ -89,10 +86,8 @@ async function updateCreatorProduct(db: any, event: any, productId: string, user
       ))
       .limit(1);
 
-    console.log('Existing product found:', existingProduct.length > 0);
 
     if (existingProduct.length === 0) {
-      console.log('Error: Product not found or not owned by user');
       throw createError({
         statusCode: 404,
         statusMessage: 'Product not found or access denied'
@@ -150,7 +145,6 @@ async function updateCreatorProduct(db: any, event: any, productId: string, user
         .limit(1);
 
       if (slugCheck.length > 0) {
-        console.log('Error: Slug already exists for another product');
         throw createError({
           statusCode: 409,
           statusMessage: 'Product with this slug already exists'
@@ -190,7 +184,6 @@ async function updateCreatorProduct(db: any, event: any, productId: string, user
     if (discountEndDate !== undefined) updateData.discountEndDate = discountEndDate ? new Date(discountEndDate) : null;
     if (status !== undefined) updateData.status = status;
 
-    console.log('Update data to apply:', JSON.stringify(updateData, null, 2));
 
     // Update the product
     const result = await db
@@ -202,7 +195,6 @@ async function updateCreatorProduct(db: any, event: any, productId: string, user
       ))
       .returning();
 
-    console.log('Product update result:', JSON.stringify(result, null, 2));
 
     if (result.length === 0) {
       throw createError({
@@ -215,7 +207,6 @@ async function updateCreatorProduct(db: any, event: any, productId: string, user
 
     // Update category mappings if provided
     if (categoryIds !== undefined && Array.isArray(categoryIds)) {
-      console.log('Updating category mappings:', categoryIds);
       
       // Delete existing mappings
       await db
@@ -234,13 +225,11 @@ async function updateCreatorProduct(db: any, event: any, productId: string, user
           .insert(productCategoryMappings)
           .values(categoryMappings);
 
-        console.log('Category mappings updated:', categoryMappings.length);
       }
     }
 
     // Update contributors if provided
     if (contributors !== undefined && Array.isArray(contributors)) {
-      console.log('Updating contributors:', contributors);
       
       // Delete existing contributors
       await db
@@ -279,12 +268,10 @@ async function updateCreatorProduct(db: any, event: any, productId: string, user
             .insert(productContributors)
             .values(contributorMappings);
 
-          console.log('Contributors updated:', contributorMappings.length);
         }
       }
     }
 
-    console.log('=== UPDATE PRODUCT SUCCESS ===');
 
     return {
       success: true,
@@ -292,11 +279,6 @@ async function updateCreatorProduct(db: any, event: any, productId: string, user
       data: updatedProduct
     };
   } catch (error: any) {
-    console.log('=== UPDATE PRODUCT ERROR ===');
-    console.error('Error updating product:', error);
-    console.error('Error message:', error.message);
-    console.error('Error status:', error.statusCode);
-    console.log('=== END ERROR ===');
     
     if (error.statusCode) {
       throw error;

@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <div>
         <!-- Loading -->
         <div v-if="loading" class="flex items-center justify-center py-16">
@@ -324,7 +324,6 @@ const loadReviews = async (page = 1) => {
         canReview.value = res.user?.canReview ?? false
         pagination.value = res.pagination
     } catch (err) {
-        console.error('Failed to load reviews', err)
     } finally {
         loading.value = false
     }

@@ -1,4 +1,4 @@
-export default defineEventHandler(async (event) => {
+﻿export default defineEventHandler(async (event) => {
   // Only handle admin page requests
   const url = getRequestURL(event)
   
@@ -38,7 +38,6 @@ export default defineEventHandler(async (event) => {
     }
 
   } catch (error) {
-    console.error('Admin SSR middleware error:', error)
     await sendRedirect(event, '/auth/login')
     return
   }

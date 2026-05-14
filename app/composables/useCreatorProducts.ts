@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue'
+﻿import { ref, computed } from 'vue'
 import type { ProductFormData, ProductStats } from '~/types/product'
 
 interface CreatorProduct {
@@ -55,7 +55,6 @@ export const useCreatorProducts = () => {
       }
     } catch (err: any) {
       error.value = err.data?.message || err.message || 'Failed to fetch products'
-      console.error('Error fetching creator products:', err)
     } finally {
       loading.value = false
     }
@@ -80,7 +79,6 @@ export const useCreatorProducts = () => {
       }
     } catch (err: any) {
       error.value = err.data?.message || err.message || 'Failed to create product'
-      console.error('Error creating product:', err)
       throw err
     } finally {
       loading.value = false
@@ -109,7 +107,6 @@ export const useCreatorProducts = () => {
       }
     } catch (err: any) {
       error.value = err.data?.message || err.message || 'Failed to update product'
-      console.error('Error updating product:', err)
       throw err
     } finally {
       loading.value = false
@@ -134,7 +131,6 @@ export const useCreatorProducts = () => {
       }
     } catch (err: any) {
       error.value = err.data?.message || err.message || 'Failed to delete product'
-      console.error('Error deleting product:', err)
       throw err
     } finally {
       loading.value = false
@@ -170,7 +166,6 @@ export const useCreatorProducts = () => {
       }
     } catch (err: any) {
       error.value = err.data?.message || err.message || 'Failed to toggle product status'
-      console.error('Error toggling product status:', err)
       throw err
     } finally {
       loading.value = false
@@ -192,7 +187,6 @@ export const useCreatorProducts = () => {
       }
     } catch (err: any) {
       error.value = err.data?.message || err.message || 'Failed to fetch product'
-      console.error('Error fetching product:', err)
       return null
     } finally {
       loading.value = false

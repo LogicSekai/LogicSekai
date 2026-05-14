@@ -41,4 +41,5 @@ public/uploads/gallery/*
 public/uploads/preview/*
 public/uploads/product/*
 public/uploads/thumbnail/*
+public/uploads/support/*
 !public/uploads/**/.gitkeep

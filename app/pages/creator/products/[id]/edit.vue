@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <div class="p-6 space-y-8">
         <div class="max-w-4xl mx-auto">
 
@@ -674,7 +674,6 @@ const handleSubmit = async () => {
         saveSuccess.value = true
         window.scrollTo({ top: 0, behavior: 'smooth' })
     } catch (err) {
-        console.error('Failed to update product:', err)
     }
 }
 </script>

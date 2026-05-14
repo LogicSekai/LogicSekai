@@ -1,4 +1,4 @@
-import { initializeDB } from '~/lib/db/connection';
+﻿import { initializeDB } from '~/lib/db/connection';
 import { products, productCategoryMappings, productContributors } from '~/lib/db/schema/products';
 import { eq, and } from 'drizzle-orm';
 
@@ -72,8 +72,6 @@ export default defineEventHandler(async (event) => {
 
 async function deleteCreatorProduct(db: any, productId: string, userId: string) {
   try {
-    console.log('=== DELETE PRODUCT START ===');
-    console.log('Deleting product ID:', productId, 'for user:', userId);
     
     // Check if product exists and belongs to user
     const existingProduct = await db
@@ -85,10 +83,8 @@ async function deleteCreatorProduct(db: any, productId: string, userId: string) 
       ))
       .limit(1);
 
-    console.log('Existing product found:', existingProduct.length > 0);
 
     if (existingProduct.length === 0) {
-      console.log('Error: Product not found or not owned by user');
       throw createError({
         statusCode: 404,
         statusMessage: 'Product not found or access denied'
@@ -96,21 +92,18 @@ async function deleteCreatorProduct(db: any, productId: string, userId: string) 
     }
 
     // Delete related data first (foreign key constraints)
-    console.log('Deleting related data...');
 
     // Delete category mappings
     await db
       .delete(productCategoryMappings)
       .where(eq(productCategoryMappings.productId, productId));
 
-    console.log('Category mappings deleted');
 
     // Delete contributors
     await db
       .delete(productContributors)
       .where(eq(productContributors.productId, productId));
 
-    console.log('Contributors deleted');
 
     // Finally delete the product
     const result = await db
@@ -121,19 +114,12 @@ async function deleteCreatorProduct(db: any, productId: string, userId: string) 
       ))
       .returning();
 
-    console.log('Product deleted:', result.length > 0);
-    console.log('=== DELETE PRODUCT SUCCESS ===');
 
     return {
       success: true,
       message: 'Product deleted successfully'
     };
   } catch (error: any) {
-    console.log('=== DELETE PRODUCT ERROR ===');
-    console.error('Error deleting product:', error);
-    console.error('Error message:', error.message);
-    console.error('Error status:', error.statusCode);
-    console.log('=== END ERROR ===');
     
     if (error.statusCode) {
       throw error;

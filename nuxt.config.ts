@@ -4,7 +4,7 @@ import { resolve } from "path"
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
-  devtools: { enabled: true },
+  devtools: { enabled: false },
   ssr: false,
   css: ['@/assets/css/main.css'],
 
@@ -16,8 +16,7 @@ export default defineNuxtConfig({
             // Prevent FOUC (Flash of Unstyled Content) for dark mode
             (function() {
               const stored = localStorage.getItem('darkMode');
-              const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-              const shouldBeDark = stored !== null ? JSON.parse(stored) : prefersDark;
+              const shouldBeDark = stored !== null ? JSON.parse(stored) : false;
               
               if (shouldBeDark) {
                 document.documentElement.classList.add('dark');
@@ -36,6 +35,13 @@ export default defineNuxtConfig({
     plugins: [
       tailwindcss(),
     ],
+    server: {
+      allowedHosts: ['logicsekai.com', 'playground.logicsekai.com'],
+    },
+    esbuild: {
+      // Strip all console.* calls and debugger statements in production build
+      drop: process.env.NODE_ENV === 'production' ? ['console', 'debugger'] : undefined,
+    },
   },
 
   modules: ['shadcn-nuxt'],
@@ -48,6 +54,12 @@ export default defineNuxtConfig({
     preset: 'cloudflare-pages',
     experimental: {
       wasm: true
+    },
+    esbuild: {
+      // Strip all console.* calls and debugger statements from server-side code in production
+      options: {
+        drop: process.env.NODE_ENV === 'production' ? ['console', 'debugger'] : undefined,
+      },
     },
     // Replace Node.js-only packages with stubs in production (Cloudflare Workers)
     // These code paths are never reached in production (guarded by NODE_ENV checks)

@@ -1,4 +1,4 @@
-import { drizzle } from 'drizzle-orm/better-sqlite3'
+﻿import { drizzle } from 'drizzle-orm/better-sqlite3'
 import Database from 'better-sqlite3'
 import { contactMessages } from '~/lib/db/schema'
 
@@ -55,7 +55,6 @@ export default defineEventHandler(async (event) => {
 
         return { success: true, id: inserted.id }
     } catch (error: any) {
-        console.error('[contact] insert error:', error)
         throw createError({ statusCode: 500, statusMessage: 'Gagal menyimpan pesan. Coba lagi.' })
     }
 })

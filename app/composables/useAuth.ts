@@ -1,4 +1,4 @@
-export interface User {
+﻿export interface User {
     id: string
     name: string
     username: string
@@ -42,7 +42,6 @@ export const useAuth = () => {
                 }
             }
         } catch (error) {
-            console.warn('Failed to restore session:', error)
             // Clear invalid session
             const userCookie = useCookie('user-session')
             userCookie.value = null

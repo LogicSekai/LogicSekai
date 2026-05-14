@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Middleware to require creator role or higher
  * Must be placed after auth.ts middleware
  */
@@ -15,7 +15,6 @@ export default defineEventHandler(async (event) => {
   const authContext = event.context.auth
   
   if (!authContext || !authContext.isAuthenticated) {
-    console.log(`🚫 Unauthenticated creator access attempt to: ${pathname}`)
     throw createError({
       statusCode: 401,
       statusMessage: 'Authentication required'
@@ -24,12 +23,10 @@ export default defineEventHandler(async (event) => {
 
   // Check creator role (creator or admin)
   if (!authContext.isCreator()) {
-    console.log(`🚫 Non-creator user ${authContext.user?.username} attempting creator access to: ${pathname}`)
     throw createError({
       statusCode: 403,
       statusMessage: 'Creator access required'
     })
   }
 
-  console.log(`🎨 Creator access granted: ${authContext.user?.username} (${authContext.user?.role}) to ${pathname}`)
 })

@@ -47,6 +47,17 @@ export default defineEventHandler(async (event) => {
 
     try {
         const db = getDatabase();
+
+        // Block if a superadmin already exists
+        const existingSuperadmin = await db.select({ id: users.id })
+            .from(users)
+            .where(eq(users.role, 'superadmin'))
+            .limit(1);
+
+        if (existingSuperadmin.length > 0) {
+            throw createError({ statusCode: 403, statusMessage: 'Setup sudah selesai. Superadmin sudah ada.' });
+        }
+
         // Check if user already exists
         const existingUser = await db.select().from(users)
             .where(eq(users.email, email))

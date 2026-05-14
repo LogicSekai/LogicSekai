@@ -235,7 +235,6 @@ const fetchProducts = async () => {
       ...(searchQuery.value && { search: searchQuery.value })
     })
     
-    console.log('Fetching products with query:', query.toString())
     
     const response = await $fetch<{
       success: boolean
@@ -250,7 +249,6 @@ const fetchProducts = async () => {
       }
     }>(`/api/products?${query}`)
     
-    console.log('API Response:', response)
     
     if (response.success && response.data) {
       products.value = response.data.data || []
@@ -262,7 +260,6 @@ const fetchProducts = async () => {
       totalPages.value = 0
     }
   } catch (error) {
-    console.error('Error fetching products:', error)
     products.value = []
     totalProducts.value = 0
     totalPages.value = 0
@@ -280,7 +277,6 @@ const fetchFeaturedProducts = async () => {
       data: { data: Product[] } 
     }>('/api/products/featured')
     
-    console.log('Featured API Response:', response)
     
     if (response.success && response.data) {
       featuredProducts.value = response.data.data || []
@@ -288,7 +284,6 @@ const fetchFeaturedProducts = async () => {
       featuredProducts.value = []
     }
   } catch (error) {
-    console.error('Error fetching featured products:', error)
     featuredProducts.value = []
   }
 }
@@ -348,13 +343,10 @@ watch(
 
 // Initialize from URL
 onMounted(async () => {
-  console.log('Component mounted')
   const route = useRoute()
   searchQuery.value = (route.query.search as string) || ''
   currentPage.value = parseInt((route.query.page as string) || '1')
   
-  console.log('Initial search query:', searchQuery.value)
-  console.log('Initial page:', currentPage.value)
   
   await fetchProducts()
   await fetchFeaturedProducts()

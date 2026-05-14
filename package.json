@@ -16,6 +16,7 @@
     "db:push:prod": "wrangler d1 migrations apply logic-sekai-db --remote",
     "db:studio": "drizzle-kit studio --config=drizzle.dev.config.ts",
     "db:studio:prod": "drizzle-kit studio --config=drizzle.config.ts",
+    "db:seed": "node scripts/seed-data.js",
     "deploy": "wrangler pages deploy .output/public",
     "deploy:build": "bun run build:production && wrangler pages deploy .output/public"
   },

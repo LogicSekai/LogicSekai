@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <Teleport to="body">
         <div v-if="open" class="fixed inset-0 z-50 flex items-center justify-center">
             <!-- Backdrop -->
@@ -241,9 +241,7 @@ const processFile = (file: File): void => {
 }
 
 const showError = (message: string): void => {
-    // You can replace this with a proper toast notification
-    console.error('Avatar Upload Error:', message)
-    alert(message)
+    useToaster('error', message)
 }
 
 const handleDrop = (event: DragEvent): void => {
@@ -343,7 +341,6 @@ const uploadImage = async (): Promise<void> => {
             throw new Error(uploadResponse.error || 'Failed to upload avatar')
         }
     } catch (error: any) {
-        console.error('Upload error:', error)
         showError(error.message || 'Failed to upload avatar')
     } finally {
         isUploading.value = false

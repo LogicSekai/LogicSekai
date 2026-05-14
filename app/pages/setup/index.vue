@@ -143,6 +143,12 @@ definePageMeta({
   layout: 'empty'
 })
 
+// Redirect to home if superadmin already exists
+const { data: setupStatus } = await useFetch('/api/setup/status')
+if (setupStatus.value?.exists) {
+  await navigateTo('/', { replace: true })
+}
+
 const form = reactive({
   email: '',
   password: '',

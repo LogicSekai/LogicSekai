@@ -1,4 +1,4 @@
-import { existsSync, statSync, createReadStream } from 'node:fs'
+﻿import { existsSync, statSync, createReadStream } from 'node:fs'
 import { join } from 'node:path'
 import archiver from 'archiver'
 import { getDB, initializeDB } from '~/lib/db/connection'
@@ -229,7 +229,6 @@ export default defineEventHandler(async (event) => {
     return send(event, zipBuffer)
 
   } catch (error: any) {
-    console.error('Download error:', error)
     if (error.statusCode) throw error
     throw createError({ statusCode: 500, statusMessage: 'Failed to process download' })
   }

@@ -458,7 +458,7 @@ async function toggleSuspend(product: Product, action: 'suspend' | 'unsuspend') 
       products.value[idx].status = action === 'suspend' ? 'suspended' : 'published'
     }
   } catch (err: any) {
-    alert(err?.data?.statusMessage || err?.data?.message || 'Gagal mengubah status produk.')
+    useToaster('error', err?.data?.statusMessage || err?.data?.message || 'Gagal mengubah status produk.')
   } finally {
     suspendingId.value = null
   }

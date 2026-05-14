@@ -1,4 +1,4 @@
-import { getDB, initializeDB } from '~/lib/db/connection'
+﻿import { getDB, initializeDB } from '~/lib/db/connection'
 import { products } from '~/lib/db/schema'
 
 export default defineEventHandler(async (event) => {
@@ -99,7 +99,6 @@ export default defineEventHandler(async (event) => {
         await db.insert(products).values(product).onConflictDoNothing()
         inserted++
       } catch (error) {
-        console.log(`Product ${product.id} already exists or error:`, error)
       }
     }
 
@@ -109,7 +108,6 @@ export default defineEventHandler(async (event) => {
       count: sampleProducts.length
     }
   } catch (error) {
-    console.error('Error creating sample products:', error)
     throw createError({
       statusCode: 500,
       statusMessage: 'Failed to create sample products'

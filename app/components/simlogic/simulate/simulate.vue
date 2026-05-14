@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { Trash, SendToBack, TextCursor, Send } from 'lucide-vue-next'
 
 const formActive = ref('sample&fodder')
@@ -369,7 +369,6 @@ function combinePredictions(upgradeResult: any, substatResult: any) {
         });
     });
 
-    console.log(combinedPredictions);
     return combinedPredictions;
 }
 

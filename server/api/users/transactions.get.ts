@@ -1,4 +1,4 @@
-import { getDB, initializeDB } from '~/lib/db/connection'
+﻿import { getDB, initializeDB } from '~/lib/db/connection'
 import { transactions, transactionItems, products, users } from '~/lib/db/schema'
 import { eq, desc, and, sql, count } from 'drizzle-orm'
 
@@ -122,7 +122,6 @@ export default defineEventHandler(async (event) => {
     }
 
   } catch (error: any) {
-    console.error('Error fetching user transactions:', error)
     
     if (error.statusCode) {
       throw error

@@ -149,13 +149,13 @@
             <p class="font-mono text-[10px] text-gray-400 truncate">{{ category.description || 'Tidak ada deskripsi' }}</p>
             <p class="font-mono text-[10px] text-gray-300 dark:text-white/20 mt-0.5">
               <HashIcon class="inline h-2.5 w-2.5 mr-0.5" />{{ category.slug }}
-              Â· <CalendarIcon class="inline h-2.5 w-2.5 mr-0.5" />{{ formatDate(category.created) }}
+              · <CalendarIcon class="inline h-2.5 w-2.5 mr-0.5" />{{ formatDate(category.created) }}
             </p>
           </div>
 
           <!-- Creator -->
           <div class="min-w-0">
-            <p class="text-xs font-medium text-gray-800 dark:text-gray-200 truncate">{{ category.user?.name || 'â€”' }}</p>
+            <p class="text-xs font-medium text-gray-800 dark:text-gray-200 truncate">{{ category.user?.name || '—' }}</p>
             <p class="font-mono text-[10px] text-gray-400">@{{ category.user?.username || 'unknown' }}</p>
           </div>
 
@@ -276,7 +276,6 @@ async function fetchCategories() {
     const res = await $fetch<{ success: boolean; data: any[] }>('/api/categories')
     if (res.success) categories.value = res.data
   } catch (e) {
-    console.error('Error fetching categories:', e)
   } finally {
     loading.value = false
   }
@@ -294,7 +293,6 @@ async function toggleCategory(category: any) {
       if (idx !== -1) categories.value[idx].isActive = !category.isActive
     }
   } catch (e) {
-    console.error('Error toggling category:', e)
   } finally {
     toggling.value = null
   }

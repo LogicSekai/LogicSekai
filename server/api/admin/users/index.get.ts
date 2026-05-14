@@ -1,4 +1,4 @@
-import { drizzle } from 'drizzle-orm/better-sqlite3'
+﻿import { drizzle } from 'drizzle-orm/better-sqlite3'
 import Database from 'better-sqlite3'
 import { users } from '~/lib/db/schema'
 import { desc } from 'drizzle-orm'
@@ -60,7 +60,6 @@ export default defineEventHandler(async (event) => {
     }
 
   } catch (error: any) {
-    console.error('Error fetching users:', error)
     
     if (error.statusCode) {
       throw error

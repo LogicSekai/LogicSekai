@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Middleware to require user authentication
  * Must be placed after auth.ts middleware
  */
@@ -28,7 +28,6 @@ export default defineEventHandler(async (event) => {
   const authContext = event.context.auth
   
   if (!authContext || !authContext.isAuthenticated) {
-    console.log(`🚫 Unauthorized access attempt to: ${pathname}`)
     throw createError({
       statusCode: 401,
       statusMessage: 'Authentication required'
@@ -37,12 +36,10 @@ export default defineEventHandler(async (event) => {
 
   // Check if user is suspended or deleted
   if (authContext.user?.suspended || authContext.user?.deleted) {
-    console.log(`🚫 Suspended/deleted user attempting access: ${authContext.user.username}`)
     throw createError({
       statusCode: 403,
       statusMessage: 'Account suspended or deleted'
     })
   }
 
-  console.log(`✅ Authenticated access: ${authContext.user?.username} to ${pathname}`)
 })

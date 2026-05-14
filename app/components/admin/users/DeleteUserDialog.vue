@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <AlertDialog v-model:open="showDialog">
         <AlertDialogContent>
             <AlertDialogHeader>
@@ -157,7 +157,6 @@ const handleDelete = async () => {
             useToaster('error', response.error || 'Failed to delete user')
         }
     } catch (error: any) {
-        console.error('Error deleting user:', error)
         useToaster('error', error.message || 'Failed to delete user')
     } finally {
         isDeleting.value = false

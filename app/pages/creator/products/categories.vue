@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <div class="p-6 space-y-8">
         <div class="max-w-4xl mx-auto">
 
@@ -354,7 +354,6 @@ const handleDeleteCategory = async () => {
         showDeleteConfirm.value = false
         categoryToDelete.value = null
     } catch (err: any) {
-        console.error('Error deleting category:', err)
     } finally {
         deleting.value = false
     }
