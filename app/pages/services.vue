@@ -141,6 +141,18 @@ const tools = [
         icon: 'M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4',
         image: null,
     },
+    {
+        id: 8,
+        name: 'Cron Expression',
+        tagline: 'Cron Builder & Explainer',
+        description: 'Builder visual untuk cron expression. Susun jadwal tanpa hafal syntax, baca penjelasan bahasa manusia, dan preview 5 jadwal eksekusi berikutnya.',
+        tag: 'CRON / DEV',
+        category: 'Dev Utility',
+        status: 'AVAILABLE',
+        link: '/tools/cron-expression',
+        icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
+        image: null,
+    },
 ]
 </script>
 
