@@ -64,7 +64,7 @@ async function importKey(version: number): Promise<CryptoKey> {
 
     return globalThis.crypto.subtle.importKey(
         'raw',
-        bytes,
+        bytes.buffer as ArrayBuffer,
         { name: ALGORITHM, length: 256 },
         false,              // non-extractable — key cannot be read back
         ['encrypt', 'decrypt'],

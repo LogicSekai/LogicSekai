@@ -8,13 +8,13 @@ const founder = {
   quote: 'Setiap kreator memiliki potensi untuk sukses. Logic Sekai ada untuk membuat itu jadi kenyataan.',
   achievements: [
     { value: '5+', label: 'Tahun Exp.' },
-    { value: '500+', label: 'Kreator' },
-    { value: '10K+', label: 'Produk' },
+    { value: '500+', label: 'Pengguna' },
+    { value: '2K+', label: 'Transaksi' },
   ],
-  skills: ['Vue.js & Nuxt.js', 'Web Development', 'UI/UX Design', 'Community Building', 'Product Management'],
+  skills: ['Vue', 'Nuxt', 'React', 'Next', 'Electron', 'Laravel', 'CodeIgniter', 'Svelte', 'Tailwind CSS', 'Bootstrap'],
   social: {
     linkedin: '#',
-    github: '#',
+    github: 'https://github.com/LogicSekai',
     twitter: '#',
     email: 'logicsekai@gmail.com',
   },
@@ -49,9 +49,10 @@ const timeline = [
 
           <!-- Avatar -->
           <div class="w-24 h-24 border border-gray-200 dark:border-white/10 bg-gradient-to-br from-indigo-100 to-violet-100 dark:from-indigo-500/20 dark:to-violet-500/20 flex items-center justify-center mb-6">
-            <svg class="w-12 h-12 text-indigo-300 dark:text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <!-- <svg class="w-12 h-12 text-indigo-300 dark:text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
+            </svg> -->
+            <img src="/img/portfolio/profile.jpg" alt="Kwaii Avatar" class="w-full h-full object-cover object-center">
           </div>
 
           <!-- Name & Role -->
@@ -72,7 +73,7 @@ const timeline = [
           </div>
 
           <!-- Social links -->
-          <div class="mt-6 flex gap-2">
+          <!-- <div class="mt-6 flex gap-2">
             <a
               v-for="(link, name) in { LN: founder.social.linkedin, GH: founder.social.github, TW: founder.social.twitter }"
               :key="name"
@@ -83,7 +84,7 @@ const timeline = [
             >
               {{ name }}
             </a>
-          </div>
+          </div> -->
 
           <!-- Skills -->
           <div class="mt-8">

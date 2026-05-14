@@ -60,19 +60,19 @@
                         <!-- Decorative offset border -->
                         <div class="absolute -bottom-3 -right-3 w-full h-full border border-indigo-200 dark:border-indigo-500/30 z-0" />
                         <!-- Main photo -->
-                        <div class="relative z-10 w-80 aspect-[3/4] overflow-hidden border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/3">
+                        <div class="relative z-10 w-80 aspect-3/4 overflow-hidden border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/3">
                             <img
                                 src="/img/portfolio/profile.jpg"
-                                alt="Yusuf Ikhwanul Karim"
-                                class="w-full h-full object-cover object-top grayscale-[20%] hover:grayscale-0 transition-all duration-500"
+                                alt="KWAII"
+                                class="w-full h-full object-cover object-top grayscale-20 hover:grayscale-0 transition-all duration-500"
                                 loading="eager"
                             />
                             <!-- Subtle gradient overlay at bottom -->
-                            <div class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/30 to-transparent" />
+                            <div class="absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-black/30 to-transparent" />
                             <!-- Name badge -->
                             <div class="absolute bottom-0 left-0 right-0 p-4">
                                 <p class="font-mono text-[0.6rem] tracking-[0.2em] uppercase text-white/70">
-                                    Yusuf Ikhwanul Karim
+                                    KWAII
                                 </p>
                             </div>
                         </div>

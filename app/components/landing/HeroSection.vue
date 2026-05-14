@@ -85,19 +85,19 @@ const marqueeItems = [
           <div class="text-3xl lg:text-5xl font-black text-gray-900 dark:text-white">
             500<span class="text-indigo-500">+</span>
           </div>
-          <div class="mt-1 text-xs font-semibold tracking-widest uppercase text-gray-400">Kreator Aktif</div>
+          <div class="mt-1 text-xs font-semibold tracking-widest uppercase text-gray-400">Pengguna Aktif</div>
         </div>
         <div class="py-7 px-6 border-r border-gray-100 dark:border-white/[0.06]">
           <div class="text-3xl lg:text-5xl font-black text-gray-900 dark:text-white">
-            10K<span class="text-indigo-500">+</span>
+            2K<span class="text-indigo-500">+</span>
           </div>
-          <div class="mt-1 text-xs font-semibold tracking-widest uppercase text-gray-400">Produk Digital</div>
+          <div class="mt-1 text-xs font-semibold tracking-widest uppercase text-gray-400">Transaksi Sukses</div>
         </div>
         <div class="py-7 pl-6">
           <div class="text-3xl lg:text-5xl font-black text-gray-900 dark:text-white">
             50K<span class="text-indigo-500">+</span>
           </div>
-          <div class="mt-1 text-xs font-semibold tracking-widest uppercase text-gray-400">Transaksi Sukses</div>
+          <div class="mt-1 text-xs font-semibold tracking-widest uppercase text-gray-400">Pengunjung per minggu</div>
         </div>
       </div>
 

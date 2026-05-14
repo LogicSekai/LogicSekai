@@ -14,7 +14,7 @@ const testimonials = [
     role: 'UI/UX Designer',
     initials: 'SW',
     text: 'Platform yang sangat mudah digunakan dan profesional. Dashboard analytics-nya membantu saya optimize pricing strategy. Support team juga sangat responsive!',
-    metric: '1,200+ Produk Terjual',
+    metric: '50+ Produk Terjual',
   },
   {
     id: 3,
@@ -28,8 +28,8 @@ const testimonials = [
 
 const stats = [
   { value: '4.9/5', label: 'RATING' },
-  { value: '500+', label: 'KREATOR' },
-  { value: '10K+', label: 'PRODUK' },
+  { value: '500+', label: 'PENGGUNA' },
+  { value: '2K+', label: 'TRANSAKSI SUKSES' },
   { value: '98%', label: 'KEPUASAN' },
 ]
 </script>
