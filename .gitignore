@@ -43,3 +43,6 @@ public/uploads/product/*
 public/uploads/thumbnail/*
 public/uploads/support/*
 !public/uploads/**/.gitkeep
+
+
+cloudflare_workers_deploy_log.txt
