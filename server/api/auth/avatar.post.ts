@@ -1,9 +1,6 @@
 ﻿import { eq } from 'drizzle-orm'
 import { getDB } from '~/lib/db/connection'
 import { users } from '~/lib/db/schema'
-import { createId } from '@paralleldrive/cuid2'
-import { promises as fs } from 'fs'
-import path from 'path'
 
 export default defineEventHandler(async (event) => {
     try {
@@ -74,39 +71,24 @@ export default defineEventHandler(async (event) => {
                 })
             }
 
-            // Generate unique filename
-            const fileExtension = path.extname(file.filename || '.jpg')
-            const fileName = `avatar-${sessionData.id}-${createId()}${fileExtension}`
-            
-            // Create uploads directory if it doesn't exist
-            const uploadsDir = path.join(process.cwd(), 'public', 'uploads', 'avatars')
-            try {
-                await fs.mkdir(uploadsDir, { recursive: true })
-            } catch (error) {
-                // Directory might already exist
-            }
-
-            // Save file
-            const filePath = path.join(uploadsDir, fileName)
-            await fs.writeFile(filePath, file.data)
+            // Store as base64 in database (Cloudflare Workers has no writable filesystem)
+            const base64Image = `data:${file.type};base64,${file.data.toString('base64')}`
 
             // Update user avatar in database
             const db = getDB()
             if (!db) throw createError({ statusCode: 503, statusMessage: 'Database not available' })
 
-            const avatarUrl = `/uploads/avatars/${fileName}`
-
             await db
                 .update(users)
                 .set({
-                    avatar: avatarUrl,
+                    avatar: base64Image,
                     updated: new Date()
                 })
                 .where(eq(users.id, sessionData.id))
 
             return {
                 success: true,
-                avatar: avatarUrl,
+                avatar: base64Image,
                 message: 'Avatar updated successfully'
             }
 
@@ -114,23 +96,6 @@ export default defineEventHandler(async (event) => {
             // Handle avatar removal
             const db = getDB()
             if (!db) throw createError({ statusCode: 503, statusMessage: 'Database not available' })
-
-            // Get current avatar to delete file
-            const user = await db
-                .select({ avatar: users.avatar })
-                .from(users)
-                .where(eq(users.id, sessionData.id))
-                .limit(1)
-
-            if (user.length && user[0].avatar) {
-                // Delete old avatar file
-                const oldAvatarPath = path.join(process.cwd(), 'public', user[0].avatar)
-                try {
-                    await fs.unlink(oldAvatarPath)
-                } catch (error) {
-                    // File might not exist, continue anyway
-                }
-            }
 
             // Remove avatar from database
             await db
