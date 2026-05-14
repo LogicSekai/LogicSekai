@@ -12,16 +12,6 @@ const rateLimit = new Map<string, RateLimitEntry>()
 const WINDOW_SIZE = 15 * 60 * 1000 // 15 minutes
 const MAX_REQUESTS = 100 // requests per window
 
-// Cleanup old entries every 5 minutes
-setInterval(() => {
-  const now = Date.now()
-  for (const [ip, entry] of rateLimit.entries()) {
-    if (now > entry.resetTime) {
-      rateLimit.delete(ip)
-    }
-  }
-}, 5 * 60 * 1000)
-
 export default defineEventHandler(async (event) => {
   // Skip rate limiting for admin users and certain endpoints
   const url = getRequestURL(event)
@@ -30,6 +20,16 @@ export default defineEventHandler(async (event) => {
   // Skip for static assets and health checks
   if (pathname.startsWith('/_') || pathname.startsWith('/api/health')) {
     return
+  }
+
+  // Cleanup expired entries periodically (every ~100 requests randomly)
+  if (Math.random() < 0.01) {
+    const now = Date.now()
+    for (const [ip, entry] of rateLimit.entries()) {
+      if (now > entry.resetTime) {
+        rateLimit.delete(ip)
+      }
+    }
   }
 
   // Get client IP
