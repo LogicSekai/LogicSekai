@@ -12,12 +12,3 @@ migrations_dir = "./app/lib/db/migrations"
 [vars]
 BETTER_AUTH_URL = "https://logicsekai.com"
 NODE_ENV = "production"
-
-# Preview environment
-[env.preview]
-name = "logic-sekai-preview"
-
-[[env.preview.d1_databases]]
-binding = "DB"
-database_name = "logic-sekai-db-preview"
-database_id = "" # Isi dengan preview database ID
