@@ -1,5 +1,5 @@
-name = "LogicSekai"
-pages_build_output_dir = "dist"
+name = "logicsekai"
+pages_build_output_dir = ".output/public"
 compatibility_date = "2024-11-09"
 compatibility_flags = ["nodejs_compat"]
 
