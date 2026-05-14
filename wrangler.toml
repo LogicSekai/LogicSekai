@@ -9,11 +9,11 @@ command = "NODE_ENV=production bun run build"
 [[d1_databases]]
 binding = "DB"
 database_name = "logic-sekai-db"
-database_id = "" # Isi dengan database ID dari Cloudflare dashboard
+database_id = "8e584977-b7e9-4f7d-aa4c-a30fab656636"
 migrations_dir = "./app/lib/db/migrations"
 
 [vars]
-BETTER_AUTH_URL = "https://logic-sekai.pages.dev"
+BETTER_AUTH_URL = "https://logicsekai.com"
 NODE_ENV = "production"
 
 # Preview environment
