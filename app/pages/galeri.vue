@@ -190,7 +190,7 @@
 import { ref, computed } from 'vue'
 import { Image as ImageIcon, Play as PlayIcon, X as XIcon, ChevronLeft as ChevronLeftIcon, ChevronRight as ChevronRightIcon, ArrowDown as ArrowDownIcon, ArrowUp as ArrowUpIcon } from 'lucide-vue-next'
 
-useHead({ title: 'Galeri — Yusuf Ikhwanul Karim' })
+useHead({ title: 'Galeri — Logic Sekai' })
 definePageMeta({ layout: 'default' })
 
 interface GalleryItem {

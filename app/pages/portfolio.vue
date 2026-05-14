@@ -355,7 +355,7 @@ const experience = [
 ]
 
 useHead({
-    title: 'Portofolio — Yusuf Ikhwanul Karim',
+    title: 'Portofolio — Kwaii',
     meta: [
         {
             name: 'description',
