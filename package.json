@@ -44,7 +44,7 @@
     "drizzle-orm": "^0.44.7",
     "embla-carousel-vue": "^8.6.0",
     "lucide-vue-next": "^0.553.0",
-    "nuxt": "^4.2.1",
+    "nuxt": "4.2.1",
     "reka-ui": "^2.6.0",
     "shadcn-nuxt": "2.3.2",
     "slugify": "^1.6.6",

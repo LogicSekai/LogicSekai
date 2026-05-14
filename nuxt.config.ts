@@ -51,7 +51,7 @@ export default defineNuxtConfig({
   },
 
   nitro: {
-    preset: 'cloudflare-pages',
+    preset: process.env.NODE_ENV === 'production' ? 'cloudflare-pages' : undefined,
     experimental: {
       wasm: true
     },
