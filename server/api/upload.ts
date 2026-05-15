@@ -1,8 +1,187 @@
-﻿import { createWriteStream, existsSync, mkdirSync, writeFileSync, unlinkSync } from 'fs'
+﻿import { randomUUID } from 'crypto'
+import { existsSync, mkdirSync, writeFileSync, unlinkSync } from 'fs'
 import { join } from 'path'
-import { pipeline } from 'stream/promises'
-import { randomUUID } from 'crypto'
-import type { MultiPartData } from 'h3'
+
+export default defineEventHandler(async (event) => {
+  // Handle CORS for preflight requests
+  if (event.node.req.method === 'OPTIONS') {
+    setHeaders(event, {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    })
+    return ''
+  }
+
+  try {
+    // Get user from session
+    let userSession = getCookie(event, 'user-session');
+    
+    if (!userSession) {
+      const cookieHeader = getHeader(event, 'cookie');
+      if (cookieHeader) {
+        const match = cookieHeader.match(/user-session=([^;]+)/);
+        if (match) {
+          userSession = decodeURIComponent(match[1]);
+        }
+      }
+    }
+    
+    if (!userSession) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: 'Authentication required'
+      });
+    }
+    
+    let sessionData;
+    try {
+      sessionData = JSON.parse(userSession);
+    } catch (error) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: 'Invalid session format'
+      });
+    }
+    
+    if (!sessionData?.id) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: 'User not found in session'
+      });
+    }
+    
+    const userId = sessionData.id;
+    const bucket = event.context.cloudflare?.env?.BUCKET
+
+    const method = getMethod(event)
+
+    if (method === 'POST') {
+      return await handleFileUpload(event, userId, bucket)
+    } else if (method === 'DELETE') {
+      return await handleFileDelete(event, bucket)
+    } else {
+      throw createError({
+        statusCode: 405,
+        statusMessage: 'Method not allowed'
+      })
+    }
+  } catch (error: any) {
+    throw createError({
+      statusCode: error.statusCode || 500,
+      statusMessage: error.statusMessage || 'Internal server error'
+    })
+  }
+})
+
+async function handleFileUpload(event: any, userId: string, bucket: any) {
+  try {
+    const form = await readMultipartFormData(event)
+    
+    if (!form || form.length === 0) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: 'No files provided'
+      })
+    }
+
+    const fileData = form.find(item => item.name === 'file')
+    const typeData = form.find(item => item.name === 'type')
+    
+    if (!fileData || !fileData.data || !fileData.filename) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: 'No valid file found'
+      })
+    }
+
+    const uploadType = typeData?.data?.toString() || 'product'
+    const originalName = fileData.filename
+    const fileBuffer = fileData.data
+    const contentType = fileData.type || 'application/octet-stream'
+
+    // Validate file
+    validateUploadedFile(fileBuffer, originalName, uploadType)
+
+    // Generate unique filename
+    const fileExtension = originalName.split('.').pop()
+    const uniqueFilename = `${randomUUID()}.${fileExtension}`
+    const storageKey = `uploads/${uploadType}/${userId}/${uniqueFilename}`
+
+    if (bucket) {
+      // Production: store in Cloudflare R2
+      await bucket.put(storageKey, fileBuffer, {
+        httpMetadata: { contentType }
+      })
+    } else {
+      // Development: store in local filesystem
+      const uploadDir = join(process.cwd(), 'public', 'uploads', uploadType, userId)
+      if (!existsSync(uploadDir)) {
+        mkdirSync(uploadDir, { recursive: true })
+      }
+      writeFileSync(join(uploadDir, uniqueFilename), fileBuffer)
+    }
+
+    // URL: R2 via proxy endpoint in prod, static path in dev
+    const fileUrl = bucket
+      ? `/api/files/${storageKey}`
+      : `/uploads/${uploadType}/${userId}/${uniqueFilename}`
+    
+    return {
+      success: true,
+      data: {
+        url: fileUrl,
+        filename: uniqueFilename,
+        originalName: originalName,
+        size: fileBuffer.length,
+        type: contentType
+      }
+    }
+  } catch (error: any) {
+    throw createError({
+      statusCode: error.statusCode || 500,
+      statusMessage: error.statusMessage || 'Upload failed'
+    })
+  }
+}
+
+async function handleFileDelete(event: any, bucket: any) {
+  try {
+    const body = await readBody(event)
+    const { fileUrl } = body
+
+    if (!fileUrl) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: 'File URL is required'
+      })
+    }
+
+    if (bucket) {
+      // Production: delete from R2
+      // URL format: /api/files/uploads/type/userId/filename
+      const key = fileUrl.replace(/^\/api\/files\//, '')
+      await bucket.delete(key)
+    } else {
+      // Development: delete from filesystem
+      // URL format: /uploads/type/userId/filename
+      const filePath = join(process.cwd(), 'public', fileUrl)
+      if (existsSync(filePath)) {
+        unlinkSync(filePath)
+      }
+    }
+
+    return {
+      success: true,
+      message: 'File deleted successfully'
+    }
+  } catch (error: any) {
+    throw createError({
+      statusCode: error.statusCode || 500,
+      statusMessage: error.statusMessage || 'Delete failed'
+    })
+  }
+}
 
 export default defineEventHandler(async (event) => {
   // Handle CORS for preflight requests
