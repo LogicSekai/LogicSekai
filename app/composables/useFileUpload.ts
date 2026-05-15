@@ -116,12 +116,12 @@ export const useFileUpload = () => {
 
   // Delete uploaded file
   const deleteFile = async (fileUrl: string): Promise<boolean> => {
+    if (!fileUrl?.startsWith('/api/files/') && !fileUrl?.startsWith('/uploads/')) return true
     try {
-      const response = await $fetch<{ success: boolean }>('/api/upload', {
-        method: 'DELETE',
+      const response = await $fetch<{ success: boolean }>('/api/upload/delete', {
+        method: 'POST',
         body: { fileUrl }
       })
-
       return response.success
     } catch (err: any) {
       error.value = err.data?.message || err.message || 'Failed to delete file'

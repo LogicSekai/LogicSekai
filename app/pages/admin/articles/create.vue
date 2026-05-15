@@ -269,6 +269,10 @@ async function handleCoverUpload(event: Event) {
   coverUploading.value = true
   coverError.value = ''
   try {
+    // Delete old cover from R2 if exists
+    if (form.coverImage?.startsWith('/api/files/')) {
+      await $fetch('/api/upload/delete', { method: 'POST', body: { fileUrl: form.coverImage } }).catch(() => {})
+    }
     const formData = new FormData()
     formData.append('file', file)
     formData.append('type', 'thumbnail')
@@ -284,7 +288,10 @@ async function handleCoverUpload(event: Event) {
   }
 }
 
-function removeCover() {
+async function removeCover() {
+  if (form.coverImage?.startsWith('/api/files/')) {
+    await $fetch('/api/upload/delete', { method: 'POST', body: { fileUrl: form.coverImage } }).catch(() => {})
+  }
   form.coverImage = ''
   coverError.value = ''
 }

@@ -558,6 +558,12 @@ function openEdit(item: GalleryItem) {
     showModal.value = true
 }
 
+// Delete helper for R2 files
+async function deleteR2File(url: string) {
+    if (!url?.startsWith('/api/files/') && !url?.startsWith('/uploads/')) return
+    await $fetch('/api/upload/delete', { method: 'POST', body: { fileUrl: url } }).catch(() => {})
+}
+
 // Upload helper — uses XMLHttpRequest for progress tracking
 async function uploadFile(file: File, onProgress: (p: number) => void): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -597,6 +603,7 @@ async function onMediaFileChange(e: Event) {
     mediaUploadProgress.value = 0
     formError.value = ''
     try {
+        await deleteR2File(form.value.url)
         form.value.url = await uploadFile(file, (p) => { mediaUploadProgress.value = p })
     } catch (err: any) {
         formError.value = err.message
@@ -612,6 +619,7 @@ async function onThumbFileChange(e: Event) {
     thumbUploadProgress.value = 0
     formError.value = ''
     try {
+        await deleteR2File(form.value.thumbnailUrl)
         form.value.thumbnailUrl = await uploadFile(file, (p) => { thumbUploadProgress.value = p })
     } catch (err: any) {
         formError.value = err.message
@@ -628,6 +636,7 @@ async function onMediaDrop(e: DragEvent) {
     mediaUploadProgress.value = 0
     formError.value = ''
     try {
+        await deleteR2File(form.value.url)
         form.value.url = await uploadFile(file, (p) => { mediaUploadProgress.value = p })
     } catch (err: any) {
         formError.value = err.message
@@ -644,6 +653,7 @@ async function onThumbDrop(e: DragEvent) {
     thumbUploadProgress.value = 0
     formError.value = ''
     try {
+        await deleteR2File(form.value.thumbnailUrl)
         form.value.thumbnailUrl = await uploadFile(file, (p) => { thumbUploadProgress.value = p })
     } catch (err: any) {
         formError.value = err.message
