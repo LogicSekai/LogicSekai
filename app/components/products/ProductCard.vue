@@ -22,9 +22,12 @@
         </div>
 
         <!-- Price badge -->
-        <div class="absolute bottom-2 right-2">
-          <span class="font-mono text-xs font-bold bg-black/80 dark:bg-black/90 text-white px-2.5 py-1">
+        <div class="absolute bottom-2 right-2 flex flex-col items-end gap-0.5">
+          <span v-if="product.discountedPrice !== null && product.discountedPrice !== undefined" class="font-mono text-[10px] line-through text-white/60 bg-black/70 px-1.5 py-0.5 leading-none">
             {{ formatPrice(product.price) }}
+          </span>
+          <span class="font-mono text-xs font-bold bg-black/80 dark:bg-black/90 text-white px-2.5 py-1">
+            {{ product.discountedPrice !== null && product.discountedPrice !== undefined ? formatPrice(product.discountedPrice) : (product.price === 0 ? 'GRATIS' : formatPrice(product.price)) }}
           </span>
         </div>
       </div>
@@ -88,6 +91,7 @@ interface Product {
   slug: string
   description: string
   price: number
+  discountedPrice?: number | null
   thumbnail?: string
   category: string
   categories: { id: string; name: string; slug: string }[]

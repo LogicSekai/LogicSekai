@@ -22,6 +22,10 @@ export default defineEventHandler(async (event) => {
         description: products.description,
         shortDescription: products.shortDescription,
         basePrice: products.basePrice,
+        discountType: products.discountType,
+        discountValue: products.discountValue,
+        discountStartDate: products.discountStartDate,
+        discountEndDate: products.discountEndDate,
         currency: products.currency,
         thumbnailImage: products.thumbnailImage,
         tags: products.tags,
@@ -57,20 +61,37 @@ export default defineEventHandler(async (event) => {
       .limit(limit)
 
     // Format products data
-    const formattedProducts = featuredProducts.map((product: any) => ({
+    const formattedProducts = featuredProducts.map((product: any) => {
+      const basePrice = product.basePrice || 0
+      let discountedPrice: number | null = null
+      if (product.discountType && product.discountValue) {
+        const now = new Date()
+        const startOk = !product.discountStartDate || new Date(product.discountStartDate) <= now
+        const endOk = !product.discountEndDate || new Date(product.discountEndDate) >= now
+        if (startOk && endOk) {
+          if (product.discountType === 'percentage') {
+            discountedPrice = Math.round(basePrice * (1 - product.discountValue / 100))
+          } else if (product.discountType === 'flat') {
+            discountedPrice = Math.max(0, basePrice - product.discountValue)
+          }
+        }
+      }
+      return {
       id: product.id,
       title: product.title,
       slug: product.slug,
       description: product.description || product.shortDescription || '',
-      price: product.basePrice || 0,
+      price: basePrice,
+      discountedPrice,
       thumbnail: product.thumbnailImage,
-      category: 'General', // We'll implement categories later
+      category: 'General',
       tags: product.tags ? JSON.parse(product.tags) : [],
       status: product.status,
       featured: true,
       createdAt: product.created?.toISOString(),
       creator: product.creator
-    }))
+    }
+    })
 
     return {
       success: true,
