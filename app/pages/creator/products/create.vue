@@ -380,7 +380,7 @@
                                     <img :src="formData.thumbnailImage" alt="Thumbnail" class="w-20 h-20 object-cover" />
                                     <button
                                         type="button"
-                                        @click="formData.thumbnailImage = ''"
+                                        @click="removeThumbnail"
                                         class="font-mono text-[10px] uppercase tracking-widest text-red-500 hover:text-red-700 transition-colors">
                                         Remove
                                     </button>
@@ -561,7 +561,7 @@ definePageMeta({
 // Composables
 const router = useRouter()
 const { createProduct, loading, error } = useCreatorProducts()
-const { uploadFile, uploadFiles, formatFileSize } = useFileUpload()
+const { uploadFile, uploadFiles, formatFileSize, deleteFile } = useFileUpload()
 
 // Form data
 const formData = reactive<ProductFormData>({
@@ -652,11 +652,19 @@ const updateContributor = (index: number, value: any) => {
     }
 }
 
+const removeThumbnail = async () => {
+    if (formData.thumbnailImage) {
+        await deleteFile(formData.thumbnailImage)
+        formData.thumbnailImage = ''
+    }
+}
+
 const handleThumbnailUpload = async (event: Event) => {
     const target = event.target as HTMLInputElement
     const file = target.files?.[0]
     if (file) {
         try {
+            if (formData.thumbnailImage) await deleteFile(formData.thumbnailImage)
             const result = await uploadFile(file, 'thumbnail')
             formData.thumbnailImage = result.url
         } catch (err) {
@@ -685,7 +693,9 @@ const handleProductFilesUpload = async (event: Event) => {
     }
 }
 
-const removeProductFile = (index: number) => {
+const removeProductFile = async (index: number) => {
+    const file = formData.productFiles[index]
+    if (file?.url) await deleteFile(file.url)
     formData.productFiles.splice(index, 1)
 }
 
@@ -703,7 +713,9 @@ const handlePreviewImagesUpload = async (event: Event) => {
     }
 }
 
-const removePreviewImage = (index: number) => {
+const removePreviewImage = async (index: number) => {
+    const url = formData.previewImages[index]
+    if (url) await deleteFile(url)
     formData.previewImages.splice(index, 1)
 }
 

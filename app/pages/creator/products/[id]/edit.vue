@@ -323,7 +323,7 @@
                             <div class="border border-dashed border-gray-300 dark:border-white/10 p-6">
                                 <div v-if="formData.thumbnailImage" class="flex items-center gap-4">
                                     <img :src="formData.thumbnailImage" alt="Thumbnail" class="w-20 h-20 object-cover" />
-                                    <button type="button" @click="formData.thumbnailImage = ''"
+                                    <button type="button" @click="removeThumbnail"
                                         class="font-mono text-[10px] uppercase tracking-widest text-red-500 hover:text-red-700 transition-colors">
                                         Remove
                                     </button>
@@ -486,7 +486,7 @@ const router = useRouter()
 const productId = route.params.id as string
 
 const { fetchProduct, updateProduct, loading, error } = useCreatorProducts()
-const { uploadFile, uploadFiles, formatFileSize } = useFileUpload()
+const { uploadFile, uploadFiles, formatFileSize, deleteFile } = useFileUpload()
 
 const pageLoading = ref(true)
 const notFound = ref(false)
@@ -611,10 +611,17 @@ const updateContributor = (index: number, value: any) => {
     else formData.contributors[index] = value
 }
 
+const removeThumbnail = async () => {
+    const url = formData.thumbnailImage
+    if (url?.startsWith('/api/files/')) await deleteFile(url)
+    formData.thumbnailImage = ''
+}
+
 const handleThumbnailUpload = async (event: Event) => {
     const file = (event.target as HTMLInputElement).files?.[0]
     if (file) {
         try {
+            if (formData.thumbnailImage?.startsWith('/api/files/')) await deleteFile(formData.thumbnailImage)
             const result = await uploadFile(file, 'thumbnail')
             formData.thumbnailImage = result.url
         } catch (err) { console.error(err) }
@@ -639,7 +646,11 @@ const handleProductFilesUpload = async (event: Event) => {
         } catch (err) { console.error(err) }
     }
 }
-const removeProductFile = (index: number) => formData.productFiles.splice(index, 1)
+const removeProductFile = async (index: number) => {
+    const file = formData.productFiles[index]
+    if (file?.url?.startsWith('/api/files/')) await deleteFile(file.url)
+    formData.productFiles.splice(index, 1)
+}
 
 const handlePreviewImagesUpload = async (event: Event) => {
     const files = Array.from((event.target as HTMLInputElement).files || [])
@@ -650,7 +661,11 @@ const handlePreviewImagesUpload = async (event: Event) => {
         } catch (err) { console.error(err) }
     }
 }
-const removePreviewImage = (index: number) => formData.previewImages.splice(index, 1)
+const removePreviewImage = async (index: number) => {
+    const url = formData.previewImages[index]
+    if (url?.startsWith('/api/files/')) await deleteFile(url)
+    formData.previewImages.splice(index, 1)
+}
 
 const isFormValid = computed(() => formData.title.trim() && formData.basePrice >= 0)
 
