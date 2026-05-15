@@ -5,8 +5,8 @@ export default defineEventHandler(async (event) => {
     const bucket = event.context.cloudflare?.env?.BUCKET
     if (!bucket) throw createError({ statusCode: 503, statusMessage: 'Storage not available' })
 
-    // Reconstruct the storage key: /api/files/uploads/type/userId/file → uploads/type/userId/file
-    const key = `uploads/${slug}`
+    // slug already contains full R2 key, e.g. "uploads/thumbnail/userId/file.png"
+    const key = slug
 
     const object = await bucket.get(key)
     if (!object) throw createError({ statusCode: 404, statusMessage: 'File not found' })
