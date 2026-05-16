@@ -241,14 +241,26 @@ async function updateCreatorProduct(db: any, event: any, productId: string, user
         const contributorMappings = [];
         
         for (const contributorIdentifier of contributors) {
-          // Find user by username or ID
+          // Handle both plain string identifiers and full contributor objects from the frontend
+          if (typeof contributorIdentifier === 'object' && contributorIdentifier !== null && (contributorIdentifier as any).id) {
+            contributorMappings.push({
+              productId: productId,
+              userId: (contributorIdentifier as any).id,
+              role: (contributorIdentifier as any).role || 'contributor',
+              addedAt: new Date()
+            });
+            continue;
+          }
+
+          // Find user by ID or username (string identifier)
+          const identifier = String(contributorIdentifier);
           const contributorUser = await db
             .select({ id: users.id })
             .from(users)
             .where(
               or(
-                eq(users.id, contributorIdentifier),
-                eq(users.username, contributorIdentifier)
+                eq(users.id, identifier),
+                eq(users.username, identifier)
               )
             )
             .limit(1);
