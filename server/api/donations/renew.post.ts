@@ -50,9 +50,10 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    const serverKey = config.midtransServerKey as string
-    const mode      = (config.midtransMode || 'sandbox') as 'sandbox' | 'live'
-    const origin    = config.public.baseUrl || 'http://localhost:3000'
+    const cfEnv     = (event.context.cloudflare?.env ?? {}) as Record<string, string>
+    const serverKey = (config.midtransServerKey || cfEnv.MIDTRANS_SERVER_KEY || '') as string
+    const mode      = ((config.midtransMode || cfEnv.MIDTRANS_MODE || 'sandbox')) as 'sandbox' | 'live'
+    const origin    = config.public.baseUrl || cfEnv.BETTER_AUTH_URL || 'https://logicsekai.com'
 
     if (!serverKey) {
         throw createError({ statusCode: 503, statusMessage: 'Payment gateway belum dikonfigurasi.' })

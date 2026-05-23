@@ -39,7 +39,8 @@ export default defineEventHandler(async (event) => {
     if (!order_id || !signature_key) return { received: true }
 
     // Verify signature
-    const serverKey = config.midtransServerKey as string
+    const cfEnv     = (event.context.cloudflare?.env ?? {}) as Record<string, string>
+    const serverKey = (config.midtransServerKey || cfEnv.MIDTRANS_SERVER_KEY || '') as string
     const valid = await verifyDonationSignature(order_id, status_code, gross_amount, serverKey, signature_key)
     if (!valid) return { received: true }
 

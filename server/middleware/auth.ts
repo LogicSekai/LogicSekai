@@ -92,7 +92,7 @@ export default defineEventHandler(async (event) => {
 
       if (sessionData?.id) {
         // Validate user exists and is active
-        const db = getDB() || initializeDB()
+        const db = getDB() || initializeDB(event.context.cloudflare?.env?.DB)
         const userData = await db
           .select({
             id: users.id,
