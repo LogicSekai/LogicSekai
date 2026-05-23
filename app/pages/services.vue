@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowRight, ExternalLink } from 'lucide-vue-next'
+import { ArrowRight, ExternalLink, Search, X } from 'lucide-vue-next'
 
 definePageMeta({ layout: 'default' })
 
@@ -201,7 +201,50 @@ const tools = [
         icon: 'M7 20l4-16m2 16l4-16M6 9h14M4 15h14',
         image: null,
     },
+    {
+        id: 13,
+        name: 'String Case Converter',
+        tagline: 'Multi-Format Case Transformer',
+        description: 'Konversi teks ke 12 format case sekaligus: camelCase, PascalCase, snake_case, kebab-case, SCREAMING_SNAKE, Title Case, dan lainnya. Input bisa berupa format apapun.',
+        tag: 'STRING / TEXT',
+        category: 'Dev Utility',
+        status: 'AVAILABLE',
+        link: '/tools/string-case-converter',
+        icon: 'M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129',
+        image: null,
+    },
 ]
+
+// ─── Filter / search ──────────────────────────────────────────────────────
+const searchQuery    = ref('')
+const activeCategory = ref('Semua')
+
+const categories = computed(() => {
+    const cats = [...new Set(tools.map(t => t.category))]
+    return ['Semua', ...cats]
+})
+
+const filteredTools = computed(() => {
+    let list = tools
+    if (activeCategory.value !== 'Semua') {
+        list = list.filter(t => t.category === activeCategory.value)
+    }
+    if (searchQuery.value.trim()) {
+        const q = searchQuery.value.trim().toLowerCase()
+        list = list.filter(t =>
+            t.name.toLowerCase().includes(q) ||
+            t.tagline.toLowerCase().includes(q) ||
+            t.description.toLowerCase().includes(q) ||
+            t.tag.toLowerCase().includes(q)
+        )
+    }
+    return list
+})
+
+function clearSearch() {
+    searchQuery.value = ''
+    activeCategory.value = 'Semua'
+}
 </script>
 
 <template>
@@ -311,12 +354,50 @@ const tools = [
                     <p class="mt-4 text-sm text-gray-500 dark:text-gray-400 max-w-lg leading-relaxed">
                         Alat bantu gratis yang kami buat untuk komunitas. Tidak perlu akun, langsung pakai.
                     </p>
+
+                    <!-- Filter bar -->
+                    <div class="mt-8 flex flex-col sm:flex-row gap-4">
+                        <!-- Search input -->
+                        <div class="relative flex-1 max-w-xs">
+                            <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 dark:text-gray-600 pointer-events-none" />
+                            <input
+                                v-model="searchQuery"
+                                type="text"
+                                placeholder="Cari tools..."
+                                class="w-full bg-gray-50 dark:bg-white/3 border border-gray-200 dark:border-white/8 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 font-mono text-xs pl-8 pr-8 py-2 focus:outline-none focus:border-indigo-500 dark:focus:border-indigo-500 transition-colors"
+                            />
+                            <button v-if="searchQuery" @click="searchQuery = ''"
+                                class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-600 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+                                <X class="w-3 h-3" />
+                            </button>
+                        </div>
+
+                        <!-- Category pills -->
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button
+                                v-for="cat in categories" :key="cat"
+                                @click="activeCategory = cat"
+                                :class="[
+                                    'font-mono text-[10px] uppercase tracking-widest px-3 py-1.5 border transition-colors',
+                                    activeCategory === cat
+                                        ? 'bg-indigo-600 border-indigo-600 text-white'
+                                        : 'border-gray-200 dark:border-white/8 text-gray-500 dark:text-gray-400 hover:border-indigo-400 dark:hover:border-indigo-500/50 hover:text-indigo-600 dark:hover:text-indigo-400'
+                                ]"
+                            >{{ cat }}</button>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Tools list -->
                 <div class="divide-y divide-gray-100 dark:divide-white/6">
+                    <!-- No results -->
+                    <div v-if="!filteredTools.length" class="py-16 flex flex-col items-center gap-3 text-center">
+                        <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-gray-400 dark:text-gray-600">Tidak ada tools yang cocok</p>
+                        <button @click="clearSearch" class="font-mono text-[10px] uppercase tracking-widest text-indigo-600 dark:text-indigo-400 hover:underline">Reset filter</button>
+                    </div>
+
                     <NuxtLink
-                        v-for="tool in tools"
+                        v-for="tool in filteredTools"
                         :key="tool.id"
                         :to="tool.link"
                         class="group flex items-center gap-6 py-8 hover:bg-gray-50/70 dark:hover:bg-white/1.5 -mx-6 px-6 lg:-mx-10 lg:px-10 transition-colors"
@@ -358,10 +439,13 @@ const tools = [
                     </NuxtLink>
                 </div>
 
-                <!-- More tools coming soon -->
+                <!-- Footer info -->
                 <div class="py-10 flex items-center gap-4">
                     <div class="h-px bg-gray-100 dark:bg-white/6 flex-1"></div>
-                    <span class="font-mono text-[0.6rem] uppercase tracking-[0.2em] text-gray-300 dark:text-gray-600">LEBIH BANYAK TOOLS SEGERA HADIR</span>
+                    <span class="font-mono text-[0.6rem] uppercase tracking-[0.2em] text-gray-300 dark:text-gray-600">
+                        {{ filteredTools.length }} / {{ tools.length }} TOOLS
+                        <template v-if="activeCategory !== 'Semua' || searchQuery"> · <button @click="clearSearch" class="hover:text-indigo-400 transition-colors">RESET</button></template>
+                    </span>
                     <div class="h-px bg-gray-100 dark:bg-white/6 flex-1"></div>
                 </div>
 
