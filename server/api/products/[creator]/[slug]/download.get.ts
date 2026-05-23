@@ -1,9 +1,17 @@
-﻿import { existsSync, statSync, createReadStream } from 'node:fs'
-import { join } from 'node:path'
-import archiver from 'archiver'
-import { getDB, initializeDB } from '~/lib/db/connection'
+﻿import { getDB, initializeDB } from '~/lib/db/connection'
 import { products, users, transactions } from '~/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
+
+/** Convert a stored file URL to an R2 object key.
+ *  Prod URLs: /api/files/uploads/product/...  -> uploads/product/...
+ *  Dev URLs:  /uploads/product/...            -> uploads/product/...
+ */
+function urlToR2Key(url: string): string | null {
+  if (!url) return null
+  if (url.startsWith('/api/files/')) return url.slice('/api/files/'.length)
+  if (url.startsWith('/uploads/')) return url.slice(1)
+  return null
+}
 
 export default defineEventHandler(async (event) => {
   try {
@@ -114,119 +122,105 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Resolve physical paths for all files
-    const resolvedFiles = productFiles
-      .map((f: any) => {
-        const fileUrl: string = f.url || ''
-        const relativePath = fileUrl.startsWith('/') ? fileUrl.slice(1) : fileUrl
-        const filePath = join(process.cwd(), 'public', relativePath)
-        const fileName = f.name || f.originalName || f.filename || 'file'
-        const mimeType = f.format || f.mimeType || 'application/octet-stream'
-        return { filePath, fileName, mimeType, exists: existsSync(filePath) }
-      })
-      .filter(f => f.exists)
+    const bucket = event.context.cloudflare?.env?.BUCKET
 
-    if (!resolvedFiles.length) {
-      throw createError({
-        statusCode: 404,
-        statusMessage: 'File tidak ditemukan di server. Hubungi creator.'
-      })
-    }
-
-    // -- INFO MODE: return file list as JSON --
+    // -- INFO MODE: return file metadata list
     if (query.info) {
-      return resolvedFiles.map((f, i) => ({
-        index: i,
-        name: f.fileName,
-        size: statSync(f.filePath).size,
-        mimeType: f.mimeType,
-      }))
-    }
-
-    // -- SINGLE FILE BY INDEX MODE (with Range/pause-resume support) --
-    const fileParam = query.file
-    if (fileParam !== undefined) {
-      const fileIndex = parseInt(fileParam as string)
-      if (isNaN(fileIndex) || fileIndex < 0 || fileIndex >= resolvedFiles.length) {
-        throw createError({ statusCode: 404, statusMessage: 'File tidak ditemukan' })
-      }
-      const { filePath, fileName, mimeType } = resolvedFiles[fileIndex]
-      const stat = statSync(filePath)
-      const rangeHeader = getHeader(event, 'range')
-
-      if (rangeHeader) {
-        const match = rangeHeader.match(/bytes=(\d+)-(\d*)/)
-        if (match) {
-          const start = parseInt(match[1])
-          const end = match[2] ? parseInt(match[2]) : stat.size - 1
-          const chunkSize = end - start + 1
-          setResponseStatus(event, 206)
-          setResponseHeaders(event, {
-            'Content-Range': `bytes ${start}-${end}/${stat.size}`,
-            'Accept-Ranges': 'bytes',
-            'Content-Length': String(chunkSize),
-            'Content-Type': mimeType,
-            'Content-Disposition': `attachment; filename="${encodeURIComponent(fileName)}"`,
-            'Cache-Control': 'no-store, no-cache',
-          })
-          return sendStream(event, createReadStream(filePath, { start, end }))
+      const list = []
+      for (let i = 0; i < productFiles.length; i++) {
+        const f = productFiles[i]
+        const r2Key = urlToR2Key(f.url || f.path || '')
+        let size: number | null = null
+        if (bucket && r2Key) {
+          const head = await bucket.head(r2Key)
+          size = head?.size ?? null
         }
+        list.push({
+          index: i,
+          name: f.name || f.originalName || f.filename || `file_${i + 1}`,
+          mimeType: f.format || f.mimeType || f.type || 'application/octet-stream',
+          size
+        })
+      }
+      return list
+    }
+
+    // -- SINGLE FILE MODE (default: index 0)
+    const fileParam = query.file
+    const fileIndex = fileParam !== undefined ? parseInt(fileParam as string) : 0
+
+    if (isNaN(fileIndex) || fileIndex < 0 || fileIndex >= productFiles.length) {
+      throw createError({ statusCode: 404, statusMessage: 'File not found' })
+    }
+
+    const fileEntry = productFiles[fileIndex]
+    const fileName = fileEntry.name || fileEntry.originalName || fileEntry.filename || `${product.title}.zip`
+    const mimeType = fileEntry.format || fileEntry.mimeType || fileEntry.type || 'application/octet-stream'
+    const fileUrl: string = fileEntry.url || fileEntry.path || ''
+    const r2Key = urlToR2Key(fileUrl)
+
+    // -- Serve from R2 (production on Cloudflare)
+    if (bucket) {
+      if (!r2Key) {
+        throw createError({ statusCode: 404, statusMessage: 'Invalid file reference' })
+      }
+
+      const object = await bucket.get(r2Key)
+      if (!object) {
+        throw createError({ statusCode: 404, statusMessage: 'File not found in storage' })
       }
 
       setResponseHeaders(event, {
-        'Accept-Ranges': 'bytes',
         'Content-Type': mimeType,
         'Content-Disposition': `attachment; filename="${encodeURIComponent(fileName)}"`,
-        'Content-Length': String(stat.size),
-        'Cache-Control': 'no-store, no-cache',
-      })
-      return sendStream(event, createReadStream(filePath))
-    }
-
-    // -- DEFAULT: single → stream directly, multiple → zip --
-    // Single file — stream directly
-    if (resolvedFiles.length === 1) {
-      const { filePath, fileName, mimeType } = resolvedFiles[0]
-      const stat = statSync(filePath)
-
-      setResponseHeaders(event, {
-        'Content-Type': mimeType,
-        'Content-Disposition': `attachment; filename="${encodeURIComponent(fileName)}"`,
-        'Content-Length': String(stat.size),
+        'Content-Length': String(object.size),
         'Cache-Control': 'no-store, no-cache',
       })
 
-      return sendStream(event, createReadStream(filePath))
+      const data = await object.arrayBuffer()
+      return Buffer.from(data)
     }
 
-    // Multiple files — buffer zip in memory then send
-    // (avoids stream timing issues with Nitro's sendStream)
-    const safeTitle = product.title.replace(/[^\w\s-]/g, '').trim() || 'product'
-    const zipName = `${safeTitle}.zip`
+    // -- Serve from local filesystem (development only)
+    const { existsSync, statSync, createReadStream } = await import('node:fs')
+    const { join } = await import('node:path')
 
-    const zipBuffer = await new Promise<Buffer>((resolve, reject) => {
-      const chunks: Buffer[] = []
-      const archive = archiver('zip', { zlib: { level: 6 } })
+    const relativePath = fileUrl.startsWith('/') ? fileUrl.slice(1) : fileUrl
+    const filePath = join(process.cwd(), 'public', relativePath)
 
-      archive.on('data', (chunk) => chunks.push(chunk as Buffer))
-      archive.on('end', () => resolve(Buffer.concat(chunks)))
-      archive.on('error', reject)
+    if (!existsSync(filePath)) {
+      throw createError({ statusCode: 404, statusMessage: 'File not found' })
+    }
 
-      for (const { filePath, fileName } of resolvedFiles) {
-        archive.file(filePath, { name: fileName })
+    const stat = statSync(filePath)
+    const rangeHeader = getHeader(event, 'range')
+
+    if (rangeHeader) {
+      const match = rangeHeader.match(/bytes=(\d+)-(\d*)/)
+      if (match) {
+        const start = parseInt(match[1])
+        const end = match[2] ? parseInt(match[2]) : stat.size - 1
+        setResponseStatus(event, 206)
+        setResponseHeaders(event, {
+          'Content-Range': `bytes ${start}-${end}/${stat.size}`,
+          'Accept-Ranges': 'bytes',
+          'Content-Length': String(end - start + 1),
+          'Content-Type': mimeType,
+          'Content-Disposition': `attachment; filename="${encodeURIComponent(fileName)}"`,
+          'Cache-Control': 'no-store, no-cache',
+        })
+        return sendStream(event, createReadStream(filePath, { start, end }))
       }
-
-      archive.finalize()
-    })
+    }
 
     setResponseHeaders(event, {
-      'Content-Type': 'application/zip',
-      'Content-Disposition': `attachment; filename="${encodeURIComponent(zipName)}"`,
-      'Content-Length': String(zipBuffer.length),
+      'Accept-Ranges': 'bytes',
+      'Content-Type': mimeType,
+      'Content-Disposition': `attachment; filename="${encodeURIComponent(fileName)}"`,
+      'Content-Length': String(stat.size),
       'Cache-Control': 'no-store, no-cache',
     })
-
-    return send(event, zipBuffer)
+    return sendStream(event, createReadStream(filePath))
 
   } catch (error: any) {
     if (error.statusCode) throw error
