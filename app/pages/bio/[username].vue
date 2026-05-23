@@ -128,9 +128,20 @@ const joinYear = computed(() => {
               <p class="font-mono text-xs tracking-[0.2em] uppercase text-indigo-600 dark:text-indigo-400 mb-3">
                 // CREATOR
               </p>
-              <h1 class="text-4xl lg:text-5xl font-black uppercase tracking-tight text-gray-900 dark:text-white leading-tight mb-1">
-                {{ creator.name }}
-              </h1>
+              <div class="flex flex-wrap items-center gap-3 mb-1">
+                <h1 class="text-4xl lg:text-5xl font-black uppercase tracking-tight text-gray-900 dark:text-white leading-tight">
+                  {{ creator.name }}
+                </h1>
+                <span v-if="creator.stellarBadge"
+                  class="inline-flex items-center gap-1.5 px-2.5 py-1 border border-amber-400/60 dark:border-amber-400/40 bg-amber-50 dark:bg-amber-400/8 font-mono text-[0.65rem] tracking-[0.18em] uppercase text-amber-600 dark:text-amber-400 leading-none"
+                  title="Stellar Supporter"
+                >
+                  <svg class="w-3 h-3 fill-current" viewBox="0 0 24 24">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                  </svg>
+                  Stellar
+                </span>
+              </div>
               <p class="font-mono text-sm text-gray-400 dark:text-gray-500 mb-4">@{{ creator.username }}</p>
 
               <p v-if="creator.headline" class="font-mono text-xs tracking-[0.12em] uppercase text-indigo-500 dark:text-indigo-400 mb-4">

@@ -7,8 +7,7 @@ export interface CreatorProfile {
   avatar?: string | null
   role: string
   verified?: boolean | null
-  created?: string | null
-  headline?: string | null
+  created?: string | null  stellarBadge?: boolean | null  headline?: string | null
   bio?: string | null
   location?: string | null
   website?: string | null

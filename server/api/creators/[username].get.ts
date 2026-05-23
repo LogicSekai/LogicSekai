@@ -24,6 +24,8 @@ export default defineEventHandler(async (event) => {
       role: users.role,
       verified: users.verified,
       created: users.created,
+      stellarBadge: users.stellarBadge,
+      stellarExpiresAt: users.stellarExpiresAt,
     })
     .from(users)
     .where(and(
@@ -127,9 +129,13 @@ export default defineEventHandler(async (event) => {
     })(),
   }))
 
+  const now = new Date()
+  const hasStellar = Boolean(creator.stellarBadge) && Boolean(creator.stellarExpiresAt) && (creator.stellarExpiresAt! > now)
+
   return {
     creator: {
       ...creator,
+      stellarBadge: hasStellar,
       headline: profile?.headline || null,
       bio: profile?.bio || null,
       location: profile?.location || null,
