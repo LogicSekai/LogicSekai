@@ -76,8 +76,13 @@ export default defineNuxtConfig({
     cloudflareAccountId: process.env.CLOUDFLARE_ACCOUNT_ID,
     cloudflareDatabaseId: process.env.CLOUDFLARE_DATABASE_ID,
     cloudflareApiToken: process.env.CLOUDFLARE_API_TOKEN,
+    // Midtrans — platform-level donation account
+    midtransServerKey: process.env.MIDTRANS_SERVER_KEY || '',
+    midtransMode: (process.env.MIDTRANS_MODE || 'sandbox') as 'sandbox' | 'live',
     public: {
-      baseUrl: process.env.BETTER_AUTH_URL || 'http://localhost:3000'
+      baseUrl: process.env.BETTER_AUTH_URL || 'http://localhost:3000',
+      midtransClientKey: process.env.MIDTRANS_CLIENT_KEY || '',
+      midtransMode: process.env.MIDTRANS_MODE || 'sandbox',
     }
   }
 })

@@ -19,6 +19,7 @@ import {
     Flag,
     MessageSquare,
     Receipt,
+    Heart,
 } from 'lucide-vue-next'
 
 export const adminMenuItems: readonly MenuItem[] = Object.freeze([
@@ -126,6 +127,14 @@ export const adminMenuItems: readonly MenuItem[] = Object.freeze([
         name: 'Transaksi',
         icon: Receipt,
         url: '/admin/transactions',
+        permission: Object.freeze(['analytics.view']),
+        roles: Object.freeze(['superadmin', 'admin'])
+    },
+    {
+        id: 'donations',
+        name: 'Donasi',
+        icon: Heart,
+        url: '/admin/donations',
         permission: Object.freeze(['analytics.view']),
         roles: Object.freeze(['superadmin', 'admin'])
     },

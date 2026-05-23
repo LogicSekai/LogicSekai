@@ -13,6 +13,8 @@ export const users = sqliteTable('users', {
     verified: integer('verified', { mode: 'timestamp' }), // null = not verified, timestamp = verified date
     suspended: integer('suspended', { mode: 'timestamp' }), // 0 = active, 1 = suspended
     deleted: integer('deleted', { mode: 'timestamp' }), // null = active, timestamp = soft deleted
+    stellarBadge: integer('stellar_badge', { mode: 'boolean' }).default(false),
+    stellarExpiresAt: integer('stellar_expires_at', { mode: 'timestamp' }),
     created: integer('created', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
     updated: integer('updated', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
 });

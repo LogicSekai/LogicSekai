@@ -43,6 +43,7 @@ export {
     paymentAccountsRelations,
     paymentAuditLogsRelations,
 } from './payment-accounts';
+export { donations } from './donations';
 
 // Define cross-table relations here to avoid circular imports
 import { relations } from 'drizzle-orm';

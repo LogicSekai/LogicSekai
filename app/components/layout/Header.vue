@@ -117,6 +117,13 @@
                     >
                         Kontak
                     </NuxtLink>
+                    <NuxtLink
+                        to="/donasi"
+                        class="font-mono text-xs tracking-[0.12em] uppercase text-amber-500 dark:text-amber-400 hover:text-amber-600 dark:hover:text-amber-300 transition-colors"
+                        active-class="!text-amber-600 dark:!text-amber-300"
+                    >
+                        Donasi
+                    </NuxtLink>
                 </nav>
 
                 <!-- Actions -->
@@ -206,6 +213,12 @@
                         class="block py-2.5 font-mono text-xs tracking-[0.12em] uppercase text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors"
                         active-class="!text-gray-900 dark:!text-white"
                     >Kontak</NuxtLink>
+                    <NuxtLink
+                        to="/donasi"
+                        @click="closeMobileMenu"
+                        class="block py-2.5 font-mono text-xs tracking-[0.12em] uppercase text-amber-500 dark:text-amber-400 hover:text-amber-600 dark:hover:text-amber-300 transition-colors"
+                        active-class="!text-amber-600 dark:!text-amber-300"
+                    >Donasi</NuxtLink>
                 </nav>
             </div>
         </Transition>
