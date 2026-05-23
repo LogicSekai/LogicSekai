@@ -177,6 +177,30 @@ const tools = [
         icon: 'M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
         image: null,
     },
+    {
+        id: 11,
+        name: 'Hash Generator',
+        tagline: 'SHA-1 / SHA-256 / SHA-384 / SHA-512',
+        description: 'Generate hash kriptografis dari teks atau file menggunakan Web Crypto API. Dukung SHA-1, SHA-256, SHA-384, SHA-512, perbandingan hash, dan verifikasi integritas file.',
+        tag: 'HASH / CRYPTO',
+        category: 'Dev Utility',
+        status: 'AVAILABLE',
+        link: '/tools/hash-generator',
+        icon: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z',
+        image: null,
+    },
+    {
+        id: 12,
+        name: 'UUID Generator',
+        tagline: 'UUID v4 Bulk Generator & Validator',
+        description: 'Generate UUID v4 secara client-side menggunakan crypto.randomUUID(). Bulk hingga 100 UUID, pilih format (standard / no-hyphen / braces / URN), dan validasi UUID input.',
+        tag: 'UUID / ID',
+        category: 'Dev Utility',
+        status: 'AVAILABLE',
+        link: '/tools/uuid-generator',
+        icon: 'M7 20l4-16m2 16l4-16M6 9h14M4 15h14',
+        image: null,
+    },
 ]
 </script>
 
