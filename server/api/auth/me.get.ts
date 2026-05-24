@@ -60,6 +60,8 @@ export default defineEventHandler(async (event) => {
             verified: users.verified,
             created: users.created,
             avatar: users.avatar,
+            stellarBadge: users.stellarBadge,
+            stellarExpiresAt: users.stellarExpiresAt,
         }).from(users)
             .where(eq(users.id, sessionData.id))
             .limit(1);

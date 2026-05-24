@@ -20,6 +20,8 @@ import {
     MessageSquare,
     Receipt,
     Heart,
+    BookOpen,
+    BookMarked,
 } from 'lucide-vue-next'
 
 export const adminMenuItems: readonly MenuItem[] = Object.freeze([
@@ -86,6 +88,31 @@ export const adminMenuItems: readonly MenuItem[] = Object.freeze([
                 url: '/admin/articles/comments',
                 permission: Object.freeze(['content.view']),
                 roles: Object.freeze(['superadmin', 'admin'])
+            },
+        ])
+    },
+    {
+        id: 'elearning',
+        name: 'E-Learning',
+        icon: BookOpen,
+        permission: Object.freeze(['content.view']),
+        roles: Object.freeze(['superadmin']),
+        child: Object.freeze([
+            {
+                id: 'elearning-books',
+                name: 'Buku / Kursus',
+                icon: BookMarked,
+                url: '/admin/elearning/books',
+                permission: Object.freeze(['content.view']),
+                roles: Object.freeze(['superadmin'])
+            },
+            {
+                id: 'elearning-chapters',
+                name: 'Bab & Konten',
+                icon: FileText,
+                url: '/admin/elearning/chapters',
+                permission: Object.freeze(['content.view']),
+                roles: Object.freeze(['superadmin'])
             },
         ])
     },

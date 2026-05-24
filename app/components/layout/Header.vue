@@ -58,6 +58,14 @@
                                 >
                                     Services &amp; Tools
                                 </NuxtLink>
+                                <NuxtLink
+                                    to="/elearning"
+                                    @click="productOpen = false"
+                                    class="block px-4 py-2.5 font-mono text-[0.65rem] uppercase tracking-[0.12em] text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/4 transition-colors"
+                                    active-class="!text-gray-900 dark:!text-white bg-gray-50 dark:bg-white/4"
+                                >
+                                    E-Learning
+                                </NuxtLink>
                             </div>
                         </Transition>
                     </div>
@@ -184,6 +192,12 @@
                             class="block py-2 pl-3 font-mono text-xs tracking-[0.12em] uppercase text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors"
                             active-class="!text-gray-900 dark:!text-white"
                         >Services &amp; Tools</NuxtLink>
+                        <NuxtLink
+                            to="/elearning"
+                            @click="closeMobileMenu"
+                            class="block py-2 pl-3 font-mono text-xs tracking-[0.12em] uppercase text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors"
+                            active-class="!text-gray-900 dark:!text-white"
+                        >E-Learning</NuxtLink>
                     </div>
                     <NuxtLink
                         to="/artikel"
@@ -265,7 +279,7 @@ const isPortfolioActive = computed(() => route.path.startsWith('/portfolio') || 
 // Product dropdown
 const productOpen = ref(false)
 const productDropdownRef = ref<HTMLElement | null>(null)
-const isProductActive = computed(() => route.path.startsWith('/products') || route.path.startsWith('/services'))
+const isProductActive = computed(() => route.path.startsWith('/products') || route.path.startsWith('/services') || route.path.startsWith('/elearning'))
 
 // Initialize and handle outside clicks
 onMounted(() => {

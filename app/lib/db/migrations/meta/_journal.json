@@ -113,6 +113,20 @@
       "when": 1779569034648,
       "tag": "0015_quick_black_crow",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "6",
+      "when": 1779600000000,
+      "tag": "0016_add_saved_token_to_donations",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "6",
+      "when": 1779700000000,
+      "tag": "0017_elearning",
+      "breakpoints": true
     }
   ]
 }

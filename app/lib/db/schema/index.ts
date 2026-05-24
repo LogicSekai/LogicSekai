@@ -44,6 +44,12 @@ export {
     paymentAuditLogsRelations,
 } from './payment-accounts';
 export { donations } from './donations';
+export {
+    elearningBooks,
+    elearningChapters,
+    elearningBooksRelations,
+    elearningChaptersRelations,
+} from './elearning';
 
 // Define cross-table relations here to avoid circular imports
 import { relations } from 'drizzle-orm';
