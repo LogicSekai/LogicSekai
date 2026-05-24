@@ -108,9 +108,39 @@
                     <!-- Book -->
                     <div class="bg-white dark:bg-[#030308] border border-gray-100 dark:border-white/6 p-5">
                         <label class="block font-mono text-[10px] tracking-[0.15em] uppercase text-gray-400 mb-3">Buku</label>
-                        <select v-model="form.bookId" class="w-full bg-transparent border border-gray-200 dark:border-white/10 px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-indigo-400 dark:focus:border-indigo-500/60 transition-colors">
-                            <option v-for="book in books" :key="book.id" :value="book.id">{{ book.title }}</option>
-                        </select>
+                        <div class="relative">
+                            <div class="flex items-center border border-gray-200 dark:border-white/10 focus-within:border-indigo-400 dark:focus-within:border-indigo-500/60 transition-colors">
+                                <Search class="w-3.5 h-3.5 text-gray-400 ml-3 shrink-0" />
+                                <input
+                                    v-model="bookSearch"
+                                    @focus="bookDropdownOpen = true"
+                                    @blur="onBookBlur"
+                                    :placeholder="selectedBook ? selectedBook.title : 'Cari buku...'"
+                                    class="w-full px-3 py-2 bg-transparent text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-white/40 focus:outline-none"
+                                />
+                                <button v-if="form.bookId" type="button" @click="clearBook" class="mr-3 text-gray-300 dark:text-white/20 hover:text-red-500 transition-colors">
+                                    <X class="w-3.5 h-3.5" />
+                                </button>
+                            </div>
+                            <div
+                                v-if="bookDropdownOpen"
+                                class="absolute z-20 w-full top-full mt-0.5 bg-white dark:bg-[#0d0d14] border border-gray-200 dark:border-white/10 max-h-52 overflow-y-auto shadow-lg"
+                            >
+                                <button
+                                    v-for="book in filteredBooks"
+                                    :key="book.id"
+                                    type="button"
+                                    @mousedown.prevent="selectBook(book)"
+                                    :class="[
+                                        'w-full text-left px-3 py-2.5 text-sm transition-colors',
+                                        form.bookId === book.id
+                                            ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400'
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/4'
+                                    ]"
+                                >{{ book.title }}</button>
+                                <p v-if="filteredBooks.length === 0" class="px-3 py-2.5 text-xs text-gray-400 font-mono">Buku tidak ditemukan.</p>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Order -->
@@ -138,27 +168,35 @@
 
                     <!-- Thumbnail -->
                     <div class="bg-white dark:bg-[#030308] border border-gray-100 dark:border-white/6 p-5">
-                        <label class="font-mono text-[10px] tracking-[0.15em] uppercase text-gray-400 mb-3 block">Thumbnail Bab</label>
+                        <div class="flex items-center justify-between mb-3">
+                            <label class="font-mono text-[10px] tracking-[0.15em] uppercase text-gray-400 block">Thumbnail Bab</label>
+                            <span class="font-mono text-[9px] text-gray-400">1280×720px (16:9)</span>
+                        </div>
                         <div v-if="form.thumbnail" class="relative group mb-3 overflow-hidden aspect-video bg-gray-100 dark:bg-white/6">
                             <img :src="form.thumbnail" alt="Thumbnail" class="w-full h-full object-cover" />
                             <button type="button" @click="form.thumbnail = ''" class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-black/60 text-white hover:bg-red-600 transition-colors opacity-0 group-hover:opacity-100">
                                 <X class="w-3.5 h-3.5" />
                             </button>
                         </div>
-                        <label
-                            :class="[
-                                'flex flex-col items-center justify-center gap-2 w-full aspect-video border-2 border-dashed cursor-pointer transition-colors',
-                                thumbUploading ? 'border-indigo-400 dark:border-indigo-500/60 bg-indigo-50 dark:bg-indigo-500/5' : 'border-gray-200 dark:border-white/10 hover:border-indigo-400 dark:hover:border-indigo-500/60'
-                            ]"
+                        <button
+                            type="button"
+                            @click="cropDialogOpen = true"
+                            class="flex flex-col items-center justify-center gap-2 w-full aspect-video border-2 border-dashed transition-colors border-gray-200 dark:border-white/10 hover:border-indigo-400 dark:hover:border-indigo-500/60"
                         >
-                            <input type="file" accept="image/jpeg,image/png,image/webp" class="hidden" :disabled="thumbUploading" @change="handleThumbUpload" />
-                            <Loader2 v-if="thumbUploading" class="w-5 h-5 animate-spin text-indigo-500" />
-                            <ImageIcon v-else class="w-5 h-5 text-gray-300 dark:text-white/20" />
+                            <ImageIcon class="w-5 h-5 text-gray-300 dark:text-white/20" />
                             <span class="font-mono text-[10px] tracking-widest uppercase text-gray-400">
-                                {{ thumbUploading ? 'Mengupload...' : (form.thumbnail ? 'Ganti' : 'Upload') }}
+                                {{ form.thumbnail ? 'Ganti Thumbnail' : 'Upload Thumbnail' }}
                             </span>
-                        </label>
+                        </button>
                     </div>
+
+                    <AdminThumbnailCropDialog
+                        v-model:open="cropDialogOpen"
+                        :aspect-ratio="16/9"
+                        label="Thumbnail Bab"
+                        recommended-size="1280×720px"
+                        @uploaded="(url) => { form.thumbnail = url }"
+                    />
                 </div>
             </div>
         </form>
@@ -166,7 +204,9 @@
 </template>
 
 <script setup lang="ts">
-import { ArrowLeft, Loader2, AlertCircle, Check, Save, X, ImageIcon, FileText, Video, Link } from 'lucide-vue-next'
+import { ArrowLeft, Loader2, AlertCircle, Check, Save, X, ImageIcon, FileText, Video, Link, Search } from 'lucide-vue-next'
+
+const cropDialogOpen = ref(false)
 
 definePageMeta({ layout: 'superadmin' })
 useHead({ title: 'Edit Bab — Admin' })
@@ -182,6 +222,28 @@ const contentTypes = [
 const { data: chapData, pending: chapPending } = await useFetch(`/api/admin/elearning/chapters/${route.params.id}`)
 const { data: booksData } = useFetch('/api/admin/elearning/books')
 const books = computed(() => (booksData.value as any)?.books ?? [])
+
+const bookSearch = ref('')
+const bookDropdownOpen = ref(false)
+const selectedBook = computed(() => books.value.find((b: any) => b.id === form.bookId) ?? null)
+const filteredBooks = computed(() => {
+    if (!bookSearch.value.trim()) return books.value
+    const q = bookSearch.value.toLowerCase()
+    return books.value.filter((b: any) => b.title.toLowerCase().includes(q))
+})
+
+function selectBook(book: any) {
+    form.bookId = book.id
+    bookSearch.value = ''
+    bookDropdownOpen.value = false
+}
+function clearBook() {
+    form.bookId = ''
+    bookSearch.value = ''
+}
+function onBookBlur() {
+    setTimeout(() => { bookDropdownOpen.value = false }, 150)
+}
 
 const form = reactive({
     bookId: '',
@@ -213,22 +275,6 @@ watchEffect(() => {
 const saving = ref(false)
 const error = ref('')
 const saved = ref(false)
-const thumbUploading = ref(false)
-
-async function handleThumbUpload(e: Event) {
-    const file = (e.target as HTMLInputElement).files?.[0]
-    if (!file) return
-    thumbUploading.value = true
-    try {
-        const fd = new FormData()
-        fd.append('file', file)
-        fd.append('type', 'thumbnail')
-        const res: any = await $fetch('/api/admin/upload', { method: 'POST', body: fd })
-        form.thumbnail = res.url
-    } finally {
-        thumbUploading.value = false
-    }
-}
 
 async function handleSubmit() {
     saving.value = true

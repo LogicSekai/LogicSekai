@@ -111,28 +111,39 @@
 
                         <!-- Thumbnail -->
                         <div class="bg-white dark:bg-[#030308] border border-gray-100 dark:border-white/6 p-5">
-                            <label class="font-mono text-[10px] tracking-[0.15em] uppercase text-gray-400 mb-3 block">Thumbnail</label>
+                            <div class="flex items-center justify-between mb-3">
+                                <label class="font-mono text-[10px] tracking-[0.15em] uppercase text-gray-400 block">Thumbnail</label>
+                                <span class="font-mono text-[9px] text-gray-400">600×800px (3:4)</span>
+                            </div>
                             <div v-if="form.thumbnail" class="relative group mb-3 overflow-hidden aspect-[3/4] bg-gray-100 dark:bg-white/6">
                                 <img :src="form.thumbnail" alt="Thumbnail" class="w-full h-full object-cover" />
                                 <button type="button" @click="form.thumbnail = ''" class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-black/60 text-white hover:bg-red-600 transition-colors opacity-0 group-hover:opacity-100">
                                     <X class="w-3.5 h-3.5" />
                                 </button>
                             </div>
-                            <label
+                            <button
+                                type="button"
+                                @click="cropDialogOpen = true"
                                 :class="[
-                                    'flex flex-col items-center justify-center gap-2 w-full border-2 border-dashed cursor-pointer transition-colors',
+                                    'flex flex-col items-center justify-center gap-2 w-full border-2 border-dashed transition-colors',
                                     form.thumbnail ? 'aspect-video' : 'aspect-[3/4]',
-                                    thumbUploading ? 'border-indigo-400 dark:border-indigo-500/60 bg-indigo-50 dark:bg-indigo-500/5' : 'border-gray-200 dark:border-white/10 hover:border-indigo-400 dark:hover:border-indigo-500/60'
+                                    'border-gray-200 dark:border-white/10 hover:border-indigo-400 dark:hover:border-indigo-500/60'
                                 ]"
                             >
-                                <input type="file" accept="image/jpeg,image/png,image/webp" class="hidden" :disabled="thumbUploading" @change="handleThumbUpload" />
-                                <Loader2 v-if="thumbUploading" class="w-5 h-5 animate-spin text-indigo-500" />
-                                <ImageIcon v-else class="w-5 h-5 text-gray-300 dark:text-white/20" />
+                                <ImageIcon class="w-5 h-5 text-gray-300 dark:text-white/20" />
                                 <span class="font-mono text-[10px] tracking-widest uppercase text-gray-400">
-                                    {{ thumbUploading ? 'Mengupload...' : (form.thumbnail ? 'Ganti' : 'Upload Thumbnail') }}
+                                    {{ form.thumbnail ? 'Ganti Thumbnail' : 'Upload Thumbnail' }}
                                 </span>
-                            </label>
+                            </button>
                         </div>
+
+                        <AdminThumbnailCropDialog
+                            v-model:open="cropDialogOpen"
+                            :aspect-ratio="3/4"
+                            label="Thumbnail Buku"
+                            recommended-size="600×800px"
+                            @uploaded="(url) => { form.thumbnail = url }"
+                        />
                     </div>
                 </div>
             </form>
@@ -142,6 +153,8 @@
 
 <script setup lang="ts">
 import { ArrowLeft, Loader2, Plus, Pencil, AlertCircle, Check, Save, X, ImageIcon } from 'lucide-vue-next'
+
+const cropDialogOpen = ref(false)
 
 definePageMeta({ layout: 'superadmin' })
 useHead({ title: 'Edit Buku — Admin' })
@@ -171,22 +184,6 @@ watchEffect(() => {
 const saving = ref(false)
 const error = ref('')
 const saved = ref(false)
-const thumbUploading = ref(false)
-
-async function handleThumbUpload(e: Event) {
-    const file = (e.target as HTMLInputElement).files?.[0]
-    if (!file) return
-    thumbUploading.value = true
-    try {
-        const fd = new FormData()
-        fd.append('file', file)
-        fd.append('type', 'thumbnail')
-        const res: any = await $fetch('/api/admin/upload', { method: 'POST', body: fd })
-        form.thumbnail = res.url
-    } finally {
-        thumbUploading.value = false
-    }
-}
 
 async function handleSubmit() {
     saving.value = true

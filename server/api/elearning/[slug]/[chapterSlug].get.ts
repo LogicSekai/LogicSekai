@@ -46,8 +46,7 @@ export default defineEventHandler(async (event) => {
 
         const now = new Date()
         const hasStellar = Boolean(userData?.stellarBadge) &&
-            Boolean(userData?.stellarExpiresAt) &&
-            (userData!.stellarExpiresAt! > now)
+            (userData?.stellarExpiresAt === null || userData!.stellarExpiresAt! > now)
 
         if (!hasStellar) {
             throw createError({ statusCode: 403, statusMessage: 'Konten ini hanya untuk Stellar Supporter.' })

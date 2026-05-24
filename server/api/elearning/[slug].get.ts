@@ -17,9 +17,13 @@ export default defineEventHandler(async (event) => {
 
     if (!book) throw createError({ statusCode: 404, statusMessage: 'Buku tidak ditemukan.' })
 
-    // Cek apakah user punya badge stellar
+    // Cek apakah user punya badge stellar (aktif)
     const auth = event.context.auth
-    const hasStellar = Boolean(auth?.isAuthenticated && (auth as any).user?.stellarBadge)
+    const now = new Date()
+    const authUser = auth?.user as any
+    const hasStellar = Boolean(auth?.isAuthenticated) &&
+        Boolean(authUser?.stellarBadge) &&
+        (authUser?.stellarExpiresAt == null || new Date(authUser.stellarExpiresAt) > now)
 
     const chapters = await db
         .select({

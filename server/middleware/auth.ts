@@ -10,6 +10,8 @@ export interface AuthUser {
   verified: Date | null
   suspended: Date | null
   deleted: Date | null
+  stellarBadge: boolean | null
+  stellarExpiresAt: Date | null
 }
 
 export interface AuthContext {
@@ -101,7 +103,9 @@ export default defineEventHandler(async (event) => {
             role: users.role,
             verified: users.verified,
             suspended: users.suspended,
-            deleted: users.deleted
+            deleted: users.deleted,
+            stellarBadge: users.stellarBadge,
+            stellarExpiresAt: users.stellarExpiresAt,
           })
           .from(users)
           .where(eq(users.id, sessionData.id))
