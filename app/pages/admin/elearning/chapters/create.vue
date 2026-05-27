@@ -54,9 +54,37 @@
                     <div v-if="form.contentType === 'blog'" class="bg-white dark:bg-[#030308] border border-gray-100 dark:border-white/6 overflow-hidden">
                         <div class="px-5 py-3 border-b border-gray-100 dark:border-white/6 flex items-center justify-between">
                             <label class="font-mono text-[10px] tracking-[0.15em] uppercase text-gray-400">Konten Artikel</label>
-                            <span class="font-mono text-[10px] text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 px-2 py-0.5">Rich Text</span>
+                            <div class="flex items-center">
+                                <button
+                                    type="button"
+                                    @click="htmlMode = false"
+                                    :class="[
+                                        'flex items-center gap-1.5 px-3 py-1 font-mono text-[10px] uppercase tracking-widest transition-colors border-r border-gray-100 dark:border-white/6',
+                                        !htmlMode ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-500' : 'text-gray-400 hover:text-gray-700 dark:hover:text-white'
+                                    ]"
+                                >
+                                    <FileText class="w-3 h-3" /> Rich Text
+                                </button>
+                                <button
+                                    type="button"
+                                    @click="htmlMode = true"
+                                    :class="[
+                                        'flex items-center gap-1.5 px-3 py-1 font-mono text-[10px] uppercase tracking-widest transition-colors',
+                                        htmlMode ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-500' : 'text-gray-400 hover:text-gray-700 dark:hover:text-white'
+                                    ]"
+                                >
+                                    <Code2 class="w-3 h-3" /> HTML
+                                </button>
+                            </div>
                         </div>
-                        <AdminTiptapEditor v-model="form.content" placeholder="Tulis konten bab di sini..." />
+                        <AdminTiptapEditor v-if="!htmlMode" v-model="form.content" placeholder="Tulis konten bab di sini..." />
+                        <textarea
+                            v-else
+                            v-model="form.content"
+                            rows="20"
+                            placeholder="<p>Masukkan HTML di sini...</p>"
+                            class="w-full px-5 py-4 bg-transparent font-mono text-xs text-gray-800 dark:text-gray-200 placeholder-gray-300 dark:placeholder-white/20 focus:outline-none resize-y leading-relaxed"
+                        />
                     </div>
 
                     <!-- Video URL -->
@@ -221,7 +249,7 @@
 </template>
 
 <script setup lang="ts">
-import { ArrowLeft, FileText, Send, Loader2, X, AlertCircle, ImageIcon, Video, Link, Search } from 'lucide-vue-next'
+import { ArrowLeft, FileText, Send, Loader2, X, AlertCircle, ImageIcon, Video, Link, Search, Code2 } from 'lucide-vue-next'
 
 const cropDialogOpen = ref(false)
 
@@ -251,6 +279,7 @@ const form = reactive({
 
 const saving = ref(false)
 const error = ref('')
+const htmlMode = ref(false)
 
 const { data: booksData } = useFetch('/api/admin/elearning/books')
 const books = computed(() => (booksData.value as any)?.books ?? [])
