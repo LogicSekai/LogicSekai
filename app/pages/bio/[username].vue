@@ -16,15 +16,32 @@ const creator = computed(() => data.value?.creator)
 const stats = computed(() => data.value?.stats)
 const products = computed(() => data.value?.products || [])
 
+const siteUrl = (useRuntimeConfig().public.baseUrl as string) || 'https://logicsekai.com'
+const absUrl = (p?: string | null) => {
+  if (!p || p.startsWith('data:')) return `${siteUrl}/img/og-banner.jpg`
+  if (/^https?:\/\//i.test(p)) return p
+  return `${siteUrl}${p.startsWith('/') ? p : '/' + p}`
+}
+const creatorDesc = computed(() =>
+  creator.value?.bio || `Lihat produk dan portofolio dari ${creator.value?.name || 'kreator'} di Logic Sekai.`
+)
+
 useHead(() => ({
-  title: creator.value ? `${creator.value.name} — Logic Sekai` : 'Creator',
-  meta: [
-    {
-      name: 'description',
-      content: creator.value?.bio || `Lihat produk dan portofolio dari ${creator.value?.name} di Logic Sekai.`,
-    },
-  ],
+  title: creator.value ? `${creator.value.name} (@${username}) — Logic Sekai` : 'Creator — Logic Sekai',
+  link: [{ rel: 'canonical', href: `${siteUrl}/bio/${username}` }],
 }))
+useSeoMeta({
+  description: () => creatorDesc.value,
+  ogType: 'profile',
+  ogTitle: () => creator.value ? `${creator.value.name} (@${username})` : 'Creator — Logic Sekai',
+  ogDescription: () => creatorDesc.value,
+  ogImage: () => absUrl(creator.value?.avatar),
+  ogUrl: () => `${siteUrl}/bio/${username}`,
+  twitterCard: 'summary_large_image',
+  twitterTitle: () => creator.value?.name || 'Creator — Logic Sekai',
+  twitterDescription: () => creatorDesc.value,
+  twitterImage: () => absUrl(creator.value?.avatar),
+})
 
 // Social icons map
 const socialIcons: Record<string, string> = {

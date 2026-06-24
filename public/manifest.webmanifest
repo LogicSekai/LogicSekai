@@ -1,6 +1,12 @@
 {
-    "name": "",
-    "short_name": "",
+    "name": "Logic Sekai — Marketplace & Belajar Kreator Digital",
+    "short_name": "Logic Sekai",
+    "description": "Platform marketplace dan e-learning untuk kreator digital Indonesia.",
+    "lang": "id",
+    "start_url": "/",
+    "scope": "/",
+    "id": "/",
+    "categories": ["education", "shopping", "productivity"],
     "icons": [
         {
             "src": "/android-chrome-192x192.png",
@@ -33,7 +39,7 @@
             "type": "image/png"
         }
     ],
-    "theme_color": "#ffffff",
-    "background_color": "#ffffff",
+    "theme_color": "#0F172A",
+    "background_color": "#0F172A",
     "display": "standalone"
 }

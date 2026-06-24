@@ -399,13 +399,27 @@ const { data, pending, error } = await useAsyncData(
 const article = computed(() => (data.value as any)?.article)
 const related = computed(() => (data.value as any)?.related ?? [])
 
+const siteUrl = (useRuntimeConfig().public.baseUrl as string) || 'https://logicsekai.com'
+const absUrl = (p?: string | null) => {
+  if (!p) return `${siteUrl}/img/og-banner.jpg`
+  if (/^https?:\/\//i.test(p)) return p
+  return `${siteUrl}${p.startsWith('/') ? p : '/' + p}`
+}
+
 useSeoMeta({
   title: () => article.value ? `${article.value.title} — Logic Sekai` : 'Artikel — Logic Sekai',
-  description: () => article.value?.excerpt || '',
-  ogTitle: () => article.value?.title,
-  ogDescription: () => article.value?.excerpt,
-  ogImage: () => article.value?.coverImage,
+  description: () => article.value?.excerpt || 'Artikel & tutorial dari Logic Sekai.',
+  ogType: 'article',
+  ogTitle: () => article.value?.title || 'Artikel — Logic Sekai',
+  ogDescription: () => article.value?.excerpt || '',
+  ogImage: () => absUrl(article.value?.coverImage),
+  ogUrl: () => `${siteUrl}/artikel/${slug}`,
+  twitterCard: 'summary_large_image',
+  twitterTitle: () => article.value?.title || 'Artikel — Logic Sekai',
+  twitterDescription: () => article.value?.excerpt || '',
+  twitterImage: () => absUrl(article.value?.coverImage),
 })
+useHead({ link: [{ rel: 'canonical', href: `${siteUrl}/artikel/${slug}` }] })
 
 const categories = [
   { value: 'tutorial', label: 'Tutorial' },

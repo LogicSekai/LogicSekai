@@ -134,9 +134,33 @@ const book = computed(() => (data.value as any)?.book ?? null)
 const chapters = computed(() => (data.value as any)?.chapters ?? [])
 const hasStellarChapters = computed(() => chapters.value.some((c: any) => c.stellarOnly))
 
+const siteUrl = (useRuntimeConfig().public.baseUrl as string) || 'https://logicsekai.com'
+const absUrl = (p?: string | null) => {
+    if (!p) return `${siteUrl}/img/og-banner.jpg`
+    if (/^https?:\/\//i.test(p)) return p
+    return `${siteUrl}${p.startsWith('/') ? p : '/' + p}`
+}
+const bookDesc = computed(() =>
+    (book.value?.description || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 200)
+    || 'Materi e-learning dari Logic Sekai.'
+)
+
 useHead(() => ({
-    title: book.value ? `${book.value.title} — E-Learning` : 'E-Learning',
+    title: book.value ? `${book.value.title} — E-Learning Logic Sekai` : 'E-Learning — Logic Sekai',
+    link: [{ rel: 'canonical', href: `${siteUrl}/elearning/${route.params.slug}` }],
 }))
+useSeoMeta({
+    description: () => bookDesc.value,
+    ogType: 'book',
+    ogTitle: () => book.value?.title || 'E-Learning — Logic Sekai',
+    ogDescription: () => bookDesc.value,
+    ogImage: () => absUrl(book.value?.thumbnail),
+    ogUrl: () => `${siteUrl}/elearning/${route.params.slug}`,
+    twitterCard: 'summary_large_image',
+    twitterTitle: () => book.value?.title || 'E-Learning — Logic Sekai',
+    twitterDescription: () => bookDesc.value,
+    twitterImage: () => absUrl(book.value?.thumbnail),
+})
 
 function contentIcon(type: string) {
     if (type === 'video_hls' || type === 'video_embed') return Video
