@@ -1,6 +1,15 @@
-User-Agent: *
-Disallow:
+User-agent: *
+Allow: /
 
+# Area privat / butuh autentikasi — jangan diindeks
 Disallow: /dashboard
 Disallow: /settings
 Disallow: /setup
+Disallow: /auth
+Disallow: /admin
+Disallow: /creator
+Disallow: /transactions
+Disallow: /payment
+Disallow: /api/
+
+Sitemap: https://logicsekai.com/sitemap.xml

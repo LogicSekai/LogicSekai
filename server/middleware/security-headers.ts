@@ -18,10 +18,16 @@ export default defineEventHandler(async (event) => {
     
     // Prevent clickjacking
     'X-Frame-Options': 'DENY',
-    
-    // XSS protection
-    'X-XSS-Protection': '1; mode=block',
-    
+
+    // X-XSS-Protection is deprecated and can introduce issues; disable it.
+    'X-XSS-Protection': '0',
+
+    // Force HTTPS (HSTS)
+    'Strict-Transport-Security': 'max-age=63072000; includeSubDomains; preload',
+
+    // Limit powerful browser features for API responses
+    'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+
     // Referrer policy
     'Referrer-Policy': 'strict-origin-when-cross-origin',
     

@@ -733,6 +733,33 @@ const { user } = useAuth()
 // Reactive state
 const loading = ref(true)
 const product = ref<Product | null>(null)
+
+// SEO / social share meta (definePageMeta tidak mengatur head; gunakan useSeoMeta)
+const _siteUrl = (useRuntimeConfig().public.baseUrl as string) || 'https://logicsekai.com'
+const _absUrl = (p?: string | null) => {
+    if (!p) return `${_siteUrl}/img/og-banner.jpg`
+    if (/^https?:\/\//i.test(p)) return p
+    return `${_siteUrl}${p.startsWith('/') ? p : '/' + p}`
+}
+const _productDesc = computed(() =>
+    (product.value?.shortDescription || product.value?.description || '')
+        .replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 200)
+    || 'Produk digital di Logic Sekai.'
+)
+useSeoMeta({
+    title: () => product.value ? `${product.value.title} — Logic Sekai` : 'Produk — Logic Sekai',
+    description: () => _productDesc.value,
+    ogType: 'product',
+    ogTitle: () => product.value?.title || 'Produk — Logic Sekai',
+    ogDescription: () => _productDesc.value,
+    ogImage: () => _absUrl(product.value?.thumbnail || product.value?.previewImages?.[0]),
+    ogUrl: () => `${_siteUrl}/products/${creatorUsername}/${productSlug}`,
+    twitterCard: 'summary_large_image',
+    twitterTitle: () => product.value?.title || 'Produk — Logic Sekai',
+    twitterDescription: () => _productDesc.value,
+    twitterImage: () => _absUrl(product.value?.thumbnail || product.value?.previewImages?.[0]),
+})
+useHead({ link: [{ rel: 'canonical', href: `${_siteUrl}/products/${creatorUsername}/${productSlug}` }] })
 const selectedImageIndex = ref(0)
 const activeTab = ref('description')
 const userOwnsProduct = ref(false)

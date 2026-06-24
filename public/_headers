@@ -1,0 +1,27 @@
+# Cloudflare Pages — HTTP response headers
+# Header keamanan global untuk seluruh halaman & aset statis.
+
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(self), interest-cohort=()
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  X-XSS-Protection: 0
+  Cross-Origin-Opener-Policy: same-origin
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; img-src 'self' data: blob: https:; media-src 'self' blob: https:; font-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://app.midtrans.com https://app.sandbox.midtrans.com; connect-src 'self' https:; frame-src 'self' https://app.midtrans.com https://app.sandbox.midtrans.com; form-action 'self'; upgrade-insecure-requests
+
+# Aset ber-hash dari Nuxt — boleh di-cache selamanya
+/_nuxt/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Gambar statis
+/img/*
+  Cache-Control: public, max-age=86400
+
+/favicon.ico
+  Cache-Control: public, max-age=86400
+
+# Jangan cache sitemap & robots terlalu lama
+/sitemap.xml
+  Cache-Control: public, max-age=3600
