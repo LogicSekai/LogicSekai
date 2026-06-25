@@ -1,4 +1,4 @@
-﻿import { ref } from 'vue'
+import { ref } from 'vue'
 import type { FileUploadResult } from '~/types/product'
 
 interface UploadProgress {
@@ -10,13 +10,56 @@ export const useFileUpload = () => {
   const progress = ref<UploadProgress>({})
   const error = ref<string | null>(null)
 
+  // Kompres & resize gambar di sisi klien sebelum upload (tanpa dependency, pakai Canvas).
+  // Mencegah file raksasa (mis. 9MB) masuk ke storage/origin. Fail-safe: jika gagal, file asli dipakai.
+  const compressImage = async (
+    file: File,
+    opts: { maxDimension?: number; quality?: number } = {}
+  ): Promise<File> => {
+    const compressible = ['image/jpeg', 'image/png', 'image/webp']
+    if (typeof document === 'undefined' || !compressible.includes(file.type)) return file
+
+    const maxDimension = opts.maxDimension ?? 1920
+    const quality = opts.quality ?? 0.82
+    try {
+      const bitmap = await createImageBitmap(file)
+      const { width, height } = bitmap
+      // Sudah cukup kecil -> biarkan apa adanya
+      if (width <= maxDimension && height <= maxDimension && file.size < 400 * 1024) {
+        bitmap.close?.()
+        return file
+      }
+      const scale = Math.min(1, maxDimension / Math.max(width, height))
+      const w = Math.round(width * scale)
+      const h = Math.round(height * scale)
+      const canvas = document.createElement('canvas')
+      canvas.width = w
+      canvas.height = h
+      const ctx = canvas.getContext('2d')
+      if (!ctx) { bitmap.close?.(); return file }
+      ctx.drawImage(bitmap, 0, 0, w, h)
+      bitmap.close?.()
+      const blob: Blob | null = await new Promise((res) => canvas.toBlob(res, 'image/webp', quality))
+      if (!blob || blob.size >= file.size) return file
+      const newName = file.name.replace(/\.(jpe?g|png|webp)$/i, '') + '.webp'
+      return new File([blob], newName, { type: 'image/webp', lastModified: Date.now() })
+    } catch {
+      return file
+    }
+  }
+
   // Upload single file
   const uploadFile = async (file: File, type: 'thumbnail' | 'product' | 'preview' = 'product'): Promise<FileUploadResult> => {
     const fileId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-    
+
     uploading.value = true
     progress.value[fileId] = 0
     error.value = null
+
+    // Kompres gambar hanya untuk thumbnail & preview - JANGAN kompres file produk (deliverable asli).
+    if (type === 'thumbnail' || type === 'preview') {
+      file = await compressImage(file)
+    }
 
     try {
       const formData = new FormData()
@@ -143,11 +186,11 @@ export const useFileUpload = () => {
   // Format file size
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes'
-    
+
     const k = 1024
     const sizes = ['Bytes', 'KB', 'MB', 'GB']
     const i = Math.floor(Math.log(bytes) / Math.log(k))
-    
+
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
   }
 
@@ -163,10 +206,11 @@ export const useFileUpload = () => {
     uploading,
     progress,
     error,
-    
+
     // Actions
     uploadFile,
     uploadFiles,
+    compressImage,
     validateFile,
     deleteFile,
     getFileInfo,
@@ -174,3 +218,5 @@ export const useFileUpload = () => {
     reset,
   }
 }
+
+// (Fase 1) Kompresi gambar sisi-klien aktif untuk upload thumbnail & preview.

@@ -35,7 +35,7 @@
                 >
                     <!-- Thumbnail -->
                     <div class="aspect-[16/9] bg-gray-50 dark:bg-white/4 overflow-hidden relative">
-                        <img
+                        <img loading="lazy" decoding="async"
                             v-if="book.thumbnail"
                             :src="book.thumbnail"
                             :alt="book.title"

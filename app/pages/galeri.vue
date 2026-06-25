@@ -154,7 +154,7 @@
 
                     <!-- Media content -->
                     <div class="max-w-4xl w-full">
-                        <img
+                        <img loading="lazy" decoding="async"
                             v-if="selectedItem.type === 'photo'"
                             :src="selectedItem.url"
                             :alt="selectedItem.title"
