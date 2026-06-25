@@ -1,0 +1,31 @@
+# Normalisasi akhiran baris: simpan LF di repo, checkout sesuai OS.
+# Menghentikan masalah CRLF/LF yang membuat ratusan file tampak "modified".
+* text=auto eol=lf
+
+# File yang harus selalu LF (skrip & config lintas-OS)
+*.ts   text eol=lf
+*.js   text eol=lf
+*.vue  text eol=lf
+*.json text eol=lf
+*.css  text eol=lf
+*.md   text eol=lf
+*.yml  text eol=lf
+*.yaml text eol=lf
+*.toml text eol=lf
+*.sql  text eol=lf
+*.sh   text eol=lf
+
+# Aset biner — jangan pernah diutak-atik EOL/diff
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.webp binary
+*.gif  binary
+*.ico  binary
+*.svg  text eol=lf
+*.pdf  binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.eot   binary
+*.db    binary
