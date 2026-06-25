@@ -1,6 +1,7 @@
 ﻿import { eq } from 'drizzle-orm'
 import { getDB } from '~/lib/db/connection'
 import { users } from '~/lib/db/schema'
+import { storeAvatar, deleteAvatarIfR2 } from '~~/server/utils/avatar-storage'
 export default defineEventHandler(async (event) => {
     try {
         // Only allow POST requests
@@ -111,25 +112,21 @@ export default defineEventHandler(async (event) => {
             })
         }
 
-        // Create unique filename
-        const timestamp = Date.now()
-        const randomId = Math.random().toString(36).substring(2, 15)
-        const fileExtension = avatarFile.filename?.split('.').pop() || 'jpg'
-        const filename = `avatar_${userId}_${timestamp}_${randomId}.${fileExtension}`
-
-        // For this example, we'll store the image as base64 in the database
-        // In production, you might want to use cloud storage like Cloudflare R2, AWS S3, etc.
-        const base64Image = `data:${avatarFile.type};base64,${avatarFile.data.toString('base64')}`
+        // Simpan ke Cloudflare R2 (fallback base64 untuk dev tanpa R2)
+        const avatarUrl = await storeAvatar(event, userId, avatarFile)
 
         // Update user avatar in database
         const [updatedUser] = await db
             .update(users)
             .set({
-                avatar: base64Image,
+                avatar: avatarUrl,
                 updated: new Date()
             })
             .where(eq(users.id, userId))
             .returning()
+
+        // Hapus avatar lama dari R2 (best-effort)
+        await deleteAvatarIfR2(event, existingUser?.avatar)
 
         if (!updatedUser) {
             throw createError({
@@ -141,7 +138,7 @@ export default defineEventHandler(async (event) => {
         // Return success response
         return {
             success: true,
-            avatarUrl: base64Image,
+            avatarUrl,
             message: 'Avatar uploaded successfully'
         }
 

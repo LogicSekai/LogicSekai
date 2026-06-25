@@ -1,6 +1,7 @@
 ﻿import { eq } from 'drizzle-orm'
 import { getDB } from '~/lib/db/connection'
 import { users } from '~/lib/db/schema'
+import { storeAvatar, deleteAvatarIfR2 } from '~~/server/utils/avatar-storage'
 
 export default defineEventHandler(async (event) => {
     try {
@@ -71,24 +72,32 @@ export default defineEventHandler(async (event) => {
                 })
             }
 
-            // Store as base64 in database (Cloudflare Workers has no writable filesystem)
-            const base64Image = `data:${file.type};base64,${file.data.toString('base64')}`
-
-            // Update user avatar in database
+            // Simpan ke Cloudflare R2 (fallback base64 untuk dev tanpa R2)
             const db = getDB()
             if (!db) throw createError({ statusCode: 503, statusMessage: 'Database not available' })
+
+            const [prev] = await db
+                .select({ avatar: users.avatar })
+                .from(users)
+                .where(eq(users.id, sessionData.id))
+                .limit(1)
+
+            const avatarUrl = await storeAvatar(event, sessionData.id, file)
 
             await db
                 .update(users)
                 .set({
-                    avatar: base64Image,
+                    avatar: avatarUrl,
                     updated: new Date()
                 })
                 .where(eq(users.id, sessionData.id))
 
+            // Hapus avatar lama dari R2 (best-effort)
+            await deleteAvatarIfR2(event, prev?.avatar)
+
             return {
                 success: true,
-                avatar: base64Image,
+                avatar: avatarUrl,
                 message: 'Avatar updated successfully'
             }
 
@@ -96,6 +105,13 @@ export default defineEventHandler(async (event) => {
             // Handle avatar removal
             const db = getDB()
             if (!db) throw createError({ statusCode: 503, statusMessage: 'Database not available' })
+
+            // Ambil avatar lama untuk dibersihkan dari R2
+            const [prev] = await db
+                .select({ avatar: users.avatar })
+                .from(users)
+                .where(eq(users.id, sessionData.id))
+                .limit(1)
 
             // Remove avatar from database
             await db
@@ -105,6 +121,8 @@ export default defineEventHandler(async (event) => {
                     updated: new Date()
                 })
                 .where(eq(users.id, sessionData.id))
+
+            await deleteAvatarIfR2(event, prev?.avatar)
 
             return {
                 success: true,
