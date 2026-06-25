@@ -119,6 +119,8 @@ export default defineNuxtConfig({
       baseUrl: process.env.BETTER_AUTH_URL || 'http://localhost:3000',
       midtransClientKey: process.env.MIDTRANS_CLIENT_KEY || '',
       midtransMode: process.env.MIDTRANS_MODE || 'sandbox',
+      // Cloudflare Web Analytics (opsional) — set via NUXT_PUBLIC_CF_BEACON_TOKEN
+      cfBeaconToken: process.env.NUXT_PUBLIC_CF_BEACON_TOKEN || '',
     }
   }
 })
