@@ -12,7 +12,7 @@ Status per fase ditandai: ☐ belum • ◐ sedang berjalan • ☑ selesai.
 
 **25 Jun 2026 — sesi AI agent:**
 - ☑ **Pembersihan aset tidak terpakai.** 19 file di `public/img` yang tidak direferensikan kode mana pun dihapus (hero.jpg, skirk.png, berbagai screenshot/mockup, logo sociabuzz/youtube/discord/github, dll). `public/img` turun dari **±13 MB → 396 KB**. Diverifikasi nol referensi rusak.
-- ◐ **Fase 0 (Higiene git).** `.gitattributes` dibuat (normalisasi EOL + tanda binary). *Sisa:* `git add --renormalize .` + commit masih terblokir oleh stale `.git/index.lock` yang tak bisa dihapus dari lingkungan ini — perlu dijalankan di mesinmu.
+- ☑ **Fase 0 (Higiene git) — SELESAI.** `.gitattributes` dibuat & di-commit; ternyata cukup menambah `.gitattributes` untuk melenyapkan 487 "phantom diff" CRLF/LF (git langsung normalisasi saat membandingkan), jadi tak perlu commit renormalisasi besar. Stale `.git/index.lock` sudah dilepas. `.env` dikonfirmasi tidak ter-track. Commit di branch `development`: `feat(seo)…` → `chore: .gitattributes` → `chore(assets): …` → `docs: …`. *Sisa kecil:* push ke `origin/development` & `prod` (belum dilakukan — menunggu konfirmasi), dan pembersihan 33 file `public/uploads/*` ter-track (masuk Fase 3).
 - ◐ **Fase 1 (Performa gambar) — bagian aset statis selesai.** Gambar besar yang berat ternyata semuanya tak terpakai → terhapus. Sisa gambar yang dipakai dikecilkan: `taszela.jpg` 238 KB→62 KB, `profile.jpg` 73 KB→40 KB. *Sisa:* pasang `@nuxt/image`, ganti `<img>`→`<NuxtImg>`, dan kompresi saat upload — butuh `npm/bun install` di mesinmu (lihat catatan di bawah).
 
 **Perlu tindakanmu / kredensial (tidak bisa dari lingkungan ini):**
@@ -177,4 +177,51 @@ Alasan: higiene dulu agar diff bersih; performa & observability memberi hasil pa
 
 ## Fase 6 — Finalisasi SEO & Share Preview (sebagian besar SUDAH dibangun)
 
-**Sudah dikerjakan** (siklus se
+**Sudah dikerjakan** (siklus sebelumnya): prerender crawler untuk share preview (`server/middleware/1.seo-prerender.ts`), `sitemap.xml` dinamis, `robots.txt` diperbaiki, default OG/Twitter di `nuxt.config.ts`, `useSeoMeta` per-halaman, banner OG 1200×630, `manifest.webmanifest` dilengkapi, security headers (`public/_headers`).
+
+**Sisa langkah (verifikasi pasca-deploy):**
+1. Commit & deploy perubahan SEO (lihat catatan blocker git di Fase 0).
+2. Uji di **Facebook Sharing Debugger**, **X Card Validator**, kirim test link WhatsApp/Telegram.
+3. Daftarkan domain di **Google Search Console**, submit `https://logicsekai.com/sitemap.xml`.
+4. Pastikan `_routes.json` hasil build meneruskan rute halaman ke worker agar middleware prerender jalan.
+5. Pantau indexing & perbaiki bila ada warning.
+
+**Verifikasi:** Preview tampil dengan judul + gambar di semua platform; sitemap terbaca Google; tidak ada error coverage.
+
+---
+
+## Catatan Eksekusi oleh AI Agent
+
+- Setiap fase dikerjakan sebagai unit terpisah dengan commit sendiri agar mudah ditinjau/di-rollback.
+- Kerja menyentuh data (Fase 3) **wajib** didahului backup dan dijalankan di lingkungan staging dulu.
+- Perubahan berisiko regresi (CSP, storage) dirilis di belakang testing (Fase 5) bila memungkinkan.
+- Sebelum mulai tiap fase, saya akan konfirmasi singkat lingkup & dependensi (mis. ketersediaan binding R2, izin dashboard Cloudflare, DSN Sentry).
+
+---
+
+*Dokumen ini hidup — perbarui status fase saat dikerjakan.*
+
+---
+
+## Status Akhir Semua Fase (update)
+
+| Fase | Status | Commit | Catatan |
+|------|--------|--------|---------|
+| 0. Higiene git | ☑ | `.gitattributes` | EOL noise hilang; lock dilepas |
+| 1. Performa gambar | ☑* | kompresi upload + lazy-load | *sisa: `@nuxt/image` (butuh install) |
+| 2. Observability | ☑* | error tracking + /api/health + analytics | *sisa: isi DSN/token |
+| 3. Storage R2 | ☑* | avatar → R2, untrack uploads | *sisa: jalankan `/api/admin/migrate-avatars` di prod |
+| 4. Keamanan | ☑* | rate limiter + CSP report-only | *sisa: aktifkan CF Rate Limit Rules; pantau CSP report |
+| 5. Testing | ☑* | Vitest unit + CI | *sisa: `bun install`; component/E2E Playwright |
+| 6. SEO | ☑ | sudah live & terverifikasi | lihat `docs/VERIFIKASI-SEO.md` |
+
+**Terverifikasi live di logicsekai.com:** homepage meta OG/Twitter, `sitemap.xml`,
+`robots.txt`, `og-banner.jpg` — semua aktif dan benar.
+
+**Daftar tindakan yang menunggu kamu (butuh kredensial/mesin):**
+1. Push branch `development` ke `origin` lalu deploy (commit Fase 0–5 belum di-deploy).
+2. `bun install` untuk menambah Vitest ke `bun.lock`, lalu `bun run test`.
+3. `bun add @nuxt/image sharp` untuk lanjutan optimasi gambar (Fase 1).
+4. Jalankan migrasi avatar: `POST /api/admin/migrate-avatars` (cookie superadmin) — Fase 3.
+5. Aktifkan Cloudflare Rate Limiting Rules / isi `ERROR_WEBHOOK_URL` & `NUXT_PUBLIC_CF_BEACON_TOKEN` — Fase 2 & 4.
+6. Verifikasi SEO pasca-deploy sesuai `docs/VERIFIKASI-SEO.md` — Fase 6.
