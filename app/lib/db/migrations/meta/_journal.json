@@ -141,6 +141,13 @@
       "when": 1779900000000,
       "tag": "0019_user_sessions",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "6",
+      "when": 1780000000000,
+      "tag": "0020_mcp_trash",
+      "breakpoints": true
     }
   ]
 }

@@ -1,5 +1,5 @@
 /**
- * Tool MCP Logic Sekai — SEMUA read-only dan hanya mengembalikan data yang
+ * Tool MCP BACA Logic Sekai — read-only dan hanya mengembalikan data yang
  * memang sudah publik di website (status published, produk tersedia,
  * bab e-learning non-Stellar). Tidak ada email, password, transaksi, atau
  * data pribadi pengguna yang diekspos.
@@ -14,55 +14,12 @@ import {
     elearningBooks,
     elearningChapters,
 } from '~/lib/db/schema'
-import type { McpScope } from './scopes'
+import {
+    SITE_URL, ToolInputError, str, int, likeEsc, parseList, iso,
+    type McpTool,
+} from './tool-types'
 
-const SITE_URL = 'https://logicsekai.com'
 const MAX_TEXT = 20_000
-
-export interface ToolContext {
-    db: any
-}
-
-export interface McpTool {
-    name: string
-    title: string
-    description: string
-    scope: McpScope
-    inputSchema: Record<string, unknown>
-    handler: (args: Record<string, any>, ctx: ToolContext) => Promise<unknown>
-}
-
-export class ToolInputError extends Error {}
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function str(args: Record<string, any>, key: string, opts: { required?: boolean; max?: number } = {}): string | undefined {
-    const v = args[key]
-    if (v === undefined || v === null || v === '') {
-        if (opts.required) throw new ToolInputError(`Argumen "${key}" wajib diisi`)
-        return undefined
-    }
-    if (typeof v !== 'string') throw new ToolInputError(`Argumen "${key}" harus string`)
-    const t = v.trim()
-    if (t.length > (opts.max ?? 200)) throw new ToolInputError(`Argumen "${key}" terlalu panjang`)
-    return t
-}
-
-function int(args: Record<string, any>, key: string, def: number, min: number, max: number): number {
-    const v = args[key]
-    if (v === undefined || v === null) return def
-    const n = Number(v)
-    if (!Number.isInteger(n)) throw new ToolInputError(`Argumen "${key}" harus bilangan bulat`)
-    return Math.min(max, Math.max(min, n))
-}
-
-/** Escape karakter wildcard LIKE agar input pengguna diperlakukan literal. */
-function likePattern(q: string): string {
-    return `%${q.replace(/[\\%_]/g, (m) => '\\' + m)}%`
-}
-function likeEsc(col: any, q: string) {
-    return sql`${col} LIKE ${likePattern(q)} ESCAPE '\\'`
-}
 
 function htmlToText(html: string | null | undefined): string {
     if (!html) return ''
@@ -81,22 +38,6 @@ function htmlToText(html: string | null | undefined): string {
         .replace(/\n{3,}/g, '\n\n')
         .trim()
     return text.length > MAX_TEXT ? text.slice(0, MAX_TEXT) + '\n…[dipotong]' : text
-}
-
-function parseList(raw: string | null | undefined): string[] {
-    if (!raw) return []
-    try {
-        const v = JSON.parse(raw)
-        return Array.isArray(v) ? v.map(String) : []
-    } catch {
-        return []
-    }
-}
-
-function iso(d: Date | number | null | undefined): string | null {
-    if (d === null || d === undefined) return null
-    const date = d instanceof Date ? d : new Date(typeof d === 'number' && d < 1e12 ? d * 1000 : d)
-    return isNaN(date.getTime()) ? null : date.toISOString()
 }
 
 function effectivePrice(p: any): number {
@@ -490,8 +431,3 @@ export const MCP_TOOLS: McpTool[] = [
         },
     },
 ]
-
-export function toolsForScopes(scopes: McpScope[]): McpTool[] {
-    const set = new Set(scopes)
-    return MCP_TOOLS.filter(t => set.has(t.scope))
-}

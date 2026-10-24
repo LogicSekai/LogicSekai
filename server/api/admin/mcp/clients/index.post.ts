@@ -6,14 +6,14 @@ import { initializeDB } from '~/lib/db/connection'
 import { mcpClients } from '~/lib/db/schema'
 import { encryptSecret, encryptedKeyVersion, maskSecret } from '~~/server/utils/encryption'
 import { generateClientId, generateSigningSecret } from '~~/server/utils/mcp/signature'
-import { mcpClientInputSchema, serializeMcpClient, validationError } from '~~/server/utils/mcp/admin'
+import { mcpClientInputSchemaChecked, serializeMcpClient, validationError } from '~~/server/utils/mcp/admin'
 import { writeMcpAudit } from '~~/server/utils/mcp/auth'
 
 export default defineEventHandler(async (event) => {
     const db = initializeDB(event.context.cloudflare?.env?.DB)
     if (!db) throw createError({ statusCode: 503, statusMessage: 'Database not available' })
 
-    const parsed = mcpClientInputSchema.safeParse(await readBody(event))
+    const parsed = mcpClientInputSchemaChecked.safeParse(await readBody(event))
     if (!parsed.success) throw validationError(parsed.error)
     const input = parsed.data
 

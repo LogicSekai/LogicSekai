@@ -20,6 +20,10 @@ const memStore = new Map<string, RateLimitEntry>()
 const WINDOW_MS = 15 * 60 * 1000 // 15 menit
 const DEFAULT_MAX = 100
 const SENSITIVE_MAX = 15
+// /api/mcp: AI agent wajar melakukan banyak panggilan beruntun. Endpoint ini sudah
+// dilindungi signature per klien + batas tulis per klien (server/utils/mcp/protocol.ts),
+// jadi diberi jatah sendiri yang lebih longgar dan tidak memakan jatah API umum.
+const MCP_MAX = 600
 
 // Endpoint sensitif (brute-force / spam) — limit lebih ketat
 const SENSITIVE_PATHS = [
@@ -49,12 +53,13 @@ export default defineEventHandler(async (event) => {
   if (getMethod(event) === 'OPTIONS') return
 
   const isSensitive = SENSITIVE_PATHS.some((p) => pathname === p || pathname.startsWith(p))
+  const isMcp = pathname === '/api/mcp'
   const clientIP = getClientIP(event)
 
   // 1) Pertahanan utama: Cloudflare Rate Limiting binding (bila dikonfigurasi)
   const cfEnv: any = (event as any).context?.cloudflare?.env
   const limiter = isSensitive ? cfEnv?.AUTH_RATE_LIMITER : cfEnv?.API_RATE_LIMITER
-  if (limiter?.limit) {
+  if (limiter?.limit && !isMcp) {
     try {
       const { success } = await limiter.limit({ key: `${clientIP}:${pathname}` })
       if (!success) {
@@ -75,8 +80,8 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  const baseMax = isSensitive ? SENSITIVE_MAX : DEFAULT_MAX
-  const key = `${clientIP}:${isSensitive ? 'auth' : 'api'}`
+  const baseMax = isSensitive ? SENSITIVE_MAX : isMcp ? MCP_MAX : DEFAULT_MAX
+  const key = `${clientIP}:${isSensitive ? 'auth' : isMcp ? 'mcp' : 'api'}`
   let entry = memStore.get(key)
   if (!entry || now > entry.resetTime) {
     entry = { count: 0, resetTime: now + WINDOW_MS }

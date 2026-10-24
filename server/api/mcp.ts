@@ -21,7 +21,7 @@ import {
     type JsonRpcMessage,
 } from '~~/server/utils/mcp/protocol'
 
-const MAX_BODY_BYTES = 64 * 1024
+const MAX_BODY_BYTES = 512 * 1024 // cukup untuk artikel panjang dalam Markdown
 const ALLOWED_ORIGINS = new Set([
     'https://logicsekai.com',
     'https://www.logicsekai.com',

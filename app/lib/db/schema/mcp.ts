@@ -104,3 +104,21 @@ export const mcpAuditLogs = sqliteTable('mcp_audit_logs', {
 export const mcpClientsRelations = relations(mcpClients, ({ one }) => ({
     creator: one(users, { fields: [mcpClients.createdBy], references: [users.id] }),
 }))
+
+/**
+ * Tempat sampah untuk konten yang dihapus lewat MCP. Menyimpan snapshot JSON
+ * lengkap (termasuk bab milik buku, komentar & reaksi artikel) sehingga bisa
+ * dipulihkan oleh agent (restore_from_trash) atau dari panel admin.
+ */
+export const mcpTrash = sqliteTable('mcp_trash', {
+    id: text('id').primaryKey().$defaultFn(() => createId()),
+    clientId: text('client_id'), // klien yang menghapus
+    entityType: text('entity_type', { enum: ['article', 'book', 'chapter'] }).notNull(),
+    entityId: text('entity_id').notNull(),
+    title: text('title').notNull(),
+    snapshot: text('snapshot').notNull(), // JSON
+    deletedAt: integer('deleted_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+    restoredAt: integer('restored_at', { mode: 'timestamp' }),
+}, (t) => [
+    index('idx_mcp_trash_deleted').on(t.deletedAt),
+])

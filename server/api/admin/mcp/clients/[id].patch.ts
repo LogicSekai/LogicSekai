@@ -2,7 +2,7 @@
 import { eq } from 'drizzle-orm'
 import { initializeDB } from '~/lib/db/connection'
 import { mcpClients, mcpSessions } from '~/lib/db/schema'
-import { mcpClientPatchSchema, serializeMcpClient, validationError } from '~~/server/utils/mcp/admin'
+import { mcpClientPatchSchemaChecked, serializeMcpClient, validationError } from '~~/server/utils/mcp/admin'
 import { writeMcpAudit } from '~~/server/utils/mcp/auth'
 
 export default defineEventHandler(async (event) => {
@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
     const id = getRouterParam(event, 'id')
     if (!id) throw createError({ statusCode: 400, statusMessage: 'ID wajib' })
 
-    const parsed = mcpClientPatchSchema.safeParse(await readBody(event))
+    const parsed = mcpClientPatchSchemaChecked.safeParse(await readBody(event))
     if (!parsed.success) throw validationError(parsed.error)
     const input = parsed.data
 
