@@ -1,3 +1,6 @@
+import { initializeDB } from '~/lib/db/connection'
+import { destroyCurrentSession, clearSessionCookies } from '~~/server/utils/session'
+
 export default defineEventHandler(async (event) => {
     if (getMethod(event) !== 'POST') {
         throw createError({
@@ -6,13 +9,10 @@ export default defineEventHandler(async (event) => {
         });
     }
 
-    // Clear session cookie on server side
-    setCookie(event, 'user-session', '', {
-        maxAge: -1, // Expire immediately
-        httpOnly: false,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax'
-    })
+    // Hapus sesi di database + kedua cookie
+    const db = initializeDB(event.context.cloudflare?.env?.DB)
+    if (db) await destroyCurrentSession(event, db)
+    else clearSessionCookies(event)
 
     return {
         success: true,

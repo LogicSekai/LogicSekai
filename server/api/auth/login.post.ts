@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
 import { getDB } from '~/lib/db/connection';
 import { users } from '~/lib/db/schema';
+import { createUserSession } from '~~/server/utils/session';
 
 export default defineEventHandler(async (event) => {
     if (getMethod(event) !== 'POST') {
@@ -48,20 +49,21 @@ export default defineEventHandler(async (event) => {
             });
         }
 
-        // Create session data
-        const sessionData = {
-            id: user[0].id,
-            role: user[0].role,
-            email: user[0].email,
-            name: user[0].name
-        };
+        // Akun suspend / terhapus tidak boleh login
+        if (user[0].suspended || user[0].deleted) {
+            throw createError({
+                statusCode: 403,
+                statusMessage: 'Account is suspended or deleted'
+            });
+        }
 
-        // Set session cookie
-        setCookie(event, 'user-session', JSON.stringify(sessionData), {
-            secure: false, // Set false for localhost development
-            sameSite: 'lax',
-            httpOnly: false, // Allow client-side access for session restore
-            maxAge: 60 * 60 * 24 * 7, // 7 days
+        // Buat sesi server-side (token httpOnly + cookie petunjuk UI)
+        await createUserSession(event, db, {
+            id: user[0].id,
+            username: user[0].username,
+            name: user[0].name,
+            email: user[0].email,
+            role: user[0].role,
         });
 
         // Return user data (exclude password)

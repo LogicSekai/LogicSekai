@@ -2,6 +2,7 @@
 import { getDB } from '~/lib/db/connection'
 import bcrypt from 'bcryptjs'
 import { users } from '~/lib/db/schema'
+import { revokeUserSessions } from '~~/server/utils/session'
 
 export default defineEventHandler(async (event) => {
     try {
@@ -113,6 +114,9 @@ export default defineEventHandler(async (event) => {
                 updated: new Date()
             })
             .where(eq(users.id, sessionData.id))
+
+        // Keluarkan semua perangkat lain yang mungkin memegang sesi lama
+        await revokeUserSessions(db, sessionData.id, event.context.sessionId)
 
         return {
             success: true,

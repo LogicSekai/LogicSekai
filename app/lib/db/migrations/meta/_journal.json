@@ -127,6 +127,20 @@
       "when": 1779700000000,
       "tag": "0017_elearning",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "6",
+      "when": 1779800000000,
+      "tag": "0018_mcp",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "6",
+      "when": 1779900000000,
+      "tag": "0019_user_sessions",
+      "breakpoints": true
     }
   ]
 }

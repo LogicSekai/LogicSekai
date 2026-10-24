@@ -22,6 +22,7 @@ import {
     Heart,
     BookOpen,
     BookMarked,
+    Plug,
 } from 'lucide-vue-next'
 
 export const adminMenuItems: readonly MenuItem[] = Object.freeze([
@@ -189,6 +190,14 @@ export const adminMenuItems: readonly MenuItem[] = Object.freeze([
         url: '/admin/contacts',
         permission: Object.freeze(['contacts.view']),
         roles: Object.freeze(['superadmin', 'admin'])
+    },
+    {
+        id: 'mcp',
+        name: 'Koneksi MCP',
+        icon: Plug,
+        url: '/admin/mcp',
+        permission: Object.freeze(['mcp.view']),
+        roles: Object.freeze(['superadmin'])
     },
     {
         id: 'gallery',

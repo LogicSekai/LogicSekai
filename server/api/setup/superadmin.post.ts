@@ -38,7 +38,16 @@ export default defineEventHandler(async (event) => {
     const { secret } = body;
     const config = useRuntimeConfig();
     
-    if (secret !== config.superadminSetupSecret) {
+    const expected = String(config.superadminSetupSecret || '');
+    if (expected.length < 16) {
+        // Tanpa SUPERADMIN_SETUP_SECRET yang kuat, endpoint ini dimatikan
+        throw createError({
+            statusCode: 403,
+            statusMessage: 'Setup superadmin dinonaktifkan (SUPERADMIN_SETUP_SECRET belum diset / terlalu pendek)'
+        });
+    }
+
+    if (!timingSafeEqualStr(String(secret ?? ''), expected)) {
         throw createError({
             statusCode: 403,
             statusMessage: 'Invalid secret key'
@@ -116,3 +125,11 @@ export default defineEventHandler(async (event) => {
         });
     }
 });
+
+function timingSafeEqualStr(a: string, b: string): boolean {
+    const enc = new TextEncoder();
+    const x = enc.encode(a), y = enc.encode(b);
+    let diff = x.length ^ y.length;
+    for (let i = 0; i < Math.max(x.length, y.length); i++) diff |= (x[i] ?? 0) ^ (y[i] ?? 0);
+    return diff === 0;
+}

@@ -120,8 +120,9 @@ bun run deploy
 ### 3. Environment Variables di Cloudflare
 
 Set environment variables di Cloudflare Pages dashboard:
-- `BETTER_AUTH_SECRET`
-- `BETTER_AUTH_URL`
+- `BETTER_AUTH_URL` (URL dasar situs)
+- `ENCRYPTION_MASTER_KEY` (secret, 32 byte base64)
+- `SUPERADMIN_SETUP_SECRET` (opsional, min. 16 karakter — hanya untuk setup awal)
 - `CLOUDFLARE_ACCOUNT_ID`
 - `CLOUDFLARE_DATABASE_ID` 
 - `CLOUDFLARE_API_TOKEN`
@@ -186,7 +187,7 @@ nuxt.config.ts         # Nuxt config
 - Verifikasi migration files
 
 ### Authentication Issues  
-- Cek BETTER_AUTH_SECRET di environment
+- Pastikan migrasi `0019_user_sessions` sudah diterapkan (sesi login disimpan di tabel `user_sessions`)
 - Pastikan BASE_URL sesuai dengan deployment
 - Verifikasi password hashing
 
