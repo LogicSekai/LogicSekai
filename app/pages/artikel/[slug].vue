@@ -110,7 +110,8 @@
               prose-code:text-indigo-600 dark:prose-code:text-indigo-400 prose-code:bg-gray-100 dark:prose-code:bg-white/6 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-none
               prose-pre:bg-gray-950 dark:prose-pre:bg-black/60 prose-pre:rounded-none
               prose-blockquote:border-l-indigo-600 prose-blockquote:not-italic
-              prose-img:rounded-none prose-img:border prose-img:border-gray-100 dark:prose-img:border-white/6"
+              prose-img:rounded-none prose-img:border prose-img:border-gray-100 dark:prose-img:border-white/6
+              prose-code:before:content-none prose-code:after:content-none [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:text-gray-100 [&_pre_code]:font-normal dark:[&_pre_code]:bg-transparent dark:[&_pre_code]:text-gray-100 prose-pre:text-gray-100 [&_blockquote_p]:before:content-none [&_blockquote_p]:after:content-none"
             v-html="article.content"
           />
 

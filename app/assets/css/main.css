@@ -1,5 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+/* Gaya konten artikel/bab/deskripsi produk (kelas `prose`) — wajib, tanpanya heading,
+   paragraf & list kehilangan jarak dan ukuran karena reset bawaan Tailwind. */
+@plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
 
