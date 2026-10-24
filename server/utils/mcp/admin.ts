@@ -23,6 +23,19 @@ export const mcpClientPatchSchema = z.object({
     status: z.enum(['active', 'revoked']).optional(),
 })
 
+/** *:publish hanya bermakna bersama *:write. */
+function publishNeedsWrite(scopes: string[] | undefined, ctx: z.RefinementCtx) {
+    if (!scopes) return
+    for (const d of ['articles', 'elearning']) {
+        if (scopes.includes(`${d}:publish`) && !scopes.includes(`${d}:write`)) {
+            ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['scopes'], message: `${d}:publish membutuhkan ${d}:write` })
+        }
+    }
+}
+
+export const mcpClientInputSchemaChecked = mcpClientInputSchema.superRefine((v, ctx) => publishNeedsWrite(v.scopes, ctx))
+export const mcpClientPatchSchemaChecked = mcpClientPatchSchema.superRefine((v, ctx) => publishNeedsWrite(v.scopes, ctx))
+
 export function serializeMcpClient(c: any) {
     return {
         id: c.id,

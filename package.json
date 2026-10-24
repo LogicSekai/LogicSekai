@@ -47,6 +47,7 @@
     "embla-carousel-vue": "^8.6.0",
     "hls.js": "^1.6.16",
     "lucide-vue-next": "^0.553.0",
+    "marked": "^15.0.12",
     "nuxt": "4.2.1",
     "reka-ui": "^2.6.0",
     "shadcn-nuxt": "2.3.2",
@@ -60,6 +61,7 @@
     "vue-router": "^4.6.3",
     "vue-sonner": "^2.0.9",
     "wrangler": "^4.46.0",
+    "xss": "^1.0.15",
     "zod": "^3.24.0"
   },
   "devDependencies": {

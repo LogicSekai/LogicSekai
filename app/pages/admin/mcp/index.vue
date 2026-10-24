@@ -2,7 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import {
     Plug, Plus, RefreshCw, KeyRound, Ban, CheckCircle2, Trash2, Copy, X,
-    ShieldCheck, ShieldAlert, Clock, AlertTriangle, ScrollText,
+    ShieldCheck, ShieldAlert, Clock, AlertTriangle, ScrollText, Undo2, PenLine,
 } from 'lucide-vue-next'
 
 definePageMeta({
@@ -28,7 +28,8 @@ interface McpClient {
     secretRotatedAt: string | null
     createdAt: string
 }
-interface ScopeInfo { key: string; description: string; tools: string[] }
+interface ScopeInfo { key: string; description: string; tools: string[]; write?: boolean }
+interface TrashItem { id: string; clientId: string | null; entityType: 'article' | 'book' | 'chapter'; entityId: string; title: string; deletedAt: string; restoredAt: string | null }
 interface AuditLog {
     id: string
     clientId: string | null
@@ -37,6 +38,7 @@ interface AuditLog {
     success: boolean
     errorCode: string | null
     ipAddress: string | null
+    metadata: any
     createdAt: string
 }
 
@@ -45,7 +47,11 @@ const clients = ref<McpClient[]>([])
 const scopes = ref<ScopeInfo[]>([])
 const endpoint = ref('')
 const isLoading = ref(false)
-const tab = ref<'clients' | 'logs'>('clients')
+const tab = ref<'clients' | 'logs' | 'trash'>('clients')
+
+const trash = ref<TrashItem[]>([])
+const trashLoading = ref(false)
+const restoringId = ref<string | null>(null)
 
 const logs = ref<AuditLog[]>([])
 const logsLoading = ref(false)
@@ -96,11 +102,53 @@ const fetchLogs = async () => {
     }
 }
 
+const fetchTrash = async () => {
+    trashLoading.value = true
+    try {
+        const data = await $fetch<any>('/api/admin/mcp/trash')
+        trash.value = data.items
+    } catch (e: any) {
+        useToaster('error', e?.data?.statusMessage || 'Gagal memuat tempat sampah')
+    } finally {
+        trashLoading.value = false
+    }
+}
+
+const restoreTrash = async (item: TrashItem) => {
+    restoringId.value = item.id
+    try {
+        await $fetch(`/api/admin/mcp/trash/${item.id}/restore`, { method: 'POST' })
+        useToaster('success', `"${item.title}" dipulihkan`)
+        fetchTrash()
+    } catch (e: any) {
+        useToaster('error', e?.data?.statusMessage || 'Gagal memulihkan')
+    } finally {
+        restoringId.value = null
+    }
+}
+
+const trashTypeLabel: Record<string, string> = { article: 'Artikel', book: 'Buku', chapter: 'Bab' }
+
+const isWriteScope = (key: string) => scopes.value.find(s => s.key === key)?.write ?? /:(write|publish)$/.test(key)
+
+const logDetail = (l: AuditLog) => {
+    const m = l.metadata
+    if (!m) return ''
+    if (m.entity) {
+        const e = m.entity
+        const parts = [e.op, e.type, e.status, e.fields?.join?.(','), e.id ? `#${String(e.id).slice(0, 8)}` : '']
+        return parts.filter(Boolean).join(' · ')
+    }
+    if (m.message) return m.message
+    return ''
+}
+
 onMounted(fetchClients)
 
-const switchTab = (t: 'clients' | 'logs') => {
+const switchTab = (t: 'clients' | 'logs' | 'trash') => {
     tab.value = t
     if (t === 'logs') { logsPage.value = 1; fetchLogs() }
+    if (t === 'trash') fetchTrash()
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────
@@ -148,7 +196,7 @@ const bridgeConfig = computed(() => {
 // ─── Form ───────────────────────────────────────────────────────────────
 const openCreate = () => {
     editing.value = null
-    form.value = { name: '', description: '', scopes: scopes.value.filter(s => s.key !== 'stats:read').map(s => s.key), allowedIpsText: '', expiresInDays: 90 }
+    form.value = { name: '', description: '', scopes: scopes.value.filter(s => s.key.endsWith(':read') && s.key !== 'stats:read').map(s => s.key), allowedIpsText: '', expiresInDays: 90 }
     showForm.value = true
 }
 const openEdit = (c: McpClient) => {
@@ -157,9 +205,26 @@ const openEdit = (c: McpClient) => {
     showForm.value = true
 }
 const toggleScope = (key: string) => {
-    const i = form.value.scopes.indexOf(key)
-    i >= 0 ? form.value.scopes.splice(i, 1) : form.value.scopes.push(key)
+    const list = form.value.scopes
+    const i = list.indexOf(key)
+    if (i >= 0) {
+        list.splice(i, 1)
+        // Mencabut *:write juga mencabut *:publish
+        if (key.endsWith(':write')) {
+            const pub = key.replace(':write', ':publish')
+            const j = list.indexOf(pub)
+            if (j >= 0) list.splice(j, 1)
+        }
+    } else {
+        list.push(key)
+        // *:publish butuh *:write
+        if (key.endsWith(':publish')) {
+            const w = key.replace(':publish', ':write')
+            if (!list.includes(w)) list.push(w)
+        }
+    }
 }
+const formHasWrite = computed(() => form.value.scopes.some(isWriteScope))
 
 const submitForm = async () => {
     saving.value = true
@@ -251,6 +316,9 @@ const actionLabel: Record<string, string> = {
     client_reactivated: 'Diaktifkan',
     client_deleted: 'Klien dihapus',
     secret_rotated: 'Secret dirotasi',
+    'tools/write': 'Tulis',
+    'tools/write_failed': 'Tulis gagal',
+    trash_restored_by_admin: 'Dipulihkan admin',
 }
 
 const inputCls = 'w-full px-3 py-2.5 bg-white dark:bg-[#030308] border border-gray-200 dark:border-white/10 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:border-indigo-400 dark:focus:border-indigo-500/60 transition-colors'
@@ -271,8 +339,8 @@ const btnPrimary = 'flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-i
                 </p>
             </div>
             <div class="flex gap-2">
-                <button :class="btnGhost" @click="tab === 'logs' ? fetchLogs() : fetchClients()">
-                    <RefreshCw class="w-3.5 h-3.5" :class="(isLoading || logsLoading) ? 'animate-spin' : ''" /> Refresh
+                <button :class="btnGhost" @click="tab === 'logs' ? fetchLogs() : tab === 'trash' ? fetchTrash() : fetchClients()">
+                    <RefreshCw class="w-3.5 h-3.5" :class="(isLoading || logsLoading || trashLoading) ? 'animate-spin' : ''" /> Refresh
                 </button>
                 <button :class="btnPrimary" @click="openCreate">
                     <Plus class="w-3.5 h-3.5" /> Klien baru
@@ -304,7 +372,7 @@ const btnPrimary = 'flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-i
 
         <!-- Tabs -->
         <div class="flex gap-6 border-b border-gray-100 dark:border-white/6">
-            <button v-for="t in [{ k: 'clients', l: 'Klien' }, { k: 'logs', l: 'Log audit' }]" :key="t.k"
+            <button v-for="t in [{ k: 'clients', l: 'Klien' }, { k: 'logs', l: 'Log audit' }, { k: 'trash', l: 'Tempat sampah' }]" :key="t.k"
                 class="pb-3 -mb-px font-mono text-[11px] tracking-widest uppercase border-b-2 transition-colors"
                 :class="tab === t.k ? 'border-indigo-500 text-gray-900 dark:text-white' : 'border-transparent text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'"
                 @click="switchTab(t.k as any)">{{ t.l }}</button>
@@ -336,7 +404,8 @@ const btnPrimary = 'flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-i
                         <span class="font-mono">secret {{ c.maskedSecret }}</span>
                     </div>
                     <div class="flex flex-wrap gap-1.5">
-                        <span v-for="s in c.scopes" :key="s" class="font-mono text-[10px] px-2 py-0.5 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">{{ s }}</span>
+                        <span v-for="s in c.scopes" :key="s" class="font-mono text-[10px] px-2 py-0.5"
+                            :class="isWriteScope(s) ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400' : 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400'">{{ s }}</span>
                         <span v-if="c.allowedIps.length" class="font-mono text-[10px] px-2 py-0.5 bg-gray-100 dark:bg-white/6 text-gray-600 dark:text-gray-300">IP: {{ c.allowedIps.join(', ') }}</span>
                     </div>
                     <p class="text-[11px] text-gray-400">
@@ -356,7 +425,7 @@ const btnPrimary = 'flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-i
         </div>
 
         <!-- Logs -->
-        <div v-else class="space-y-4">
+        <div v-else-if="tab === 'logs'" class="space-y-4">
             <label class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300 cursor-pointer w-fit">
                 <input v-model="logsFailedOnly" type="checkbox" class="accent-indigo-600" @change="logsPage = 1; fetchLogs()" />
                 Hanya tampilkan yang gagal
@@ -366,12 +435,12 @@ const btnPrimary = 'flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-i
                     <thead class="bg-gray-50 dark:bg-white/2">
                         <tr class="text-left font-mono text-[10px] tracking-widest uppercase text-gray-400">
                             <th class="px-4 py-3">Waktu</th><th class="px-4 py-3">Klien</th><th class="px-4 py-3">Aksi</th>
-                            <th class="px-4 py-3">Tool</th><th class="px-4 py-3">Status</th><th class="px-4 py-3">IP</th>
+                            <th class="px-4 py-3">Tool</th><th class="px-4 py-3">Status</th><th class="px-4 py-3">Detail</th><th class="px-4 py-3">IP</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 dark:divide-white/6">
-                        <tr v-if="logsLoading"><td colspan="6" class="px-4 py-6 text-center text-gray-400">Memuat…</td></tr>
-                        <tr v-else-if="!logs.length"><td colspan="6" class="px-4 py-6 text-center text-gray-400">Belum ada log.</td></tr>
+                        <tr v-if="logsLoading"><td colspan="7" class="px-4 py-6 text-center text-gray-400">Memuat…</td></tr>
+                        <tr v-else-if="!logs.length"><td colspan="7" class="px-4 py-6 text-center text-gray-400">Belum ada log.</td></tr>
                         <tr v-for="l in logs" :key="l.id" class="text-gray-700 dark:text-gray-300">
                             <td class="px-4 py-2.5 whitespace-nowrap text-xs">{{ fmt(l.createdAt) }}</td>
                             <td class="px-4 py-2.5 text-xs">{{ clientName(l.clientId) }}</td>
@@ -381,6 +450,7 @@ const btnPrimary = 'flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-i
                                 <span v-if="l.success" class="text-emerald-600 dark:text-emerald-400">OK</span>
                                 <span v-else class="text-red-600 dark:text-red-400 font-mono">{{ l.errorCode ?? 'gagal' }}</span>
                             </td>
+                            <td class="px-4 py-2.5 text-xs text-gray-500 dark:text-gray-400 max-w-[280px] truncate" :title="logDetail(l)">{{ logDetail(l) || '—' }}</td>
                             <td class="px-4 py-2.5 font-mono text-xs">{{ l.ipAddress ?? '—' }}</td>
                         </tr>
                     </tbody>
@@ -390,6 +460,27 @@ const btnPrimary = 'flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-i
                 <button :class="btnGhost" :disabled="logsPage <= 1" @click="logsPage--; fetchLogs()">Sebelumnya</button>
                 <span>{{ logsPage }} / {{ logsTotalPages }}</span>
                 <button :class="btnGhost" :disabled="logsPage >= logsTotalPages" @click="logsPage++; fetchLogs()">Berikutnya</button>
+            </div>
+        </div>
+
+        <!-- Trash -->
+        <div v-else class="space-y-3">
+            <p class="text-sm text-gray-500 dark:text-gray-400">Konten yang dihapus AI agent lewat MCP. Pemulihan dari sini mempertahankan status aslinya (draft/tayang).</p>
+            <div class="border border-gray-100 dark:border-white/6 divide-y divide-gray-100 dark:divide-white/6">
+                <div v-if="trashLoading" class="p-6 text-center text-sm text-gray-400">Memuat…</div>
+                <div v-else-if="!trash.length" class="p-10 text-center text-sm text-gray-500 dark:text-gray-400">Tempat sampah kosong.</div>
+                <div v-for="t in trash" :key="t.id" class="p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2">
+                            <span class="font-mono text-[9px] tracking-widest uppercase px-2 py-0.5 bg-gray-100 dark:bg-white/6 text-gray-600 dark:text-gray-300">{{ trashTypeLabel[t.entityType] }}</span>
+                            <span class="font-bold text-gray-900 dark:text-white truncate">{{ t.title }}</span>
+                        </div>
+                        <p class="text-[11px] text-gray-400 mt-1">Dihapus {{ fmt(t.deletedAt) }} oleh {{ clientName(t.clientId) }}</p>
+                    </div>
+                    <button :class="btnGhost" :disabled="restoringId === t.id" @click="restoreTrash(t)">
+                        <Undo2 class="w-3.5 h-3.5" /> {{ restoringId === t.id ? 'Memulihkan…' : 'Pulihkan' }}
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -414,10 +505,16 @@ const btnPrimary = 'flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-i
                         <input type="checkbox" class="mt-1 accent-indigo-600" :checked="form.scopes.includes(s.key)" @change="toggleScope(s.key)" />
                         <span>
                             <span class="font-mono text-xs text-gray-900 dark:text-white">{{ s.key }}</span>
+                            <span v-if="s.write" class="ml-2 inline-flex items-center gap-1 font-mono text-[9px] tracking-widest uppercase px-1.5 py-0.5 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400"><PenLine class="w-2.5 h-2.5" />tulis</span>
                             <span class="block text-xs text-gray-500 dark:text-gray-400">{{ s.description }}</span>
-                            <span class="block font-mono text-[10px] text-gray-400 mt-0.5">{{ s.tools.join(', ') }}</span>
+                            <span v-if="s.tools.length" class="block font-mono text-[10px] text-gray-400 mt-0.5">{{ s.tools.join(', ') }}</span>
+                            <span v-else class="block font-mono text-[10px] text-gray-400 mt-0.5">izin tambahan untuk tool *:write</span>
                         </span>
                     </label>
+                </div>
+                <div v-if="formHasWrite" class="flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 text-xs text-amber-800 dark:text-amber-200">
+                    <AlertTriangle class="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                    <span>Klien ini bisa mengubah konten atas nama Anda. Simpan secret dengan aman, pertimbangkan IP allowlist &amp; masa berlaku pendek. Tanpa scope <b>*:publish</b>, agent hanya bisa mengelola draft.</span>
                 </div>
                 <div class="space-y-1.5">
                     <label class="font-mono text-[10px] tracking-widest uppercase text-gray-400">IP yang diizinkan (opsional)</label>

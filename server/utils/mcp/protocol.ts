@@ -5,11 +5,15 @@
  * disimpan di D1 (mcp_sessions) dan terikat ke client id.
  */
 import type { H3Event } from 'h3'
-import { and, eq, lt } from 'drizzle-orm'
-import { mcpSessions } from '~/lib/db/schema'
+import { and, eq, gt, lt, sql } from 'drizzle-orm'
+import { mcpSessions, mcpAuditLogs } from '~/lib/db/schema'
 import { generateSessionId } from './signature'
 import { writeMcpAudit, type VerifiedMcpClient } from './auth'
-import { toolsForScopes, ToolInputError } from './tools'
+import { toolsForScopes } from './registry'
+import { ToolInputError } from './tool-types'
+
+/** Batas operasi tulis per klien per jam (pertahanan dari agent yang lepas kendali). */
+export const WRITE_LIMIT_PER_HOUR = 120
 
 export const SUPPORTED_PROTOCOL_VERSIONS = ['2025-11-25', '2025-06-18', '2025-03-26', '2024-11-05']
 export const LATEST_PROTOCOL_VERSION = SUPPORTED_PROTOCOL_VERSIONS[0]
@@ -120,8 +124,10 @@ export async function handleRpcMessage(
                     capabilities: { tools: { listChanged: false } },
                     serverInfo: SERVER_INFO,
                     instructions:
-                        'Server MCP resmi Logic Sekai (logicsekai.com). Semua tool bersifat read-only ' +
-                        'dan hanya mengakses konten publik: produk marketplace, artikel, dan e-learning. ' +
+                        'Server MCP resmi Logic Sekai (logicsekai.com). Tool baca hanya mengakses konten publik. ' +
+                        'Tool tulis (bila diizinkan scope) mengelola artikel & e-learning: tulis konten dalam Markdown, ' +
+                        'simpan sebagai draft kecuali diminta menerbitkan, dan gunakan manage_list_* untuk mendapatkan id. ' +
+                        'Penghapusan memindahkan konten ke tempat sampah (bisa dipulihkan dengan restore_from_trash). ' +
                         `Klien "${client.name}" memiliki scope: ${client.scopes.join(', ') || '(tidak ada)'}.`,
                 }),
             }
@@ -136,7 +142,9 @@ export async function handleRpcMessage(
                 title: t.title,
                 description: t.description,
                 inputSchema: t.inputSchema,
-                annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+                annotations: t.writes
+                    ? { readOnlyHint: false, destructiveHint: !!t.destructive, idempotentHint: false, openWorldHint: false }
+                    : { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
             }))
             return { response: rpcResult(id, { tools }) }
         }
@@ -154,9 +162,33 @@ export async function handleRpcMessage(
                 return { response: rpcError(id, RPC.INVALID_PARAMS, `Unknown tool: ${name.slice(0, 64)}`) }
             }
 
+            const action = tool.writes ? 'tools/write' : 'tools/call'
+
+            // Batas laju khusus operasi tulis (dihitung dari audit log, berlaku lintas isolate)
+            if (tool.writes) {
+                const [{ n }] = await db.select({ n: sql<number>`count(*)` }).from(mcpAuditLogs).where(and(
+                    eq(mcpAuditLogs.clientId, client.clientId),
+                    eq(mcpAuditLogs.action, 'tools/write'),
+                    gt(mcpAuditLogs.createdAt, new Date(Date.now() - 3600_000)),
+                ))
+                if (Number(n) >= WRITE_LIMIT_PER_HOUR) {
+                    await writeMcpAudit(db, event, { clientId: client.clientId, action: 'tools/call', toolName: tool.name, success: false, errorCode: 'write_rate_limited' })
+                    return {
+                        response: rpcResult(id, {
+                            content: [{ type: 'text', text: `Batas ${WRITE_LIMIT_PER_HOUR} operasi tulis per jam tercapai. Coba lagi nanti.` }],
+                            isError: true,
+                        }),
+                    }
+                }
+            }
+
+            const auditMeta: Record<string, unknown> = {}
             try {
-                const data = await tool.handler(args, { db })
-                await writeMcpAudit(db, event, { clientId: client.clientId, action: 'tools/call', toolName: tool.name, success: true })
+                const data = await tool.handler(args, { db, client, audit: auditMeta })
+                await writeMcpAudit(db, event, {
+                    clientId: client.clientId, action, toolName: tool.name, success: true,
+                    metadata: Object.keys(auditMeta).length ? auditMeta : undefined,
+                })
                 return {
                     response: rpcResult(id, {
                         content: [{ type: 'text', text: JSON.stringify(data, null, 2) }],
@@ -167,8 +199,9 @@ export async function handleRpcMessage(
             } catch (e: any) {
                 const userError = e instanceof ToolInputError
                 await writeMcpAudit(db, event, {
-                    clientId: client.clientId, action: 'tools/call', toolName: tool.name, success: false,
+                    clientId: client.clientId, action: tool.writes ? 'tools/write_failed' : 'tools/call', toolName: tool.name, success: false,
                     errorCode: userError ? 'tool_input_error' : 'tool_internal_error',
+                    metadata: userError ? { message: String(e.message).slice(0, 300) } : undefined,
                 })
                 // Error eksekusi tool dilaporkan di dalam result (isError) sesuai spesifikasi MCP
                 return {

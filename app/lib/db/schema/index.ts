@@ -55,6 +55,7 @@ export {
     mcpNonces,
     mcpSessions,
     mcpAuditLogs,
+    mcpTrash,
     mcpClientsRelations,
 } from './mcp';
 export { userSessions } from './user-sessions';
