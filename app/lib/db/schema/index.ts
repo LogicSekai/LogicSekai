@@ -50,6 +50,14 @@ export {
     elearningBooksRelations,
     elearningChaptersRelations,
 } from './elearning';
+export {
+    mcpClients,
+    mcpNonces,
+    mcpSessions,
+    mcpAuditLogs,
+    mcpClientsRelations,
+} from './mcp';
+export { userSessions } from './user-sessions';
 
 // Define cross-table relations here to avoid circular imports
 import { relations } from 'drizzle-orm';

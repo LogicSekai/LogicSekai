@@ -1,6 +1,14 @@
-﻿/**
- * Simple rate limiting middleware
- * Limits requests per IP address
+/**
+ * Rate limiting middleware.
+ *
+ * CATATAN PENTING: penyimpanan in-memory (Map) TIDAK andal di Cloudflare Workers
+ * karena tiap request bisa berjalan di isolate berbeda. Ini hanya jaring pengaman
+ * sekunder. Pertahanan UTAMA yang disarankan:
+ *   1) Cloudflare Rate Limiting Rules (dashboard / WAF) — rekomendasi, tanpa kode.
+ *   2) Cloudflare Rate Limiting binding (env.AUTH_RATE_LIMITER / API_RATE_LIMITER)
+ *      — dipakai otomatis bila tersedia (lihat wrangler.toml).
+ *
+ * Middleware ini menerapkan limit lebih KETAT untuk endpoint auth/sensitif.
  */
 
 interface RateLimitEntry {
@@ -8,77 +16,88 @@ interface RateLimitEntry {
   resetTime: number
 }
 
-const rateLimit = new Map<string, RateLimitEntry>()
-const WINDOW_SIZE = 15 * 60 * 1000 // 15 minutes
-const MAX_REQUESTS = 100 // requests per window
+const memStore = new Map<string, RateLimitEntry>()
+const WINDOW_MS = 15 * 60 * 1000 // 15 menit
+const DEFAULT_MAX = 100
+const SENSITIVE_MAX = 15
+
+// Endpoint sensitif (brute-force / spam) — limit lebih ketat
+const SENSITIVE_PATHS = [
+  '/api/auth/login',
+  '/api/auth/register',
+  '/api/auth/password',
+  '/api/auth/verify-email',
+  '/api/setup/superadmin',
+  '/api/contact',
+]
+
+function getClientIP(event: any): string {
+  const ip =
+    getHeader(event, 'cf-connecting-ip') ||
+    getHeader(event, 'x-forwarded-for') ||
+    getHeader(event, 'x-real-ip')
+  if (ip) return ip.split(',')[0].trim()
+  return event.node?.req?.socket?.remoteAddress || 'unknown'
+}
 
 export default defineEventHandler(async (event) => {
-  // Skip rate limiting for admin users and certain endpoints
-  const url = getRequestURL(event)
-  const pathname = url.pathname
-  
-  // Skip for static assets and health checks
-  if (pathname.startsWith('/_') || pathname.startsWith('/api/health')) {
-    return
-  }
+  const pathname = getRequestURL(event).pathname
 
-  // Cleanup expired entries periodically (every ~100 requests randomly)
-  if (Math.random() < 0.01) {
-    const now = Date.now()
-    for (const [ip, entry] of rateLimit.entries()) {
-      if (now > entry.resetTime) {
-        rateLimit.delete(ip)
+  // Hanya jaga endpoint API; lewati aset internal & health check
+  if (!pathname.startsWith('/api/')) return
+  if (pathname.startsWith('/api/health')) return
+  if (getMethod(event) === 'OPTIONS') return
+
+  const isSensitive = SENSITIVE_PATHS.some((p) => pathname === p || pathname.startsWith(p))
+  const clientIP = getClientIP(event)
+
+  // 1) Pertahanan utama: Cloudflare Rate Limiting binding (bila dikonfigurasi)
+  const cfEnv: any = (event as any).context?.cloudflare?.env
+  const limiter = isSensitive ? cfEnv?.AUTH_RATE_LIMITER : cfEnv?.API_RATE_LIMITER
+  if (limiter?.limit) {
+    try {
+      const { success } = await limiter.limit({ key: `${clientIP}:${pathname}` })
+      if (!success) {
+        throw createError({ statusCode: 429, statusMessage: 'Too many requests. Please slow down.' })
       }
+      return
+    } catch (e: any) {
+      if (e?.statusCode === 429) throw e
+      // Binding error → lanjut ke fallback in-memory
     }
   }
 
-  // Get client IP
-  const clientIP = getHeader(event, 'x-forwarded-for') || 
-                  getHeader(event, 'x-real-ip') || 
-                  event.node.req.socket?.remoteAddress || 
-                  'unknown'
+  // 2) Fallback in-memory (per-isolate; hanya jaring pengaman)
   const now = Date.now()
-  
-  // Get or create rate limit entry
-  let entry = rateLimit.get(clientIP)
-  
-  if (!entry || now > entry.resetTime) {
-    // Create new entry or reset expired one
-    entry = {
-      count: 0,
-      resetTime: now + WINDOW_SIZE
+  if (Math.random() < 0.01) {
+    for (const [k, v] of memStore.entries()) {
+      if (now > v.resetTime) memStore.delete(k)
     }
-    rateLimit.set(clientIP, entry)
   }
 
-  // Increment request count
+  const baseMax = isSensitive ? SENSITIVE_MAX : DEFAULT_MAX
+  const key = `${clientIP}:${isSensitive ? 'auth' : 'api'}`
+  let entry = memStore.get(key)
+  if (!entry || now > entry.resetTime) {
+    entry = { count: 0, resetTime: now + WINDOW_MS }
+    memStore.set(key, entry)
+  }
   entry.count++
 
-  // Check if admin user (higher limits for authenticated admin)
-  const authContext = event.context.auth
-  const maxRequests = authContext?.isAdmin() ? MAX_REQUESTS * 3 : MAX_REQUESTS
+  // Admin terautentikasi mendapat limit lebih tinggi
+  const authContext: any = event.context.auth
+  const max = authContext?.isAdmin?.() ? baseMax * 3 : baseMax
 
-  if (entry.count > maxRequests) {
-    const remainingTime = Math.ceil((entry.resetTime - now) / 1000)
-    
-    
+  setHeader(event, 'X-RateLimit-Limit', String(max))
+  setHeader(event, 'X-RateLimit-Remaining', String(Math.max(0, max - entry.count)))
+  setHeader(event, 'X-RateLimit-Reset', String(entry.resetTime))
+
+  if (entry.count > max) {
+    const retry = Math.ceil((entry.resetTime - now) / 1000)
+    setHeader(event, 'Retry-After', String(retry))
     throw createError({
       statusCode: 429,
-      statusMessage: `Too many requests. Try again in ${remainingTime} seconds`,
-      data: {
-        limit: maxRequests,
-        current: entry.count,
-        resetTime: remainingTime
-      }
+      statusMessage: `Too many requests. Try again in ${retry} seconds`,
     })
-  }
-
-  // Add rate limit headers
-  setHeader(event, 'X-RateLimit-Limit', maxRequests.toString())
-  setHeader(event, 'X-RateLimit-Remaining', (maxRequests - entry.count).toString())
-  setHeader(event, 'X-RateLimit-Reset', entry.resetTime.toString())
-
-  // Log suspicious activity (high request count)
-  if (entry.count > maxRequests * 0.8) {
   }
 })

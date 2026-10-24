@@ -106,9 +106,8 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
-    betterAuthSecret: process.env.BETTER_AUTH_SECRET || 'dev-secret',
-    betterAuthUrl: process.env.BETTER_AUTH_URL || 'http://localhost:3000',
-    superadminSetupSecret: process.env.SUPERADMIN_SETUP_SECRET || 'create-superadmin-2024',
+    // Wajib diset via env (min. 16 karakter); kosong = endpoint setup superadmin nonaktif
+    superadminSetupSecret: process.env.SUPERADMIN_SETUP_SECRET || '',
     cloudflareAccountId: process.env.CLOUDFLARE_ACCOUNT_ID,
     cloudflareDatabaseId: process.env.CLOUDFLARE_DATABASE_ID,
     cloudflareApiToken: process.env.CLOUDFLARE_API_TOKEN,
@@ -119,6 +118,8 @@ export default defineNuxtConfig({
       baseUrl: process.env.BETTER_AUTH_URL || 'http://localhost:3000',
       midtransClientKey: process.env.MIDTRANS_CLIENT_KEY || '',
       midtransMode: process.env.MIDTRANS_MODE || 'sandbox',
+      // Cloudflare Web Analytics (opsional) — set via NUXT_PUBLIC_CF_BEACON_TOKEN
+      cfBeaconToken: process.env.NUXT_PUBLIC_CF_BEACON_TOKEN || '',
     }
   }
 })

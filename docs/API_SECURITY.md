@@ -109,9 +109,14 @@ POST   /api/admin/setup               - System setup
 ## Security Features
 
 ### 🔒 Authentication
-- Session-based authentication via cookies
-- Session validation against database
-- Automatic user status checking (suspended/deleted)
+- **Sesi berbasis database** (`user_sessions`, migrasi 0019). Login membuat token acak 256-bit
+  di cookie **`ls_session` (httpOnly, SameSite=Lax, Secure di production)**; DB hanya menyimpan SHA-256-nya.
+- Cookie `user-session` kini **hanya petunjuk UI** untuk frontend. Middleware `server/middleware/0.session.ts`
+  selalu membuang nilai kiriman browser lalu menyusunnya ulang dari database (role terbaru), sehingga
+  cookie ini **tidak bisa dipalsukan** untuk eskalasi hak akses.
+- Akun suspend/terhapus langsung kehilangan sesi; logout menghapus sesi di DB; ganti password
+  mencabut sesi di perangkat lain. Sesi berlaku 7 hari (diperpanjang otomatis saat aktif).
+- Helper: `server/utils/session.ts` (`createUserSession`, `resolveUserSession`, `destroyCurrentSession`, `revokeUserSessions`).
 
 ### 🎭 Role-Based Access Control (RBAC)
 - **user**: Basic user (purchase, download owned products)
@@ -204,3 +209,11 @@ Middleware dieksekusi berdasarkan nama file secara alfabetis. File diberi nama d
 6. **Audit Logging**: Track security events
 7. **Session Security**: Secure session handling
 8. **CORS Policy**: Restricted cross-origin access
+
+## 🤖 MCP Endpoint (Signature per Koneksi)
+```
+POST   /api/mcp   - JSON-RPC MCP, wajib header X-MCP-* bertanda tangan HMAC-SHA256
+DELETE /api/mcp   - Akhiri sesi MCP (bertanda tangan)
+GET/POST/PATCH/DELETE /api/admin/mcp/**  - Kelola klien MCP (superadmin)
+```
+Detail: lihat `docs/MCP.md`.

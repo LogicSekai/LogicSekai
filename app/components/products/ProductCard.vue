@@ -4,7 +4,7 @@
 
       <!-- Thumbnail -->
       <div class="relative aspect-video overflow-hidden bg-gray-100 dark:bg-white/4 mb-4">
-        <img
+        <img loading="lazy" decoding="async"
           v-if="product.thumbnail"
           :src="product.thumbnail"
           :alt="product.title"
@@ -44,7 +44,7 @@
 
         <!-- Creator -->
         <div class="flex items-center gap-2 pt-1">
-          <img
+          <img loading="lazy" decoding="async"
             v-if="product.creator.avatar"
             :src="product.creator.avatar"
             :alt="product.creator.name"

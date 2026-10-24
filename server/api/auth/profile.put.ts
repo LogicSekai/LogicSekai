@@ -1,6 +1,7 @@
 ﻿import { eq, or } from 'drizzle-orm'
 import { getDB } from '~/lib/db/connection'
 import { users } from '~/lib/db/schema'
+import { setHintCookie } from '~~/server/utils/session'
 
 export default defineEventHandler(async (event) => {
     try {
@@ -121,19 +122,13 @@ export default defineEventHandler(async (event) => {
 
         const userData = updatedUser[0]
 
-        // Update session cookie with new data
-        const newSessionData = {
-            ...sessionData,
-            name: userData.name,
+        // Perbarui cookie petunjuk UI (bukan kredensial — sesi tetap di ls_session)
+        setHintCookie(event, {
+            id: userData.id,
             username: userData.username,
-            email: userData.email
-        }
-
-        setCookie(event, 'user-session', JSON.stringify(newSessionData), {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 60 * 60 * 24 * 7 // 7 days
+            name: userData.name,
+            email: userData.email,
+            role: userData.role,
         })
 
         return {

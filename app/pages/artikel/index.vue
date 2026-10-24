@@ -94,7 +94,7 @@
           >
             <!-- Cover Image -->
             <div class="aspect-video w-full mb-4 overflow-hidden bg-gray-100 dark:bg-white/6">
-              <img
+              <img loading="lazy" decoding="async"
                 v-if="article.coverImage"
                 :src="article.coverImage"
                 :alt="article.title"
@@ -140,7 +140,7 @@
             <div class="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-white/6">
               <div class="flex items-center gap-2">
                 <div class="w-6 h-6 rounded-full overflow-hidden bg-gray-100 dark:bg-white/6 flex-shrink-0">
-                  <img
+                  <img loading="lazy" decoding="async"
                     v-if="article.author?.avatar"
                     :src="article.author.avatar"
                     :alt="article.author.name"
