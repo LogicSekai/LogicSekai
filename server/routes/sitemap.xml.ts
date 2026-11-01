@@ -18,6 +18,8 @@ const STATIC_ROUTES: Array<{ path: string; priority: string; changefreq: string 
   { path: '/galeri', priority: '0.6', changefreq: 'weekly' },
   { path: '/portfolio', priority: '0.6', changefreq: 'monthly' },
   { path: '/services', priority: '0.7', changefreq: 'monthly' },
+  { path: '/omo', priority: '0.7', changefreq: 'weekly' },
+  { path: '/omo/omoauto', priority: '0.7', changefreq: 'weekly' },
   { path: '/donasi', priority: '0.6', changefreq: 'monthly' },
   { path: '/tentang-kami', priority: '0.5', changefreq: 'monthly' },
   { path: '/kontak', priority: '0.5', changefreq: 'monthly' },
