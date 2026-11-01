@@ -84,14 +84,19 @@ export const omoApps: OmoApp[] = [
     tagline: 'YouTube & web di layar motor',
     description:
       'Browser ringan yang muncul di peluncur Android Auto. Saat OmoAuto berjalan, OmoWeb tampil di layar motor dan bisa dikendalikan dari layar Kontrol OmoAuto (layar penuh, ultrawide, tombol media).',
-    status: 'SEGERA HADIR',
+    status: 'DALAM PENGEMBANGAN',
     icon: Globe,
     iconSrc: '/img/omo/omoweb-icon.svg',
-    hasDetail: false,
-    repo: null,
+    hasDetail: true,
+    repo: 'https://github.com/LogicSekai/OmoWeb',
     githubRepo: 'LogicSekai/OmoWeb',
-    license: LICENSE_TBD,
-    tags: ['BROWSER', 'YOUTUBE', 'ANDROID AUTO'],
+    license: {
+      name: 'AGPL-3.0-or-later',
+      note: 'Lisensi ganda: AGPL dengan kewajiban kredit, atau lisensi komersial lewat GitHub Sponsors.',
+      url: 'https://github.com/LogicSekai/OmoWeb/blob/main/LICENSE',
+      final: true,
+    },
+    tags: ['BROWSER', 'YOUTUBE', 'OPEN SOURCE'],
   },
   {
     slug: 'omovibe',
@@ -159,9 +164,9 @@ export function resolveOmoStatus(app: OmoApp, rel: OmoReleaseState): OmoResolved
 }
 
 export const omoStatusClass: Record<OmoStatus, string> = {
-  'RILIS': 'text-emerald-600 dark:text-emerald-400 border-emerald-500/30 bg-emerald-500/5',
-  'TERSEDIA': 'text-emerald-600 dark:text-emerald-400 border-emerald-500/30 bg-emerald-500/5',
-  'BETA': 'text-sky-600 dark:text-sky-400 border-sky-500/30 bg-sky-500/5',
-  'DALAM PENGEMBANGAN': 'text-cyan-700 dark:text-cyan-400 border-cyan-500/30 bg-cyan-500/5',
+  'RILIS': 'text-[#1E9A4B] dark:text-[#2DBE60] border-[#2DBE60]/30 bg-[#2DBE60]/5',
+  'TERSEDIA': 'text-[#1E9A4B] dark:text-[#2DBE60] border-[#2DBE60]/30 bg-[#2DBE60]/5',
+  'BETA': 'text-[#B87400] dark:text-[#FFB020] border-[#FFB020]/40 bg-[#FFB020]/5',
+  'DALAM PENGEMBANGAN': 'text-[#EC6436] dark:text-[#FF7A4F] border-[#FF7A4F]/30 bg-[#FF7A4F]/5',
   'SEGERA HADIR': 'text-gray-500 dark:text-gray-400 border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-white/3',
 }

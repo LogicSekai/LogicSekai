@@ -1,7 +1,7 @@
 <template>
   <section aria-labelledby="omo-support-title">
     <div class="mb-6">
-      <p class="font-mono text-[10px] tracking-[0.25em] uppercase text-cyan-600 dark:text-cyan-400 mb-2">// DUKUNG PROYEK</p>
+      <p class="font-mono text-[10px] tracking-[0.25em] uppercase text-[#EC6436] dark:text-[#FF7A4F] mb-2">// DUKUNG PROYEK</p>
       <h2 id="omo-support-title" class="font-black text-xl lg:text-2xl uppercase tracking-tight text-gray-900 dark:text-white">
         {{ app ? `Dukung ${app.name}` : 'Dukung Omo Ecosystem' }}
       </h2>

@@ -13,6 +13,10 @@
         <!-- Menjelaskan solusi yang ditawarkan -->
         <LandingServicesProducts />
         
+        <!-- [SECTION 3.5] Omo Ecosystem - The Showcase -->
+        <!-- Etalase aplikasi open source Logic Sekai untuk pengendara OMOWAY -->
+        <LandingOmoEcosystem />
+        
         <!-- [SECTION 4] Founder Profile - The Connection -->
         <!-- Membangun koneksi personal dengan founder -->
         <LandingFounderProfile />
@@ -32,6 +36,7 @@
 import LandingHeroSection from '~/components/landing/HeroSection.vue'
 import LandingBrandValue from '~/components/landing/BrandValue.vue'
 import LandingServicesProducts from '~/components/landing/ServicesProducts.vue'
+import LandingOmoEcosystem from '~/components/landing/OmoEcosystem.vue'
 import LandingFounderProfile from '~/components/landing/FounderProfile.vue'
 import LandingTestimonials from '~/components/landing/Testimonials.vue'
 import LandingFinalCTA from '~/components/landing/FinalCTA.vue'
