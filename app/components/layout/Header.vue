@@ -66,6 +66,14 @@
                                 >
                                     E-Learning
                                 </NuxtLink>
+                                <NuxtLink
+                                    to="/omo"
+                                    @click="productOpen = false"
+                                    class="block px-4 py-2.5 font-mono text-[0.65rem] uppercase tracking-[0.12em] text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/4 transition-colors"
+                                    active-class="!text-gray-900 dark:!text-white bg-gray-50 dark:bg-white/4"
+                                >
+                                    Omo Ecosystem
+                                </NuxtLink>
                             </div>
                         </Transition>
                     </div>
@@ -198,6 +206,12 @@
                             class="block py-2 pl-3 font-mono text-xs tracking-[0.12em] uppercase text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors"
                             active-class="!text-gray-900 dark:!text-white"
                         >E-Learning</NuxtLink>
+                        <NuxtLink
+                            to="/omo"
+                            @click="closeMobileMenu"
+                            class="block py-2 pl-3 font-mono text-xs tracking-[0.12em] uppercase text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors"
+                            active-class="!text-gray-900 dark:!text-white"
+                        >Omo Ecosystem</NuxtLink>
                     </div>
                     <NuxtLink
                         to="/artikel"
