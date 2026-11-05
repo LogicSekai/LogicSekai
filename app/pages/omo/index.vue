@@ -236,7 +236,7 @@ const hubNodes = [
 ]
 
 const title = 'Omo Ecosystem — Aplikasi Open Source Logic Sekai'
-const description = 'Omo Ecosystem: OmoAuto, OmoWeb, OmoVibe, dan OmoZ — aplikasi Android dari Logic Sekai untuk layar motor OMOWAY. Proyek independen, tidak berafiliasi dengan OMOWAY.'
+const description = 'Omo Ecosystem: OmoAuto, OmoWeb, OmoVibe, dan OmoZ — aplikasi Android dari Logic Sekai untuk pengendara OMOWAY dan kendaraan listrik. Proyek independen, tidak berafiliasi dengan OMOWAY.'
 
 useHead({
   title,

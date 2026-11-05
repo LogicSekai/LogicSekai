@@ -116,17 +116,22 @@ export const omoApps: OmoApp[] = [
   {
     slug: 'omoz',
     name: 'OmoZ',
-    tagline: 'Segera diumumkan',
+    tagline: 'Suara mesin untuk kendaraan listrik',
     description:
-      'Anggota terbaru Omo Ecosystem yang sedang disiapkan. Detail fitur akan diumumkan menyusul.',
-    status: 'SEGERA HADIR',
+      'Kendaraan listrik hampir tanpa suara. OmoZ memutar suara mesin sintetis (jet, kereta cepat, atau mesin piston) lewat pengeras suara kendaraan, mengikuti kecepatan GPS, tetap jalan di latar belakang, dan bisa menyala otomatis lewat Bluetooth.',
+    status: 'DALAM PENGEMBANGAN',
     icon: Sparkles,
-    iconSrc: null,
-    hasDetail: false,
-    repo: null,
+    iconSrc: '/img/omo/omoz-icon.svg',
+    hasDetail: true,
+    repo: 'https://github.com/LogicSekai/OmoZ',
     githubRepo: 'LogicSekai/OmoZ',
-    license: LICENSE_TBD,
-    tags: ['TBA'],
+    license: {
+      name: 'AGPL-3.0-or-later',
+      note: 'Lisensi ganda: AGPL dengan kewajiban kredit, atau lisensi komersial lewat GitHub Sponsors.',
+      url: 'https://github.com/LogicSekai/OmoZ/blob/main/LICENSE',
+      final: true,
+    },
+    tags: ['SUARA MESIN', 'GPS', 'BLUETOOTH', 'OPEN SOURCE'],
   },
 ]
 

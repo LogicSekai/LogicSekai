@@ -21,6 +21,7 @@ const STATIC_ROUTES: Array<{ path: string; priority: string; changefreq: string 
   { path: '/omo', priority: '0.7', changefreq: 'weekly' },
   { path: '/omo/omoauto', priority: '0.7', changefreq: 'weekly' },
   { path: '/omo/omoweb', priority: '0.7', changefreq: 'weekly' },
+  { path: '/omo/omoz', priority: '0.7', changefreq: 'weekly' },
   { path: '/donasi', priority: '0.6', changefreq: 'monthly' },
   { path: '/tentang-kami', priority: '0.5', changefreq: 'monthly' },
   { path: '/kontak', priority: '0.5', changefreq: 'monthly' },

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="18 18 72 72" role="img" aria-label="OmoZ">
+<defs><linearGradient id="g" x1="0" y1="0" x2="108" y2="108" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FF9470"/><stop offset="1" stop-color="#F2643A"/></linearGradient></defs>
+<path fill="url(#g)" d="M0,0h108v108h-108z"/>
+<path fill="#fff" fill-opacity="0.12" d="M108,0A60,60 0,0 1,48 0Z"/>
+<g transform="translate(26.4 26.4) scale(2.3)">
+<path fill="#fff" fill-rule="evenodd" d="M12,1.5A10.5,10.5 0,1 0,12 22.5A10.5,10.5 0,1 0,12 1.5ZM12,3.5A8.5,8.5 0,1 1,12 20.5A8.5,8.5 0,1 1,12 3.5Z"/>
+<path fill="#fff" transform="rotate(0 12 12)" d="M12,10.2C13.6,9.2 14.2,6.9 12.9,4.3L11.4,4.4C12.3,6.4 11.9,8.4 10.9,9.6Z"/><path fill="#fff" transform="rotate(60 12 12)" d="M12,10.2C13.6,9.2 14.2,6.9 12.9,4.3L11.4,4.4C12.3,6.4 11.9,8.4 10.9,9.6Z"/><path fill="#fff" transform="rotate(120 12 12)" d="M12,10.2C13.6,9.2 14.2,6.9 12.9,4.3L11.4,4.4C12.3,6.4 11.9,8.4 10.9,9.6Z"/><path fill="#fff" transform="rotate(180 12 12)" d="M12,10.2C13.6,9.2 14.2,6.9 12.9,4.3L11.4,4.4C12.3,6.4 11.9,8.4 10.9,9.6Z"/><path fill="#fff" transform="rotate(240 12 12)" d="M12,10.2C13.6,9.2 14.2,6.9 12.9,4.3L11.4,4.4C12.3,6.4 11.9,8.4 10.9,9.6Z"/><path fill="#fff" transform="rotate(300 12 12)" d="M12,10.2C13.6,9.2 14.2,6.9 12.9,4.3L11.4,4.4C12.3,6.4 11.9,8.4 10.9,9.6Z"/>
+<path fill="#fff" d="M12,9.6A2.4,2.4 0,1 0,12 14.4A2.4,2.4 0,1 0,12 9.6Z"/>
+<path fill="#3C467D" d="M12,10.8A1.2,1.2 0,1 0,12 13.2A1.2,1.2 0,1 0,12 10.8Z"/>
+</g>
+</svg>
