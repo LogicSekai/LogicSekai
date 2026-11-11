@@ -1,117 +1,125 @@
 import { getDB } from '~/lib/db/connection'
-import { articles, products, elearningBooks, users } from '~/lib/db/schema'
-import { eq, desc } from 'drizzle-orm'
+import { articles, products, elearningBooks, elearningChapters, users } from '~/lib/db/schema'
+import { eq, desc, and, asc } from 'drizzle-orm'
+import { SITE_URL, PUBLIC_PAGES, escapeXml, toIso } from '../utils/seo'
 
 /**
  * Sitemap XML dinamis.
- * Menggabungkan halaman statis publik + konten dinamis (artikel, produk, e-learning)
- * dari database. Dirujuk oleh /robots.txt.
+ * Halaman statis publik (dari server/utils/seo.ts) + konten dinamis dari database:
+ * artikel, produk, buku e-learning, dan setiap bab e-learning — lengkap dengan <lastmod>.
+ * Dirujuk oleh /robots.txt.
  */
 
-const SITE_URL = 'https://logicsekai.com'
+interface Entry { loc: string; lastmod?: string | null; priority?: string; changefreq?: string; image?: string | null }
 
-const STATIC_ROUTES: Array<{ path: string; priority: string; changefreq: string }> = [
-  { path: '/', priority: '1.0', changefreq: 'daily' },
-  { path: '/products', priority: '0.9', changefreq: 'daily' },
-  { path: '/artikel', priority: '0.9', changefreq: 'daily' },
-  { path: '/elearning', priority: '0.8', changefreq: 'weekly' },
-  { path: '/galeri', priority: '0.6', changefreq: 'weekly' },
-  { path: '/portfolio', priority: '0.6', changefreq: 'monthly' },
-  { path: '/services', priority: '0.7', changefreq: 'monthly' },
-  { path: '/omo', priority: '0.7', changefreq: 'weekly' },
-  { path: '/omo/omoauto', priority: '0.7', changefreq: 'weekly' },
-  { path: '/omo/omoweb', priority: '0.7', changefreq: 'weekly' },
-  { path: '/omo/omoz', priority: '0.7', changefreq: 'weekly' },
-  { path: '/donasi', priority: '0.6', changefreq: 'monthly' },
-  { path: '/tentang-kami', priority: '0.5', changefreq: 'monthly' },
-  { path: '/kontak', priority: '0.5', changefreq: 'monthly' },
-  { path: '/faq', priority: '0.5', changefreq: 'monthly' },
-  { path: '/dokumentasi', priority: '0.4', changefreq: 'monthly' },
-  { path: '/syarat-ketentuan', priority: '0.3', changefreq: 'yearly' },
-  { path: '/kebijakan-privasi', priority: '0.3', changefreq: 'yearly' },
-]
-
-function escapeXml(s: string): string {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;')
-}
-
-function toIso(ts: any): string | null {
-  if (!ts) return null
-  const n = typeof ts === 'number' ? (ts < 1e12 ? ts * 1000 : ts) : Date.parse(ts)
-  if (!n || isNaN(n)) return null
-  return new Date(n).toISOString()
-}
-
-function urlEntry(loc: string, opts: { lastmod?: string | null; priority?: string; changefreq?: string } = {}): string {
-  let s = `  <url>\n    <loc>${escapeXml(loc)}</loc>`
-  if (opts.lastmod) s += `\n    <lastmod>${opts.lastmod}</lastmod>`
-  if (opts.changefreq) s += `\n    <changefreq>${opts.changefreq}</changefreq>`
-  if (opts.priority) s += `\n    <priority>${opts.priority}</priority>`
+function urlEntry(e: Entry): string {
+  let s = `  <url>\n    <loc>${escapeXml(e.loc)}</loc>`
+  if (e.lastmod) s += `\n    <lastmod>${e.lastmod}</lastmod>`
+  if (e.changefreq) s += `\n    <changefreq>${e.changefreq}</changefreq>`
+  if (e.priority) s += `\n    <priority>${e.priority}</priority>`
+  if (e.image) s += `\n    <image:image><image:loc>${escapeXml(e.image)}</image:loc></image:image>`
   return s + '\n  </url>'
 }
 
+function img(path?: string | null): string | null {
+  if (!path || path.startsWith('data:')) return null
+  return /^https?:\/\//i.test(path) ? path : SITE_URL + (path.startsWith('/') ? path : '/' + path)
+}
+
+function maxIso(...vals: Array<string | null | undefined>): string | null {
+  const v = vals.filter(Boolean) as string[]
+  return v.length ? v.sort().at(-1)! : null
+}
+
 export default defineEventHandler(async (event) => {
-  const entries: string[] = STATIC_ROUTES.map((r) =>
-    urlEntry(SITE_URL + r.path, { priority: r.priority, changefreq: r.changefreq })
-  )
+  const dynamic: Entry[] = []
+  let latestArticle: string | null = null
+  let latestBook: string | null = null
+  let latestProduct: string | null = null
 
   try {
     const db = getDB()
     if (db) {
-      // Artikel publlik
       const arts = await db
-        .select({ slug: articles.slug, updatedAt: articles.updatedAt, publishedAt: articles.publishedAt })
+        .select({ slug: articles.slug, updatedAt: articles.updatedAt, publishedAt: articles.publishedAt, coverImage: articles.coverImage })
         .from(articles)
         .where(eq(articles.status, 'published'))
         .orderBy(desc(articles.publishedAt))
-        .limit(2000)
+        .limit(5000)
       for (const a of arts) {
-        entries.push(urlEntry(`${SITE_URL}/artikel/${a.slug}`, {
-          lastmod: toIso(a.updatedAt || a.publishedAt), changefreq: 'weekly', priority: '0.7',
-        }))
+        const lastmod = toIso(a.updatedAt) || toIso(a.publishedAt)
+        latestArticle = maxIso(latestArticle, lastmod)
+        dynamic.push({ loc: `${SITE_URL}/artikel/${a.slug}`, lastmod, changefreq: 'monthly', priority: '0.7', image: img(a.coverImage) })
       }
 
-      // Produk publik (butuh username kreator untuk URL)
       const prods = await db
-        .select({ slug: products.slug, username: users.username, updatedAt: products.lastUpdated })
+        .select({ slug: products.slug, username: users.username, updatedAt: products.lastUpdated, updated: products.updated, thumb: products.thumbnailImage })
         .from(products)
         .leftJoin(users, eq(products.userId, users.id))
         .where(eq(products.status, 'published'))
-        .limit(2000)
+        .limit(5000)
       for (const p of prods) {
         if (!p.username || !p.slug) continue
-        entries.push(urlEntry(`${SITE_URL}/products/${p.username}/${p.slug}`, {
-          lastmod: toIso(p.updatedAt), changefreq: 'weekly', priority: '0.8',
-        }))
+        const lastmod = toIso(p.updated) || toIso(p.updatedAt)
+        latestProduct = maxIso(latestProduct, lastmod)
+        dynamic.push({ loc: `${SITE_URL}/products/${p.username}/${p.slug}`, lastmod, changefreq: 'weekly', priority: '0.8', image: img(p.thumb) })
       }
 
-      // E-learning publik
       const books = await db
-        .select({ slug: elearningBooks.slug, updatedAt: elearningBooks.updatedAt })
+        .select({ id: elearningBooks.id, slug: elearningBooks.slug, updatedAt: elearningBooks.updatedAt, thumbnail: elearningBooks.thumbnail })
         .from(elearningBooks)
         .where(eq(elearningBooks.status, 'published'))
-        .limit(2000)
+        .limit(1000)
+      const bookById = new Map<string, { slug: string }>()
+      for (const b of books) bookById.set(b.id, { slug: b.slug })
+
+      // Semua bab yang terbit, dikelompokkan per buku.
+      const chapters = books.length
+        ? await db
+          .select({ bookId: elearningChapters.bookId, slug: elearningChapters.slug, updatedAt: elearningChapters.updatedAt, thumbnail: elearningChapters.thumbnail })
+          .from(elearningChapters)
+          .innerJoin(elearningBooks, eq(elearningChapters.bookId, elearningBooks.id))
+          .where(and(eq(elearningChapters.status, 'published'), eq(elearningBooks.status, 'published')))
+          .orderBy(asc(elearningChapters.bookId), asc(elearningChapters.order))
+          .limit(20000)
+        : []
+      const bookLastmod = new Map<string, string | null>()
+      for (const c of chapters) {
+        const b = bookById.get(c.bookId)
+        if (!b) continue
+        const lastmod = toIso(c.updatedAt)
+        bookLastmod.set(c.bookId, maxIso(bookLastmod.get(c.bookId), lastmod))
+        dynamic.push({ loc: `${SITE_URL}/elearning/${b.slug}/${c.slug}`, lastmod, changefreq: 'monthly', priority: '0.6', image: img(c.thumbnail) })
+      }
       for (const b of books) {
-        entries.push(urlEntry(`${SITE_URL}/elearning/${b.slug}`, {
-          lastmod: toIso(b.updatedAt), changefreq: 'weekly', priority: '0.7',
-        }))
+        const lastmod = maxIso(toIso(b.updatedAt), bookLastmod.get(b.id))
+        latestBook = maxIso(latestBook, lastmod)
+        dynamic.push({ loc: `${SITE_URL}/elearning/${b.slug}`, lastmod, changefreq: 'weekly', priority: '0.8', image: img(b.thumbnail) })
       }
     }
-  } catch {
+  } catch (err) {
     // Bila DB tidak tersedia, tetap kembalikan sitemap statis.
+    console.error('[sitemap]', err)
   }
 
+  const staticEntries: Entry[] = Object.entries(PUBLIC_PAGES).map(([path, p]) => ({
+    loc: SITE_URL + path,
+    priority: p.priority,
+    changefreq: p.changefreq,
+    lastmod:
+      path === '/artikel' ? latestArticle
+      : path === '/elearning' ? latestBook
+      : path === '/products' ? latestProduct
+      : path === '/' ? maxIso(latestArticle, latestBook, latestProduct)
+      : null,
+  }))
+
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${entries.join('\n')}
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+${[...staticEntries, ...dynamic].map(urlEntry).join('\n')}
 </urlset>`
 
   setResponseHeader(event, 'Content-Type', 'application/xml; charset=utf-8')
-  setResponseHeader(event, 'Cache-Control', 'public, max-age=3600, s-maxage=21600')
+  setResponseHeader(event, 'Cache-Control', 'public, max-age=3600, s-maxage=3600')
   return xml
 })

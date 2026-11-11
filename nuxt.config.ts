@@ -1,6 +1,11 @@
 import tailwindcss from "@tailwindcss/vite"
 import { resolve } from "path"
 
+// Token verifikasi Google Search Console & Bing Webmaster Tools.
+// Isi langsung di sini (dari menu "HTML tag" masing-masing) atau lewat env saat build.
+const GOOGLE_SITE_VERIFICATION = process.env.NUXT_PUBLIC_GOOGLE_SITE_VERIFICATION || ''
+const BING_SITE_VERIFICATION = process.env.NUXT_PUBLIC_BING_SITE_VERIFICATION || ''
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
@@ -31,15 +36,16 @@ export default defineNuxtConfig({
         { property: 'og:image:width', content: '1200' },
         { property: 'og:image:height', content: '630' },
         { property: 'og:image:alt', content: 'Logic Sekai' },
-        { property: 'og:url', content: 'https://logicsekai.com' },
         // Twitter / X
         { name: 'twitter:card', content: 'summary_large_image' },
         { name: 'twitter:title', content: 'Logic Sekai — Marketplace & Belajar untuk Kreator Digital Indonesia' },
         { name: 'twitter:description', content: 'Platform marketplace dan e-learning untuk kreator digital Indonesia.' },
         { name: 'twitter:image', content: 'https://logicsekai.com/img/og-banner.jpg' },
+        // Verifikasi kepemilikan situs (harus ada di HTML beranda yang dilayani ke semua user-agent)
+        ...(GOOGLE_SITE_VERIFICATION ? [{ name: 'google-site-verification', content: GOOGLE_SITE_VERIFICATION }] : []),
+        ...(BING_SITE_VERIFICATION ? [{ name: 'msvalidate.01', content: BING_SITE_VERIFICATION }] : []),
       ],
       link: [
-        { rel: 'canonical', href: 'https://logicsekai.com' },
         { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
         { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32x32.png' },
         { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/favicon-16x16.png' },
@@ -120,6 +126,8 @@ export default defineNuxtConfig({
       midtransMode: process.env.MIDTRANS_MODE || 'sandbox',
       // Cloudflare Web Analytics (opsional) — set via NUXT_PUBLIC_CF_BEACON_TOKEN
       cfBeaconToken: process.env.NUXT_PUBLIC_CF_BEACON_TOKEN || '',
+      googleSiteVerification: GOOGLE_SITE_VERIFICATION,
+      bingSiteVerification: BING_SITE_VERIFICATION,
     }
   }
 })
