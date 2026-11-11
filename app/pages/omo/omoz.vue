@@ -323,13 +323,13 @@ const totalTitle = computed(() =>
 const wave = [30, 55, 80, 45, 95, 60, 35, 70, 90, 50, 75, 40, 85, 55, 30, 65, 95, 45, 70, 35]
 
 const flow = [
-  { icon: AudioWaveform, title: 'Pilih suara mesin', desc: 'Mesin jet, dinamo kereta cepat, atau mesin piston: tujuh suara sintetis siap dipakai.' },
+  { icon: AudioWaveform, title: 'Pilih suara mesin', desc: 'Mesin jet, dinamo kereta cepat, atau mesin piston dari V-twin sampai superbike 4 silinder: 13 suara sintetis siap dipakai.' },
   { icon: Bluetooth, title: 'Nyalakan atau biarkan otomatis', desc: 'Ketuk tombol power, atau daftarkan speaker kendaraan / intercom helm agar mesin menyala saat tersambung.' },
   { icon: Gauge, title: 'Suara mengikuti kecepatan', desc: 'Kecepatan GPS diubah menjadi putaran mesin dan gigi virtual, jadi suaranya naik turun seperti mesin sungguhan.' },
 ]
 
 const features = [
-  { icon: AudioWaveform, title: '7 suara mesin', desc: 'Mesin Jet, Jet Nging, Jet Ngung, Dinamo Kereta Cepat, V-Twin Cruiser, Inline-4 Sport, dan 2-Tak Racing.' },
+  { icon: AudioWaveform, title: '13 suara mesin', desc: 'Mesin jet, dinamo kereta cepat, V-twin, keluarga 4 silinder 250 sampai 1000 cc (termasuk supercharger), dan 2-tak, lengkap dengan perpindahan gigi.' },
   { icon: Gauge, title: 'RPM dari GPS', desc: 'Kecepatan menjadi putaran mesin dengan girboks virtual; mesin jet berputar halus tanpa gigi.' },
   { icon: Hand, title: 'Tombol gas', desc: 'Tekan dan tahan tombol bulat untuk menggeber mesin; tombol Geber juga ada di notifikasi.' },
   { icon: Bluetooth, title: 'Nyala otomatis Bluetooth', desc: 'Mesin menyala saat HP tersambung ke perangkat terdaftar dan mati saat terputus.' },
@@ -346,7 +346,13 @@ const engines = [
   { name: 'Mesin Jet Ngung', kind: 'Turbin', desc: 'Hanya dengung turbin “ngung” yang berat dan naik mengikuti kecepatan.' },
   { name: 'Dinamo Kereta Cepat', kind: 'Listrik', desc: 'Dengung motor traksi dan desing inverter kereta cepat.' },
   { name: 'V-Twin Cruiser', kind: '4-tak', desc: 'V-twin 45° yang berat dengan idle tidak rata dan 5 gigi virtual.' },
+  { name: 'Big Twin Klasik', kind: '4-tak', desc: 'V-twin 1340 cc gaya lawas: idle naik-turun, knalpot terbuka, dan 4 percepatan yang berbunyi “klonk”.' },
   { name: 'Inline-4 Sport', kind: '4-tak', desc: 'Motor sport 4 silinder yang melengking hingga 14.000 rpm lewat 6 gigi virtual.' },
+  { name: 'Inline-4 250', kind: '4-tak', desc: '4 silinder 250 cc yang melengking sampai 17.000 rpm dengan quickshifter.' },
+  { name: 'Inline-4 400', kind: '4-tak', desc: '4 silinder 400 cc yang lebih berisi, sampai 16.000 rpm.' },
+  { name: 'Inline-4 600', kind: '4-tak', desc: 'Raungan supersport kelas menengah sampai 16.000 rpm.' },
+  { name: 'Inline-4 1000', kind: '4-tak', desc: 'Superbike 1000 cc: berat di bawah, buas sampai 14.000 rpm, letupan keras.' },
+  { name: 'Supercharged 1000', kind: '4-tak', desc: 'Superbike dengan desing supercharger dan bunyi “cuit” saat gas dilepas.' },
   { name: '2-Tak Racing', kind: '2-tak', desc: 'Satu silinder 2-tak yang nyaring dengan karakter “ring-ding”.' },
 ]
 
