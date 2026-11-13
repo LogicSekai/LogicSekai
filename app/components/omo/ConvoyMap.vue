@@ -1,6 +1,7 @@
 <template>
   <div class="relative w-full h-full">
-    <div ref="el" class="absolute inset-0 z-0" :class="{ 'cursor-crosshair': pickMode }" />
+    <!-- Jangan pasang :class dinamis di sini: Vue akan menimpa kelas yang ditambahkan Leaflet -->
+    <div ref="el" class="absolute inset-0 z-0" />
     <button
       type="button"
       class="absolute right-3 bottom-3 z-[500] px-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 font-mono text-[10px] uppercase tracking-wider text-gray-700 dark:text-gray-200 shadow"
@@ -152,4 +153,7 @@ onBeforeUnmount(() => { map?.remove(); map = null })
 watch(() => props.members, syncMembers, { deep: true })
 watch(() => props.reports, syncReports, { deep: true })
 watch(() => props.destination, syncDest, { deep: true })
+watch(() => props.pickMode, (on) => {
+  if (map) map.getContainer().style.cursor = on ? 'crosshair' : ''
+})
 </script>
