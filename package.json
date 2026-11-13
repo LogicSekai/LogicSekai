@@ -20,6 +20,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "convoy:dev": "wrangler dev -c workers/omoride-convoy/wrangler.toml",
+    "convoy:deploy": "wrangler deploy -c workers/omoride-convoy/wrangler.toml",
+    "convoy:typecheck": "tsc -p workers/omoride-convoy/tsconfig.json",
     "deploy": "wrangler pages deploy .output/public",
     "deploy:build": "bun run build:production && wrangler pages deploy .output/public"
   },
@@ -47,6 +50,7 @@
     "drizzle-orm": "^0.44.7",
     "embla-carousel-vue": "^8.6.0",
     "hls.js": "^1.6.16",
+    "leaflet": "1.9.4",
     "lucide-vue-next": "^0.553.0",
     "marked": "^15.0.12",
     "nuxt": "4.2.1",
@@ -68,11 +72,12 @@
   "devDependencies": {
     "@types/archiver": "^7.0.0",
     "@types/better-sqlite3": "^7.6.13",
+    "@types/leaflet": "1.9.20",
     "@types/node": "^24.10.0",
-    "better-sqlite3": "^12.4.1",
-    "vitest": "^2.1.9",
     "@vitest/coverage-v8": "^2.1.9",
-    "typescript": "^5.9.3"
+    "better-sqlite3": "^12.4.1",
+    "typescript": "^5.9.3",
+    "vitest": "^2.1.9"
   },
   "packageManager": "bun@1.2.16"
 }

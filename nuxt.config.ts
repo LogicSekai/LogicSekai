@@ -94,6 +94,9 @@ export default defineNuxtConfig({
 
   nitro: {
     preset: process.env.NODE_ENV === 'production' ? 'cloudflare-pages' : undefined,
+    // Entry Pages kustom: = entry bawaan cloudflare-pages + gerbang WebSocket konvoi OmoRide
+    // (upgrade diteruskan ke Durable Object ConvoyRoom sebelum masuk Nitro).
+    ...(process.env.NODE_ENV === 'production' ? { entry: resolve('./server/omoride/entry.cloudflare-pages.ts') } : {}),
     experimental: {
       wasm: true
     },

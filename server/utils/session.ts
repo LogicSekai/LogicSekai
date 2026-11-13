@@ -78,12 +78,17 @@ export function clearSessionCookies(event: H3Event) {
     setCookie(event, HINT_COOKIE, '', { ...opts, httpOnly: false })
 }
 
-/** Buat sesi baru setelah login berhasil. */
-export async function createUserSession(event: H3Event, db: any, user: SessionUser) {
+/**
+ * Simpan sesi baru di database dan kembalikan token mentahnya (TANPA menyetel cookie).
+ * Dipakai langsung oleh klien non-browser (aplikasi Android OmoRide) yang mengirim
+ * token lewat header `Authorization: Bearer <token>`.
+ */
+export async function issueSessionToken(event: H3Event, db: any, user: SessionUser): Promise<{ token: string; expiresAt: Date }> {
     const bytes = new Uint8Array(32)
     globalThis.crypto.getRandomValues(bytes)
     const token = toHex(bytes)
     const now = new Date()
+    const expiresAt = new Date(now.getTime() + SESSION_TTL_SECONDS * 1000)
     await db.insert(userSessions).values({
         id: await hashSessionToken(token),
         userId: user.id,
@@ -91,15 +96,28 @@ export async function createUserSession(event: H3Event, db: any, user: SessionUs
         userAgent: (getHeader(event, 'user-agent') || '').slice(0, 300),
         createdAt: now,
         lastSeenAt: now,
-        expiresAt: new Date(now.getTime() + SESSION_TTL_SECONDS * 1000),
+        expiresAt,
     })
-    setTokenCookie(event, token)
-    setHintCookie(event, user)
 
     // Bersihkan sesi kedaluwarsa sesekali
     if (Math.random() < 0.05) {
         try { await db.delete(userSessions).where(lt(userSessions.expiresAt, now)) } catch {}
     }
+    return { token, expiresAt }
+}
+
+/** Buat sesi baru setelah login berhasil (browser: token di cookie httpOnly). */
+export async function createUserSession(event: H3Event, db: any, user: SessionUser) {
+    const { token } = await issueSessionToken(event, db, user)
+    setTokenCookie(event, token)
+    setHintCookie(event, user)
+}
+
+/** Ambil token dari header `Authorization: Bearer <token>` (klien aplikasi). */
+export function getBearerToken(event: H3Event): string | null {
+    const h = getHeader(event, 'authorization') || ''
+    const m = /^Bearer\s+([a-f0-9]{64})$/i.exec(h.trim())
+    return m ? m[1].toLowerCase() : null
 }
 
 /**
@@ -108,6 +126,20 @@ export async function createUserSession(event: H3Event, db: any, user: SessionUs
  */
 export async function resolveUserSession(event: H3Event, db: any): Promise<{ user: SessionUser; sessionId: string } | null> {
     const token = getCookie(event, SESSION_COOKIE)
+    if (!token || !TOKEN_PATTERN.test(token)) return null
+    const res = await resolveSessionToken(db, token)
+    if (res?.extended) {
+        setTokenCookie(event, token)
+        setHintCookie(event, res.user)
+    }
+    return res ? { user: res.user, sessionId: res.sessionId } : null
+}
+
+/**
+ * Validasi token mentah (dari cookie atau header Bearer) → user aktif, atau null.
+ * Tidak menyentuh cookie; `extended` = true bila masa berlaku diperpanjang.
+ */
+export async function resolveSessionToken(db: any, token: string): Promise<{ user: SessionUser; sessionId: string; extended: boolean } | null> {
     if (!token || !TOKEN_PATTERN.test(token)) return null
 
     const sessionId = await hashSessionToken(token)
@@ -138,18 +170,18 @@ export async function resolveUserSession(event: H3Event, db: any): Promise<{ use
 
     const user: SessionUser = { id: row.id, username: row.username, name: row.name, email: row.email, role: row.role }
 
+    let extended = false
     const remaining = new Date(row.expiresAt).getTime() - now
     if (remaining < (SESSION_TTL_SECONDS * 1000) / 2) {
         try {
             await db.update(userSessions)
                 .set({ lastSeenAt: new Date(now), expiresAt: new Date(now + SESSION_TTL_SECONDS * 1000) })
                 .where(eq(userSessions.id, sessionId))
-            setTokenCookie(event, token)
-            setHintCookie(event, user)
+            extended = true
         } catch {}
     }
 
-    return { user, sessionId }
+    return { user, sessionId, extended }
 }
 
 /** Logout: hapus sesi saat ini. */

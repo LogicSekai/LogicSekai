@@ -13,6 +13,15 @@ migrations_dir = "./app/lib/db/migrations"
 binding = "BUCKET"
 bucket_name = "logicsekai-uploads"
 
+# ── OmoRide Konvoi: Durable Object ConvoyRoom ───────────────────────────────
+# Pages tidak bisa mendefinisikan kelas Durable Object sendiri, jadi kelasnya hidup di Worker
+# pendamping "logicsekai-convoy" (workers/omoride-convoy, deploy: bun run convoy:deploy) dan
+# di-bind di sini lewat script_name. Migrasi DO ada di wrangler.toml Worker pendamping.
+[[durable_objects.bindings]]
+name = "CONVOY_ROOM"
+class_name = "ConvoyRoom"
+script_name = "logicsekai-convoy"
+
 [vars]
 BETTER_AUTH_URL = "https://logicsekai.com"
 NODE_ENV = "production"

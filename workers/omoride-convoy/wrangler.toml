@@ -1,0 +1,27 @@
+# Worker pendamping Logic Sekai — Durable Object ConvoyRoom (OmoRide Konvoi).
+# Deploy SEBELUM Pages yang mem-bind-nya:  bun run convoy:deploy
+# Dev lokal bersama Pages:                 bun run convoy:dev  (lalu wrangler pages dev di terminal lain)
+
+name = "logicsekai-convoy"
+main = "src/index.ts"
+compatibility_date = "2025-11-01"
+workers_dev = false
+preview_urls = false
+
+# D1 yang SAMA dengan Logic Sekai (laporan jalan disalin ke omoride_reports)
+[[d1_databases]]
+binding = "DB"
+database_name = "logic-sekai-db"
+database_id = "8e584977-b7e9-4f7d-aa4c-a30fab656636"
+
+[[durable_objects.bindings]]
+name = "CONVOY_ROOM"
+class_name = "ConvoyRoom"
+
+# SQLite-backed Durable Object (tersedia di paket gratis)
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["ConvoyRoom"]
+
+[observability]
+enabled = true

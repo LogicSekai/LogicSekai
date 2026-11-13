@@ -24,6 +24,9 @@ const SENSITIVE_MAX = 15
 // dilindungi signature per klien + batas tulis per klien (server/utils/mcp/protocol.ts),
 // jadi diberi jatah sendiri yang lebih longgar dan tidak memakan jatah API umum.
 const MCP_MAX = 600
+// /api/omoride: aplikasi OmoRide & dasbor konvoi melakukan polling ringan (laporan terdekat,
+// snapshot konvoi saat WebSocket putus) — jatah sendiri agar tidak menghabiskan jatah API umum.
+const OMORIDE_MAX = 400
 
 // Endpoint sensitif (brute-force / spam) — limit lebih ketat
 const SENSITIVE_PATHS = [
@@ -33,6 +36,8 @@ const SENSITIVE_PATHS = [
   '/api/auth/verify-email',
   '/api/setup/superadmin',
   '/api/contact',
+  '/api/omoride/auth/login',
+  '/api/omoride/convoys/join', // cegah tebak-tebakan kode konvoi
 ]
 
 function getClientIP(event: any): string {
@@ -54,12 +59,13 @@ export default defineEventHandler(async (event) => {
 
   const isSensitive = SENSITIVE_PATHS.some((p) => pathname === p || pathname.startsWith(p))
   const isMcp = pathname === '/api/mcp'
+  const isOmo = !isSensitive && pathname.startsWith('/api/omoride/')
   const clientIP = getClientIP(event)
 
   // 1) Pertahanan utama: Cloudflare Rate Limiting binding (bila dikonfigurasi)
   const cfEnv: any = (event as any).context?.cloudflare?.env
   const limiter = isSensitive ? cfEnv?.AUTH_RATE_LIMITER : cfEnv?.API_RATE_LIMITER
-  if (limiter?.limit && !isMcp) {
+  if (limiter?.limit && !isMcp && !isOmo) {
     try {
       const { success } = await limiter.limit({ key: `${clientIP}:${pathname}` })
       if (!success) {
@@ -80,8 +86,8 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  const baseMax = isSensitive ? SENSITIVE_MAX : isMcp ? MCP_MAX : DEFAULT_MAX
-  const key = `${clientIP}:${isSensitive ? 'auth' : isMcp ? 'mcp' : 'api'}`
+  const baseMax = isSensitive ? SENSITIVE_MAX : isMcp ? MCP_MAX : isOmo ? OMORIDE_MAX : DEFAULT_MAX
+  const key = `${clientIP}:${isSensitive ? 'auth' : isMcp ? 'mcp' : isOmo ? 'omo' : 'api'}`
   let entry = memStore.get(key)
   if (!entry || now > entry.resetTime) {
     entry = { count: 0, resetTime: now + WINDOW_MS }

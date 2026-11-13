@@ -59,6 +59,14 @@ export {
     mcpClientsRelations,
 } from './mcp';
 export { userSessions } from './user-sessions';
+export {
+    omorideProfiles,
+    omorideConvoys,
+    omorideConvoyMembers,
+    omorideReports,
+    omorideReportVotes,
+    omorideConvoyInvites,
+} from './omoride';
 
 // Define cross-table relations here to avoid circular imports
 import { relations } from 'drizzle-orm';
