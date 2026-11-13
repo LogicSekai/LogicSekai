@@ -21,7 +21,14 @@ const ALLOWED_ORIGINS = new Set([
     'http://localhost:3000',
     'http://localhost:8788',
     'http://127.0.0.1:8788',
+    'https://logicsekai.pages.dev',
 ])
+// Deployment preview Cloudflare Pages milik proyek ini (mis. https://557425aa.logicsekai.pages.dev)
+const PREVIEW_ORIGIN = /^https:\/\/[a-z0-9-]+\.logicsekai\.pages\.dev$/
+
+function originAllowed(origin: string | null): boolean {
+    return !!origin && (ALLOWED_ORIGINS.has(origin) || PREVIEW_ORIGIN.test(origin))
+}
 
 interface GateEnv {
     DB?: any
@@ -68,7 +75,7 @@ export async function handleConvoyWsUpgrade(request: Request, env: GateEnv): Pro
     } else {
         // Cookie hanya sah dari origin kita sendiri (cegah Cross-Site WebSocket Hijacking)
         const origin = request.headers.get('origin')
-        if (!origin || !ALLOWED_ORIGINS.has(origin)) return deny(403, 'Origin not allowed')
+        if (!originAllowed(origin)) return deny(403, 'Origin not allowed')
         token = readCookie(request.headers.get('cookie'), 'ls_session')
     }
     if (!token || !TOKEN_PATTERN.test(token)) return deny(401, 'Authentication required')
