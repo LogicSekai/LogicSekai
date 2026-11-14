@@ -103,10 +103,14 @@ export async function handleConvoyWsUpgrade(request: Request, env: GateEnv): Pro
     if (!row) return deny(403, 'Not a member of this convoy')
     if (row.status !== 'active') return deny(410, 'Convoy ended')
 
+    // Avatar hanya diteruskan bila berupa URL (/api/files/… atau https://…). Avatar lama berupa data
+    // URI base64 (puluhan KB) bisa membuat header terlalu besar dan rusak saat dipotong di DO.
+    const rawAvatar: string = typeof user.avatar === 'string' ? user.avatar : ''
+    const avatar = rawAvatar.length <= 300 && (rawAvatar.startsWith('/') || rawAvatar.startsWith('https://')) ? rawAvatar : null
     const profile = {
         username: user.username,
         name: user.display_name || user.name || user.username,
-        avatar: user.avatar || null,
+        avatar,
     }
     const ghostParam = url.searchParams.get('ghost')
     const ghost = ghostParam != null ? ghostParam === '1' : !!user.ghost_default
