@@ -117,6 +117,10 @@ export default defineNuxtConfig({
   runtimeConfig: {
     // Wajib diset via env (min. 16 karakter); kosong = endpoint setup superadmin nonaktif
     superadminSetupSecret: process.env.SUPERADMIN_SETUP_SECRET || '',
+    // Email transaksional (kode verifikasi) via Resend — domain terverifikasi: support.logicsekai.com.
+    // Di Cloudflare Pages cukup isi secret NUXT_RESEND_API_KEY; NUXT_EMAIL_FROM opsional.
+    resendApiKey: process.env.NUXT_RESEND_API_KEY || '',
+    emailFrom: process.env.NUXT_EMAIL_FROM || 'Logic Sekai <noreply@support.logicsekai.com>',
     cloudflareAccountId: process.env.CLOUDFLARE_ACCOUNT_ID,
     cloudflareDatabaseId: process.env.CLOUDFLARE_DATABASE_ID,
     cloudflareApiToken: process.env.CLOUDFLARE_API_TOKEN,

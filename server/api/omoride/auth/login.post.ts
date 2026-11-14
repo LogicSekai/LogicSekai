@@ -31,6 +31,6 @@ export default defineEventHandler(async (event) => {
     return {
         token,
         expiresAt: expiresAt.getTime(),
-        user: { id: user.id, username: user.username, name: user.name, avatar: user.avatar ?? null },
+        user: { id: user.id, username: user.username, name: user.name, email: user.email, avatar: user.avatar ?? null, verified: !!user.verified },
     }
 })

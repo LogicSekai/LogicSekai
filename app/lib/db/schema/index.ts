@@ -67,6 +67,7 @@ export {
     omorideReportVotes,
     omorideConvoyInvites,
 } from './omoride';
+export { emailVerificationCodes } from './email-verification';
 
 // Define cross-table relations here to avoid circular imports
 import { relations } from 'drizzle-orm';

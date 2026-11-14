@@ -3,7 +3,7 @@
  * konvoi aktif yang diikuti, dan jumlah undangan tertunda.
  */
 import { and, eq, isNull, sql } from 'drizzle-orm'
-import { omorideConvoyInvites, omorideConvoyMembers, omorideConvoys, omorideProfiles } from '~/lib/db/schema'
+import { omorideConvoyInvites, omorideConvoyMembers, omorideConvoys, omorideProfiles, users } from '~/lib/db/schema'
 
 export default defineEventHandler(async (event) => {
     const user = await requireOmoUser(event)
@@ -24,8 +24,10 @@ export default defineEventHandler(async (event) => {
     const [inv] = await db.select({ n: sql<number>`count(*)` }).from(omorideConvoyInvites)
         .where(and(eq(omorideConvoyInvites.toUserId, user.id), eq(omorideConvoyInvites.status, 'pending')))
 
+    const [extra] = await db.select({ verified: users.verified }).from(users).where(eq(users.id, user.id)).limit(1)
+
     return {
-        user: { id: user.id, username: user.username, name: user.name, avatar: user.avatar },
+        user: { id: user.id, username: user.username, name: user.name, email: user.email, avatar: user.avatar, verified: !!extra?.verified },
         profile: { displayName: profile.displayName, ghostDefault: !!profile.ghostDefault },
         activeConvoys: convoys.map((r: any) => ({ ...convoyDto(r.convoy), myRole: r.role })),
         pendingInvites: Number(inv?.n ?? 0),

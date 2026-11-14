@@ -37,6 +37,8 @@ const SENSITIVE_PATHS = [
   '/api/setup/superadmin',
   '/api/contact',
   '/api/omoride/auth/login',
+  '/api/omoride/auth/register',
+  '/api/omoride/auth/verify', // termasuk /verify/send — cegah tebak kode & spam email
   '/api/omoride/convoys/join', // cegah tebak-tebakan kode konvoi
 ]
 
