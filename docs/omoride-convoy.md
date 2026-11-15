@@ -50,6 +50,7 @@ jalan untuk REST & UI, tapi tanpa Durable Object (WS → 426, `/live` → 503).
 | `POST convoys/:id/destination` | `{lat,lng,name}` / `{clear:true}` | khusus leader |
 | `GET convoys/:id/live` | — | snapshot room (fallback polling) |
 | `POST convoys/:id/leave` | — | anggota keluar (leader tidak bisa) |
+| `POST convoys/:id/leader` | `{userId}` | khusus leader; serahkan peran leader (D1 lalu room → pesan `leader`) |
 | `POST convoys/:id/kick` | `{userId}` | khusus leader; `role='removed'`, socket ditutup 4002. Masuk lagi hanya lewat undangan leader (kode/tautan ditolak 403) |
 | `POST convoys/:id/end` | — | khusus leader |
 | `GET invites` / `POST invites/:id` | `{accept}` | undangan tertunda |
@@ -75,6 +76,8 @@ Heartbeat: kirim teks persis `{"t":"ping"}` tiap ~25 dtk → balasan `{"t":"pong
 | `report` | `type,lat,lng,note?,public?` | `public` default true (ikut tampil di laporan komunitas); maks 10/10 mnt |
 | `confirm` / `clear` | `id` | 1 suara per user (bisa diganti) |
 | `dest` | `lat,lng,name` / `clear:true` | khusus leader |
+| `shout` | `kind` | pesan cepat tanpa teks bebas: leader `regroup/pray/charge/rest/rain/slow/go`, anggota `wait`; 1 per 8 dtk |
+| `rally` | `lat,lng,name` / `clear:true` | khusus leader; titik kumpul, berlaku 3 jam |
 
 **Server → klien**
 
@@ -84,6 +87,9 @@ Heartbeat: kirim teks persis `{"t":"ping"}` tiap ~25 dtk → balasan `{"t":"pong
 | `member_join` | `userId, role, profile, ghost, client` |
 | `member_left` | `userId, removed?` |
 | `arrived` | `userId` — anggota dalam 60 m dari tujuan |
+| `shout` | `kind, from, name, leader, ts, lat?, lng?` |
+| `rally` | `rally` (`lat,lng,name,setAt`) atau null |
+| `leader` | `leaderId` — peran leader berpindah |
 | `removed` | — dikirim ke anggota yang dikeluarkan sebelum socket ditutup 4002 |
 | `pos` | `userId, lat,lng,spd,bearing,batt,ts` |
 | `ghost` | `userId, on` |

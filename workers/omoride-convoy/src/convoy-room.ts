@@ -31,6 +31,7 @@ type Report = {
 };
 type Meta = { convoyId: string; leaderId: string; name: string };
 type Dest = { lat: number; lng: number; name: string } | null;
+type Rally = { lat: number; lng: number; name: string; setAt: number } | null;
 
 const REPORT_TYPES = ["jam", "police", "pothole", "flood", "crash", "hazard"] as const;
 // Harus sama dengan OMO_REPORT_TTL di server/utils/omoride.ts
@@ -44,6 +45,11 @@ const REPORTS_PER_10_MIN = 10;
 const MAX_MSG_BYTES = 2048;
 // Anggota dianggap sudah sampai bila posisinya dalam radius ini dari tujuan bersama.
 const ARRIVE_M = 60;
+// Pesan cepat (tanpa teks bebas): leader ke semua; anggota hanya "wait" (tunggu saya).
+const LEADER_SHOUTS = ["regroup", "pray", "charge", "rest", "rain", "slow", "go"] as const;
+const MEMBER_SHOUTS = ["wait"] as const;
+const SHOUT_GAP_MS = 8_000;
+const RALLY_TTL_MS = 3 * 60 * 60_000;
 
 const okLatLng = (lat: unknown, lng: unknown) =>
   typeof lat === "number" && typeof lng === "number" && Number.isFinite(lat) && Number.isFinite(lng) &&
@@ -65,6 +71,9 @@ export class ConvoyRoom implements DurableObject {
   private destination: Dest = null;
   // Anggota yang sudah sampai di tujuan saat ini (direset setiap tujuan berganti).
   private arrived = new Set<string>();
+  // Titik kumpul dari leader (kedaluwarsa setelah RALLY_TTL_MS).
+  private rally: Rally = null;
+  private lastShout = new Map<string, number>();
   private meta: Meta | null = null;
   private ended = false;
   // Rate-limit laporan per user (in-memory; reset saat hibernasi tidak masalah)
@@ -76,6 +85,7 @@ export class ConvoyRoom implements DurableObject {
       this.meta = (await state.storage.get<Meta>("meta")) ?? null;
       this.ended = (await state.storage.get<boolean>("ended")) ?? false;
       for (const uid of (await state.storage.get<string[]>("arrived")) ?? []) this.arrived.add(uid);
+      this.rally = (await state.storage.get<Rally>("rally")) ?? null;
       for (const r of (await state.storage.get<Report[]>("reports")) ?? []) this.reports.set(r.id, r);
     });
     // Heartbeat klien dijawab runtime tanpa membangunkan DO
@@ -124,6 +134,21 @@ export class ConvoyRoom implements DurableObject {
         await this.checkAllArrived();
         return Response.json({ ok: true });
       }
+      case "/leader": {
+        // Pindah leader (dipanggil REST setelah D1 diperbarui).
+        const leaderId = String(b.leaderId ?? "");
+        if (!this.meta || !leaderId) return Response.json({ ok: false }, { status: 400 });
+        this.meta = { ...this.meta, leaderId };
+        for (const ws of this.state.getWebSockets()) {
+          const a = this.att(ws);
+          if (!a) continue;
+          const role = a.uid === leaderId ? "leader" : "member";
+          if (a.role !== role) { a.role = role; ws.serializeAttachment(a); }
+        }
+        this.broadcast({ t: "leader", leaderId });
+        await this.persist();
+        return Response.json({ ok: true });
+      }
       case "/end": {
         this.broadcast({ t: "ended" });
         for (const ws of this.state.getWebSockets()) try { ws.close(4000, "convoy ended"); } catch {}
@@ -131,6 +156,7 @@ export class ConvoyRoom implements DurableObject {
         this.reports.clear();
         this.destination = null;
         this.arrived.clear();
+        this.rally = null;
         this.ended = true;
         await this.state.storage.deleteAlarm();
         await this.state.storage.deleteAll();
@@ -187,6 +213,7 @@ export class ConvoyRoom implements DurableObject {
       reports: [...this.reports.values()].map((r) => this.reportDto(r, uid)),
       destination: this.destination,
       arrived: [...this.arrived],
+      rally: this.activeRally(),
     }));
     if (!wasOnline) this.broadcast({ t: "member_join", userId: uid, role: attach.role, profile, ghost: attach.ghost, client: attach.client }, server);
     return new Response(null, { status: 101, webSocket: client });
@@ -279,6 +306,32 @@ export class ConvoyRoom implements DurableObject {
         await this.updateReportCounts(r, confirms, clears);
         return;
       }
+      case "shout": {
+        const isLeader = !!this.meta && a.uid === this.meta.leaderId;
+        const allowed: readonly string[] = isLeader ? [...LEADER_SHOUTS, ...MEMBER_SHOUTS] : MEMBER_SHOUTS;
+        if (!allowed.includes(m.kind)) return;
+        const last = this.lastShout.get(a.uid) ?? 0;
+        if (now - last < SHOUT_GAP_MS) {
+          ws.send(JSON.stringify({ t: "error", code: "rate_limited", message: "Tunggu sebentar sebelum mengirim pesan lagi" }));
+          return;
+        }
+        this.lastShout.set(a.uid, now);
+        const pos = a.ghost ? null : a.pos;
+        this.broadcast({
+          t: "shout", kind: m.kind, from: a.uid, name: a.profile.name, leader: isLeader, ts: now,
+          ...(pos ? { lat: pos.lat, lng: pos.lng } : {}),
+        });
+        return;
+      }
+      case "rally": {
+        if (!this.meta || a.uid !== this.meta.leaderId) return; // hanya leader
+        if (m.clear) this.rally = null;
+        else if (okLatLng(m.lat, m.lng)) this.rally = { lat: m.lat, lng: m.lng, name: clean(m.name, 80), setAt: now };
+        else return;
+        this.broadcast({ t: "rally", rally: this.rally });
+        await this.persist();
+        return;
+      }
       case "dest": {
         if (!this.meta || a.uid !== this.meta.leaderId) return; // hanya leader
         if (m.clear) await this.setDestination(null, true);
@@ -306,6 +359,10 @@ export class ConvoyRoom implements DurableObject {
       // Anggota yang belum sampai lalu offline tidak menahan tujuan untuk yang lain.
       await this.checkAllArrived(ws);
     }
+  }
+
+  private activeRally(): Rally {
+    return this.rally && Date.now() - this.rally.setAt < RALLY_TTL_MS ? this.rally : null;
   }
 
   // ---- tujuan bersama -----------------------------------------------------------------------
@@ -389,6 +446,7 @@ export class ConvoyRoom implements DurableObject {
       ended: this.ended,
       destination: this.destination,
       arrived: [...this.arrived],
+      rally: this.activeRally(),
       members: this.snapshotMembers(),
       reports: [...this.reports.values()].map((r) => this.reportDto(r)),
       ts: Date.now(),
@@ -423,6 +481,7 @@ export class ConvoyRoom implements DurableObject {
     await this.state.storage.put({
       destination: this.destination,
       arrived: [...this.arrived],
+      rally: this.rally,
       meta: this.meta,
       ended: this.ended,
       reports: [...this.reports.values()],

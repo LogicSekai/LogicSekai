@@ -26,6 +26,22 @@ export interface ConvoyReport {
   mine?: boolean; myVote?: 'confirm' | 'clear' | null; isPublic?: boolean
 }
 export interface ConvoyDest { lat: number; lng: number; name: string }
+export interface ConvoyRally { lat: number; lng: number; name: string; setAt: number }
+export interface ConvoyShout { kind: ShoutKind; from: string; name: string; leader: boolean; ts: number; lat?: number; lng?: number }
+
+/** Pesan cepat konvoi (sama dengan aplikasi OmoRide). Anggota hanya bisa "wait". */
+export type ShoutKind = 'regroup' | 'pray' | 'charge' | 'rest' | 'rain' | 'slow' | 'go' | 'wait'
+export const SHOUT_META: Record<ShoutKind, { emoji: string; label: string }> = {
+  regroup: { emoji: '🧭', label: 'Kumpul, tunggu rombongan' },
+  pray: { emoji: '🕌', label: 'Berhenti untuk sholat' },
+  charge: { emoji: '🔌', label: 'Berhenti isi daya' },
+  rest: { emoji: '☕', label: 'Istirahat di depan' },
+  rain: { emoji: '🌧️', label: 'Pakai jas hujan' },
+  slow: { emoji: '🐢', label: 'Pelan-pelan' },
+  go: { emoji: '🏁', label: 'Lanjut jalan' },
+  wait: { emoji: '✋', label: 'Tunggu saya' },
+}
+export const LEADER_SHOUTS: ShoutKind[] = ['regroup', 'pray', 'charge', 'rest', 'rain', 'slow', 'go']
 
 export const REPORT_META: Record<ConvoyReportType, { label: string; emoji: string; color: string }> = {
   jam: { label: 'Macet', emoji: '🚗', color: '#F59E0B' },
@@ -42,6 +58,10 @@ export function useConvoyLive(convoyId: string) {
   const members = reactive(new Map<string, ConvoyMemberLive>())
   const reports = reactive(new Map<string, ConvoyReport>())
   const destination = ref<ConvoyDest | null>(null)
+  const rally = ref<ConvoyRally | null>(null)
+  const lastShout = ref<ConvoyShout | null>(null)
+  /** Berubah setiap peran leader berpindah (halaman memuat ulang daftar anggota). */
+  const leaderChange = ref(0)
   const lastEvent = ref<number>(0)
   const errorMessage = ref<string | null>(null)
 
@@ -58,6 +78,7 @@ export function useConvoyLive(convoyId: string) {
     reports.clear()
     for (const r of snap.reports ?? []) reports.set(r.id, r)
     destination.value = snap.destination ?? null
+    rally.value = snap.rally ?? null
     lastEvent.value = Date.now()
     if (snap.ended) markEnded()
   }
@@ -86,6 +107,22 @@ export function useConvoyLive(convoyId: string) {
       }
       case 'member_left':
         members.delete(m.userId)
+        break
+      case 'removed':
+        closedByUs = true
+        stopPolling()
+        status.value = 'offline'
+        errorMessage.value = 'Anda dikeluarkan dari konvoi ini oleh leader'
+        break
+      case 'leader':
+        for (const mem of members.values()) mem.role = mem.userId === m.leaderId ? 'leader' : 'member'
+        leaderChange.value++
+        break
+      case 'shout':
+        lastShout.value = { kind: m.kind, from: m.from, name: m.name, leader: !!m.leader, ts: m.ts, lat: m.lat, lng: m.lng }
+        break
+      case 'rally':
+        rally.value = m.rally ?? null
         break
       case 'pos': {
         const mem = members.get(m.userId)
@@ -147,6 +184,7 @@ export function useConvoyLive(convoyId: string) {
       if (closedByUs) return
       if (ev.code === 4000) { markEnded(); return }
       if (ev.code === 4001) { status.value = 'offline'; errorMessage.value = 'Anda sudah keluar dari konvoi ini'; return }
+      if (ev.code === 4002) { status.value = 'offline'; errorMessage.value = 'Anda dikeluarkan dari konvoi ini oleh leader'; return }
       // Gagal sebelum terbuka (mis. dev tanpa Durable Object) → polling cadangan
       startPolling()
       retry++
@@ -191,11 +229,13 @@ export function useConvoyLive(convoyId: string) {
   onBeforeUnmount(disconnect)
 
   return {
-    status, you, members, reports, destination, lastEvent, errorMessage,
+    status, you, members, reports, destination, rally, lastShout, leaderChange, lastEvent, errorMessage,
     connect, disconnect, send,
     report: (type: ConvoyReportType, lat: number, lng: number, note?: string, isPublic = true) =>
       send({ t: 'report', type, lat, lng, note, public: isPublic }),
     vote: (id: string, vote: 'confirm' | 'clear') => send({ t: vote, id }),
     setDestination: (d: ConvoyDest | null) => send(d ? { t: 'dest', ...d } : { t: 'dest', clear: true }),
+    shout: (kind: ShoutKind) => send({ t: 'shout', kind }),
+    setRally: (r: { lat: number; lng: number; name: string } | null) => send(r ? { t: 'rally', ...r } : { t: 'rally', clear: true }),
   }
 }

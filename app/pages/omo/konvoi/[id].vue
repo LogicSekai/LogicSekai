@@ -55,7 +55,7 @@
 
           <!-- Banner mode pilih titik -->
           <div v-if="pickMode" class="absolute top-3 left-1/2 -translate-x-1/2 z-[600] bg-gray-900 text-white text-xs px-4 py-2 shadow flex items-center gap-3">
-            {{ pickMode === 'dest' ? 'Klik peta untuk menetapkan tujuan bersama' : 'Klik lokasi kejadian di peta' }}
+            {{ pickMode === 'dest' ? 'Klik peta untuk menetapkan tujuan bersama' : pickMode === 'rally' ? 'Klik peta untuk menetapkan titik kumpul' : 'Klik lokasi kejadian di peta' }}
             <button class="underline" @click="pickMode = null">Batal</button>
           </div>
 
@@ -101,6 +101,25 @@
             </div>
           </section>
 
+          <!-- Titik kumpul & pesan cepat -->
+          <section :class="cls.card">
+            <h2 :class="cls.cardTitle">Pesan ke rombongan</h2>
+            <div v-if="live.rally.value" class="px-4 py-3 flex items-center gap-3 border-b border-gray-100 dark:border-white/6">
+              <span class="text-xl">📍</span>
+              <button class="flex-1 text-left text-sm font-bold text-gray-900 dark:text-white truncate" @click="mapRef?.focus(live.rally.value!.lat, live.rally.value!.lng)">
+                Titik kumpul{{ live.rally.value.name ? `: ${live.rally.value.name}` : '' }}
+              </button>
+              <button v-if="isLeader && canAct" class="text-xs text-gray-400 hover:text-red-500" @click="live.setRally(null)">Hapus</button>
+            </div>
+            <div class="px-4 py-3 flex flex-wrap gap-2">
+              <template v-if="isLeader">
+                <button v-for="k in LEADER_SHOUTS" :key="k" :class="cls.vote" :disabled="!canAct" @click="sendShout(k)">{{ SHOUT_META[k].emoji }} {{ SHOUT_META[k].label }}</button>
+                <button :class="cls.vote" :disabled="!canAct" @click="startPick('rally')">📍 Pilih titik kumpul di peta</button>
+              </template>
+              <button v-else :class="cls.vote" :disabled="!canAct" @click="sendShout('wait')">{{ SHOUT_META.wait.emoji }} {{ SHOUT_META.wait.label }}</button>
+            </div>
+          </section>
+
           <!-- Anggota -->
           <section :class="cls.card">
             <h2 :class="cls.cardTitle">Anggota</h2>
@@ -115,6 +134,10 @@
                   <span class="block text-[11px] text-gray-500 truncate">{{ m.detail }}</span>
                 </button>
                 <span v-if="m.batt >= 0" class="font-mono text-[10px] shrink-0" :class="m.batt <= 20 ? 'text-red-500' : 'text-gray-400'">{{ m.batt }}%</span>
+                <div v-if="isLeader && m.userId !== live.you.value && m.role !== 'leader'" class="flex items-center gap-1 shrink-0">
+                  <button class="px-2 py-1 border border-gray-200 dark:border-white/10 text-[10px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 hover:border-[#FF7A4F] disabled:opacity-40" :disabled="busy" :title="`Jadikan ${m.name} leader`" @click="makeLeader(m.userId, m.name)">Leader</button>
+                  <button class="px-2 py-1 border border-red-200 dark:border-red-500/30 text-[10px] font-bold uppercase tracking-wider text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 disabled:opacity-40" :disabled="busy" :title="`Keluarkan ${m.name}`" @click="kick(m.userId, m.name)">Keluarkan</button>
+                </div>
               </li>
             </ul>
           </section>
@@ -175,7 +198,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { ChevronRight, Copy, Share2, Flag, MapPin, Crosshair, UserPlus } from 'lucide-vue-next'
 import { useToaster } from '~/composables/useToaster'
-import { REPORT_META, useConvoyLive, type ConvoyReportType } from '~/composables/useConvoyLive'
+import { REPORT_META, useConvoyLive, type ConvoyReportType, SHOUT_META, LEADER_SHOUTS, type ShoutKind } from '~/composables/useConvoyLive'
 
 definePageMeta({ middleware: 'auth' })
 
@@ -188,7 +211,7 @@ const dbMembers = ref<any[]>([])
 const loadError = ref('')
 const busy = ref(false)
 const mapRef = ref<any>(null)
-const pickMode = ref<'dest' | 'report' | null>(null)
+const pickMode = ref<'dest' | 'report' | 'rally' | null>(null)
 const pendingReport = ref<{ lat: number; lng: number } | null>(null)
 const reportNote = ref('')
 const reportPublic = ref(true)
@@ -286,7 +309,7 @@ async function loadConvoy() {
   }
 }
 
-function startPick(mode: 'dest' | 'report') {
+function startPick(mode: 'dest' | 'report' | 'rally') {
   pendingReport.value = null
   pickMode.value = mode
 }
@@ -298,6 +321,9 @@ async function onPick(lat: number, lng: number) {
   } else if (pickMode.value === 'dest') {
     const name = window.prompt('Nama tujuan (opsional)', '') ?? ''
     if (!live.setDestination({ lat, lng, name: name.trim() })) useToaster('error', 'Tidak terhubung ke room')
+  } else if (pickMode.value === 'rally') {
+    const name = window.prompt('Nama titik kumpul (opsional)', '') ?? ''
+    if (!live.setRally({ lat, lng, name: name.trim() })) useToaster('error', 'Tidak terhubung ke room')
   }
   pickMode.value = null
 }
@@ -340,6 +366,47 @@ async function invite() {
     busy.value = false
   }
 }
+
+function sendShout(kind: ShoutKind) {
+  if (live.shout(kind)) useToaster('success', `Terkirim: ${SHOUT_META[kind].label}`)
+  else useToaster('error', 'Tidak terhubung ke room')
+}
+
+async function makeLeader(userId: string, name: string) {
+  if (!confirm(`Jadikan ${name} leader? Anda menjadi anggota biasa; hanya leader yang bisa mengatur tujuan, mengeluarkan anggota, dan mengakhiri konvoi.`)) return
+  busy.value = true
+  try {
+    await $fetch(`/api/omoride/convoys/${encodeURIComponent(convoyId)}/leader`, { method: 'POST', body: { userId } })
+    useToaster('success', `${name} sekarang leader`)
+    await loadConvoy()
+  } catch (e: any) {
+    useToaster('error', e?.data?.statusMessage || 'Gagal memindahkan leader')
+  } finally {
+    busy.value = false
+  }
+}
+
+async function kick(userId: string, name: string) {
+  if (!confirm(`Keluarkan ${name} dari konvoi? Lokasinya langsung berhenti dibagikan dan ia tidak bisa masuk lagi lewat kode atau tautan; hanya undangan dari leader yang bisa memasukkannya kembali.`)) return
+  busy.value = true
+  try {
+    await $fetch(`/api/omoride/convoys/${encodeURIComponent(convoyId)}/kick`, { method: 'POST', body: { userId } })
+    useToaster('success', `${name} dikeluarkan dari konvoi`)
+    await loadConvoy()
+  } catch (e: any) {
+    useToaster('error', e?.data?.statusMessage || 'Gagal mengeluarkan anggota')
+  } finally {
+    busy.value = false
+  }
+}
+
+// Pesan cepat dari rombongan → notifikasi; peran leader berpindah → muat ulang anggota.
+watch(() => live.lastShout.value?.ts, () => {
+  const sh = live.lastShout.value
+  if (!sh || sh.from === live.you.value) return
+  useToaster('info', `${SHOUT_META[sh.kind]?.emoji ?? '📣'} ${sh.name}: ${SHOUT_META[sh.kind]?.label ?? sh.kind}`)
+})
+watch(() => live.leaderChange.value, () => { void loadConvoy() })
 
 async function endConvoy() {
   if (!confirm('Akhiri konvoi untuk semua anggota? Lokasi berhenti dibagikan dan konvoi tidak bisa dibuka lagi.')) return
