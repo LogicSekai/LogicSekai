@@ -13,6 +13,8 @@
  * dibuang). Tidak memakai h3/Drizzle agar ringan dan bebas dari state Nitro.
  */
 
+import { omoAvatarUrl } from './avatar'
+
 const WS_PATH = /^\/api\/omoride\/convoys\/([A-Za-z0-9_-]{8,64})\/ws\/?$/
 const TOKEN_PATTERN = /^[a-f0-9]{64}$/
 const ALLOWED_ORIGINS = new Set([
@@ -103,10 +105,9 @@ export async function handleConvoyWsUpgrade(request: Request, env: GateEnv): Pro
     if (!row) return deny(403, 'Not a member of this convoy')
     if (row.status !== 'active') return deny(410, 'Convoy ended')
 
-    // Avatar hanya diteruskan bila berupa URL (/api/files/… atau https://…). Avatar lama berupa data
-    // URI base64 (puluhan KB) bisa membuat header terlalu besar dan rusak saat dipotong di DO.
-    const rawAvatar: string = typeof user.avatar === 'string' ? user.avatar : ''
-    const avatar = rawAvatar.length <= 300 && (rawAvatar.startsWith('/') || rawAvatar.startsWith('https://')) ? rawAvatar : null
+    // Avatar selalu diteruskan sebagai URL pendek: data URI base64 (puluhan KB) terlalu besar untuk
+    // header, jadi diganti URL /api/omoride/avatars/:id yang menyajikan gambarnya.
+    const avatar = omoAvatarUrl(String(user.id), user.avatar)
     const profile = {
         username: user.username,
         name: user.display_name || user.name || user.username,

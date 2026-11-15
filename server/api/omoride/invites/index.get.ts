@@ -2,6 +2,7 @@
 import { and, desc, eq } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/sqlite-core'
 import { omorideConvoyInvites, omorideConvoys, users } from '~/lib/db/schema'
+import { omoAvatarUrl } from '../../../omoride/avatar'
 
 export default defineEventHandler(async (event) => {
     const user = await requireOmoUser(event)
@@ -15,6 +16,7 @@ export default defineEventHandler(async (event) => {
         convoyName: omorideConvoys.name,
         fromUsername: fromUser.username,
         fromName: fromUser.name,
+        fromId: fromUser.id,
         fromAvatar: fromUser.avatar,
     })
         .from(omorideConvoyInvites)
@@ -33,7 +35,7 @@ export default defineEventHandler(async (event) => {
             id: r.id,
             createdMs: r.createdMs,
             convoy: { id: r.convoyId, name: r.convoyName },
-            from: { username: r.fromUsername, name: r.fromName, avatar: r.fromAvatar ?? null },
+            from: { username: r.fromUsername, name: r.fromName, avatar: omoAvatarUrl(r.fromId, r.fromAvatar) },
         })),
     }
 })

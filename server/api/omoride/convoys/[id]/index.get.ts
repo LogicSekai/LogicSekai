@@ -1,6 +1,7 @@
 /** GET /api/omoride/convoys/:id — detail konvoi + daftar anggota (khusus anggota aktif). */
 import { and, eq, isNull } from 'drizzle-orm'
 import { omorideConvoyMembers, omorideProfiles, users } from '~/lib/db/schema'
+import { omoAvatarUrl } from '../../../../omoride/avatar'
 
 export default defineEventHandler(async (event) => {
     const user = await requireOmoUser(event)
@@ -30,7 +31,7 @@ export default defineEventHandler(async (event) => {
             joinedMs: r.joinedMs,
             username: r.username,
             name: r.displayName || r.name,
-            avatar: r.avatar ?? null,
+            avatar: omoAvatarUrl(r.userId, r.avatar),
         })),
     }
 })
