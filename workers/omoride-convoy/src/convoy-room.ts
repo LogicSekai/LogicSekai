@@ -42,16 +42,29 @@ const CLEAR_THRESHOLD = 3;
 const POS_MIN_INTERVAL_MS = 900;
 const REPORTS_PER_10_MIN = 10;
 const MAX_MSG_BYTES = 2048;
+// Anggota dianggap sudah sampai bila posisinya dalam radius ini dari tujuan bersama.
+const ARRIVE_M = 60;
 
 const okLatLng = (lat: unknown, lng: unknown) =>
   typeof lat === "number" && typeof lng === "number" && Number.isFinite(lat) && Number.isFinite(lng) &&
   lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
 const clean = (v: unknown, max: number) => String(v ?? "").replace(/[\u0000-\u001f\u007f]/g, " ").trim().slice(0, max);
 const num = (v: unknown, def: number) => (typeof v === "number" && Number.isFinite(v) ? v : def);
+const sameDest = (a: Dest, b: Dest) =>
+  !!a && !!b && Math.abs(a.lat - b.lat) < 1e-6 && Math.abs(a.lng - b.lng) < 1e-6;
+/** Jarak dua titik dalam meter (haversine). */
+function meters(aLat: number, aLng: number, bLat: number, bLng: number): number {
+  const r = (d: number) => (d * Math.PI) / 180;
+  const dLat = r(bLat - aLat), dLng = r(bLng - aLng);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(r(aLat)) * Math.cos(r(bLat)) * Math.sin(dLng / 2) ** 2;
+  return 2 * 6_371_000 * Math.asin(Math.min(1, Math.sqrt(h)));
+}
 
 export class ConvoyRoom implements DurableObject {
   private reports = new Map<string, Report>();
   private destination: Dest = null;
+  // Anggota yang sudah sampai di tujuan saat ini (direset setiap tujuan berganti).
+  private arrived = new Set<string>();
   private meta: Meta | null = null;
   private ended = false;
   // Rate-limit laporan per user (in-memory; reset saat hibernasi tidak masalah)
@@ -62,6 +75,7 @@ export class ConvoyRoom implements DurableObject {
       this.destination = (await state.storage.get<Dest>("destination")) ?? null;
       this.meta = (await state.storage.get<Meta>("meta")) ?? null;
       this.ended = (await state.storage.get<boolean>("ended")) ?? false;
+      for (const uid of (await state.storage.get<string[]>("arrived")) ?? []) this.arrived.add(uid);
       for (const r of (await state.storage.get<Report[]>("reports")) ?? []) this.reports.set(r.id, r);
     });
     // Heartbeat klien dijawab runtime tanpa membangunkan DO
@@ -85,21 +99,29 @@ export class ConvoyRoom implements DurableObject {
         if (b.destination && okLatLng(b.destination.lat, b.destination.lng)) {
           this.destination = { lat: b.destination.lat, lng: b.destination.lng, name: clean(b.destination.name, 80) };
         }
+        this.arrived.clear();
         this.ended = false;
         await this.persist();
         return Response.json({ ok: true });
       }
       case "/dest": {
         const d = b.destination;
-        this.destination = d && okLatLng(d.lat, d.lng) ? { lat: d.lat, lng: d.lng, name: clean(d.name, 80) } : null;
-        this.broadcast({ t: "dest", destination: this.destination });
-        await this.persist();
+        await this.setDestination(d && okLatLng(d.lat, d.lng) ? { lat: d.lat, lng: d.lng, name: clean(d.name, 80) } : null, false);
         return Response.json({ ok: true });
       }
       case "/kick": {
+        // Keluar sendiri (4001) atau dikeluarkan leader (4002, didahului pesan "removed").
         const uid = String(b.userId ?? "");
-        for (const ws of this.state.getWebSockets(uid)) try { ws.close(4001, "left convoy"); } catch {}
-        this.broadcast({ t: "member_left", userId: uid });
+        const removed = b.removed === true;
+        for (const ws of this.state.getWebSockets(uid)) {
+          try {
+            if (removed) ws.send(JSON.stringify({ t: "removed" }));
+            ws.close(removed ? 4002 : 4001, removed ? "removed by leader" : "left convoy");
+          } catch {}
+        }
+        this.broadcast({ t: "member_left", userId: uid, removed });
+        if (this.arrived.delete(uid)) await this.persist();
+        await this.checkAllArrived();
         return Response.json({ ok: true });
       }
       case "/end": {
@@ -108,6 +130,7 @@ export class ConvoyRoom implements DurableObject {
         // Hapus semua state (posisi ada di attachment & ikut hilang bersama socket)
         this.reports.clear();
         this.destination = null;
+        this.arrived.clear();
         this.ended = true;
         await this.state.storage.deleteAlarm();
         await this.state.storage.deleteAll();
@@ -163,6 +186,7 @@ export class ConvoyRoom implements DurableObject {
       members: this.snapshotMembers(),
       reports: [...this.reports.values()].map((r) => this.reportDto(r, uid)),
       destination: this.destination,
+      arrived: [...this.arrived],
     }));
     if (!wasOnline) this.broadcast({ t: "member_join", userId: uid, role: attach.role, profile, ghost: attach.ghost, client: attach.client }, server);
     return new Response(null, { status: 101, webSocket: client });
@@ -192,6 +216,13 @@ export class ConvoyRoom implements DurableObject {
         };
         ws.serializeAttachment(a);
         this.broadcast({ t: "pos", userId: a.uid, ...a.pos }, ws);
+        const d = this.destination;
+        if (d && !this.arrived.has(a.uid) && meters(a.pos.lat, a.pos.lng, d.lat, d.lng) <= ARRIVE_M) {
+          this.arrived.add(a.uid);
+          this.broadcast({ t: "arrived", userId: a.uid });
+          await this.persist();
+          await this.checkAllArrived();
+        }
         return;
       }
       case "ghost": {
@@ -250,12 +281,8 @@ export class ConvoyRoom implements DurableObject {
       }
       case "dest": {
         if (!this.meta || a.uid !== this.meta.leaderId) return; // hanya leader
-        if (m.clear) this.destination = null;
-        else if (okLatLng(m.lat, m.lng)) this.destination = { lat: m.lat, lng: m.lng, name: clean(m.name, 80) };
-        else return;
-        this.broadcast({ t: "dest", destination: this.destination });
-        await this.persist();
-        await this.saveDestination();
+        if (m.clear) await this.setDestination(null, true);
+        else if (okLatLng(m.lat, m.lng)) await this.setDestination({ lat: m.lat, lng: m.lng, name: clean(m.name, 80) }, true);
         return;
       }
     }
@@ -263,18 +290,63 @@ export class ConvoyRoom implements DurableObject {
 
   async webSocketClose(ws: WebSocket, code: number, reason: string) {
     try { ws.close(code === 1005 || code === 1006 ? 1000 : code, reason); } catch {}
-    this.onGone(ws);
+    await this.onGone(ws);
   }
 
   async webSocketError(ws: WebSocket) {
-    this.onGone(ws);
+    await this.onGone(ws);
   }
 
-  private onGone(ws: WebSocket) {
+  private async onGone(ws: WebSocket) {
     const a = this.att(ws);
     if (!a) return;
     const stillOnline = this.state.getWebSockets(a.uid).some((s) => s !== ws && s.readyState === WebSocket.OPEN);
-    if (!stillOnline) this.broadcast({ t: "member_left", userId: a.uid }, ws);
+    if (!stillOnline) {
+      this.broadcast({ t: "member_left", userId: a.uid }, ws);
+      // Anggota yang belum sampai lalu offline tidak menahan tujuan untuk yang lain.
+      await this.checkAllArrived(ws);
+    }
+  }
+
+  // ---- tujuan bersama -----------------------------------------------------------------------
+
+  /**
+   * Ganti/hapus tujuan. Koordinat yang sama diabaikan (hanya nama yang diperbarui) agar status
+   * "sudah sampai" tidak ter-reset ketika aplikasi leader mengirim ulang tujuannya.
+   */
+  private async setDestination(d: Dest, saveToD1: boolean, reason?: string) {
+    if (d && this.destination && sameDest(d, this.destination)) {
+      if (d.name && d.name !== this.destination.name) {
+        this.destination = d;
+        this.broadcast({ t: "dest", destination: d, arrived: [...this.arrived] });
+        await this.persist();
+        if (saveToD1) await this.saveDestination();
+      }
+      return;
+    }
+    if (!d && !this.destination) return;
+    this.destination = d;
+    this.arrived.clear();
+    this.broadcast({ t: "dest", destination: d, arrived: [], ...(reason ? { reason } : {}) });
+    await this.persist();
+    if (saveToD1) await this.saveDestination();
+  }
+
+  /**
+   * Tujuan dipertahankan sampai SEMUA anggota yang sedang online sudah sampai (anggota mode hantu
+   * tidak dihitung karena posisinya tidak diketahui); setelah itu dihapus otomatis untuk semua.
+   */
+  private async checkAllArrived(except?: WebSocket) {
+    if (!this.destination || this.arrived.size === 0) return;
+    const tracked = new Set<string>();
+    for (const ws of this.state.getWebSockets()) {
+      if (ws === except || ws.readyState !== WebSocket.OPEN) continue;
+      const a = this.att(ws);
+      if (a && !a.ghost) tracked.add(a.uid);
+    }
+    if (tracked.size === 0) return;
+    for (const uid of tracked) if (!this.arrived.has(uid)) return;
+    await this.setDestination(null, true, "all_arrived");
   }
 
   async alarm() {
@@ -316,6 +388,7 @@ export class ConvoyRoom implements DurableObject {
       meta: this.meta,
       ended: this.ended,
       destination: this.destination,
+      arrived: [...this.arrived],
       members: this.snapshotMembers(),
       reports: [...this.reports.values()].map((r) => this.reportDto(r)),
       ts: Date.now(),
@@ -349,6 +422,7 @@ export class ConvoyRoom implements DurableObject {
   private async persist() {
     await this.state.storage.put({
       destination: this.destination,
+      arrived: [...this.arrived],
       meta: this.meta,
       ended: this.ended,
       reports: [...this.reports.values()],

@@ -19,5 +19,5 @@ export default defineEventHandler(async (event) => {
 
     const [convoy] = await db.select().from(omorideConvoys).where(eq(omorideConvoys.id, invite.convoyId)).limit(1)
     if (!convoy || convoy.status !== 'active') throw createError({ statusCode: 410, statusMessage: 'Konvoi sudah selesai' })
-    return { success: true, convoy: await joinConvoy(db, convoy, user.id) }
+    return { success: true, convoy: await joinConvoy(db, convoy, user.id, { viaInvite: true }) }
 })

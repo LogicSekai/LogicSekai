@@ -50,6 +50,7 @@ jalan untuk REST & UI, tapi tanpa Durable Object (WS → 426, `/live` → 503).
 | `POST convoys/:id/destination` | `{lat,lng,name}` / `{clear:true}` | khusus leader |
 | `GET convoys/:id/live` | — | snapshot room (fallback polling) |
 | `POST convoys/:id/leave` | — | anggota keluar (leader tidak bisa) |
+| `POST convoys/:id/kick` | `{userId}` | khusus leader; `role='removed'`, socket ditutup 4002. Masuk lagi hanya lewat undangan leader (kode/tautan ditolak 403) |
 | `POST convoys/:id/end` | — | khusus leader |
 | `GET invites` / `POST invites/:id` | `{accept}` | undangan tertunda |
 | `POST reports` | `{type,lat,lng,note?}` | laporan komunitas publik (maks 20/jam/user) |
@@ -79,19 +80,21 @@ Heartbeat: kirim teks persis `{"t":"ping"}` tiap ~25 dtk → balasan `{"t":"pong
 
 | `t` | isi |
 |---|---|
-| `welcome` | `you, meta{convoyId,leaderId,name}, members[{userId,role,profile,ghost,clients,pos}], reports[], destination` |
+| `welcome` | `you, meta{convoyId,leaderId,name}, members[{userId,role,profile,ghost,clients,pos}], reports[], destination, arrived[userId]` |
 | `member_join` | `userId, role, profile, ghost, client` |
-| `member_left` | `userId` |
+| `member_left` | `userId, removed?` |
+| `arrived` | `userId` — anggota dalam 60 m dari tujuan |
+| `removed` | — dikirim ke anggota yang dikeluarkan sebelum socket ditutup 4002 |
 | `pos` | `userId, lat,lng,spd,bearing,batt,ts` |
 | `ghost` | `userId, on` |
 | `report` | `report{id,type,lat,lng,note,isPublic,createdMs,expiresMs,confirms,clears,mine,myVote}` |
 | `report_update` | `id, confirms, clears, expiresMs` |
 | `report_expire` | `id` |
-| `dest` | `destination` (atau null) |
+| `dest` | `destination` (atau null), `arrived[]`, `reason?` (`all_arrived`) — tujuan dengan koordinat sama diabaikan (status tiba tidak direset). Tujuan dihapus otomatis bila semua anggota online non-hantu sudah sampai |
 | `ended` | konvoi diakhiri |
 | `error` | `code, message` |
 
-Kode tutup: `4000` konvoi diakhiri, `4001` keluar/di-kick. Upgrade ditolak: 401 (sesi), 403 (bukan
+Kode tutup: `4000` konvoi diakhiri, `4001` keluar, `4002` dikeluarkan leader. Upgrade ditolak: 401 (sesi), 403 (bukan
 anggota / Origin asing), 410 (konvoi selesai), 503 (binding belum ada).
 
 TTL laporan: jam 30 mnt · police 60 mnt · pothole 7 hari · flood 3 jam · crash 60 mnt · hazard 2 jam

@@ -21,9 +21,13 @@ export default defineEventHandler(async (event) => {
     if (!target || target.suspended || target.deleted) throw createError({ statusCode: 404, statusMessage: 'Pengguna tidak ditemukan' })
     if (target.id === user.id) throw createError({ statusCode: 400, statusMessage: 'Tidak bisa mengundang diri sendiri' })
 
-    const [already] = await db.select({ userId: omorideConvoyMembers.userId }).from(omorideConvoyMembers)
-        .where(and(eq(omorideConvoyMembers.convoyId, id), eq(omorideConvoyMembers.userId, target.id), isNull(omorideConvoyMembers.leftMs))).limit(1)
-    if (already) throw createError({ statusCode: 409, statusMessage: 'Pengguna sudah menjadi anggota' })
+    const [prev] = await db.select({ role: omorideConvoyMembers.role, leftMs: omorideConvoyMembers.leftMs }).from(omorideConvoyMembers)
+        .where(and(eq(omorideConvoyMembers.convoyId, id), eq(omorideConvoyMembers.userId, target.id))).limit(1)
+    if (prev && prev.leftMs == null) throw createError({ statusCode: 409, statusMessage: 'Pengguna sudah menjadi anggota' })
+    // Anggota yang dikeluarkan hanya bisa diundang kembali oleh leader.
+    if (prev?.role === 'removed' && convoy.leaderId !== user.id) {
+        throw createError({ statusCode: 403, statusMessage: 'Pengguna ini dikeluarkan leader; hanya leader yang bisa mengundangnya kembali' })
+    }
 
     const now = Date.now()
     await db.insert(omorideConvoyInvites).values({

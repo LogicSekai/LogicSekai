@@ -36,7 +36,7 @@ export const omorideConvoys = sqliteTable('omoride_convoys', {
 export const omorideConvoyMembers = sqliteTable('omoride_convoy_members', {
     convoyId: text('convoy_id').notNull().references(() => omorideConvoys.id, { onDelete: 'cascade' }),
     userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-    role: text('role', { enum: ['leader', 'member'] }).notNull().default('member'),
+    role: text('role', { enum: ['leader', 'member', 'removed'] }).notNull().default('member'),
     joinedMs: integer('joined_ms').notNull(),
     leftMs: integer('left_ms'),
 }, (t) => [

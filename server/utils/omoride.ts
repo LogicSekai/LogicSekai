@@ -160,11 +160,17 @@ export function convoyDto(c: any) {
     }
 }
 
-/** Masukkan user ke konvoi aktif (kode, tautan, atau terima undangan). Idempoten. */
-export async function joinConvoy(db: any, convoy: any, userId: string) {
+/**
+ * Masukkan user ke konvoi aktif (kode, tautan, atau terima undangan). Idempoten.
+ * Anggota yang dikeluarkan leader (`role = 'removed'`) hanya bisa masuk lagi lewat undangan.
+ */
+export async function joinConvoy(db: any, convoy: any, userId: string, opts: { viaInvite?: boolean } = {}) {
     const now = Date.now()
     const [existing] = await db.select().from(omorideConvoyMembers)
         .where(and(eq(omorideConvoyMembers.convoyId, convoy.id), eq(omorideConvoyMembers.userId, userId))).limit(1)
+    if (existing?.role === 'removed' && !opts.viaInvite) {
+        throw createError({ statusCode: 403, statusMessage: 'Anda telah dikeluarkan dari konvoi ini oleh leader' })
+    }
 
     if (!existing || existing.leftMs != null) {
         const [cnt] = await db.select({ n: sql<number>`count(*)` }).from(omorideConvoyMembers)
@@ -177,7 +183,7 @@ export async function joinConvoy(db: any, convoy: any, userId: string) {
     if (!existing) {
         await db.insert(omorideConvoyMembers).values({ convoyId: convoy.id, userId, role: 'member', joinedMs: now })
     } else if (existing.leftMs != null) {
-        await db.update(omorideConvoyMembers).set({ leftMs: null, joinedMs: now })
+        await db.update(omorideConvoyMembers).set({ leftMs: null, joinedMs: now, ...(existing.role === 'removed' ? { role: 'member' } : {}) })
             .where(and(eq(omorideConvoyMembers.convoyId, convoy.id), eq(omorideConvoyMembers.userId, userId)))
     }
 
@@ -185,7 +191,7 @@ export async function joinConvoy(db: any, convoy: any, userId: string) {
     await db.update(omorideConvoyInvites).set({ status: 'accepted', respondedMs: now })
         .where(and(eq(omorideConvoyInvites.convoyId, convoy.id), eq(omorideConvoyInvites.toUserId, userId), eq(omorideConvoyInvites.status, 'pending')))
 
-    const role = existing?.role ?? 'member'
+    const role = existing && existing.role !== 'removed' ? existing.role : 'member'
     return { ...convoyDto(convoy), myRole: role }
 }
 
