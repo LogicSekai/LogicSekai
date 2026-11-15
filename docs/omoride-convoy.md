@@ -50,6 +50,7 @@ jalan untuk REST & UI, tapi tanpa Durable Object (WS → 426, `/live` → 503).
 | `POST convoys/:id/destination` | `{lat,lng,name}` / `{clear:true}` | khusus leader |
 | `GET convoys/:id/live` | — | snapshot room (fallback polling) |
 | `POST convoys/:id/leave` | — | anggota keluar (leader tidak bisa) |
+| `POST account/delete` | `{password, scope:'omoride'\|'all'}` | hapus data OmoRide (konvoi diakhiri/ditinggalkan, undangan, profil, laporan) atau seluruh akun (soft delete + anonimkan + cabut sesi); akun kreator/admin ditolak untuk `all`. Web: `/omo/hapus-akun`, privasi: `/omo/privasi` |
 | `POST convoys/:id/leader` | `{userId}` | khusus leader; serahkan peran leader (D1 lalu room → pesan `leader`) |
 | `POST convoys/:id/kick` | `{userId}` | khusus leader; `role='removed'`, socket ditutup 4002. Masuk lagi hanya lewat undangan leader (kode/tautan ditolak 403) |
 | `POST convoys/:id/end` | — | khusus leader |

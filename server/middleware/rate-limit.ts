@@ -40,6 +40,7 @@ const SENSITIVE_PATHS = [
   '/api/omoride/auth/register',
   '/api/omoride/auth/verify', // termasuk /verify/send — cegah tebak kode & spam email
   '/api/omoride/convoys/join', // cegah tebak-tebakan kode konvoi
+  '/api/omoride/account/delete', // memakai kata sandi → cegah tebak kata sandi
 ]
 
 function getClientIP(event: any): string {
