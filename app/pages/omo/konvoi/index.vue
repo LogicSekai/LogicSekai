@@ -38,8 +38,9 @@
         <h2 class="font-black uppercase tracking-tight text-gray-900 dark:text-white mb-1">Buat konvoi</h2>
         <p class="text-xs text-gray-500 mb-4">Kamu jadi leader: bisa mengatur tujuan bersama dan mengakhiri konvoi.</p>
         <label class="block font-mono text-[10px] uppercase tracking-[0.15em] text-gray-400 mb-1" for="cv-name">Nama konvoi</label>
-        <input id="cv-name" v-model="newName" maxlength="60" placeholder="mis. Touring Puncak Minggu" :class="cls.input" />
-        <button type="submit" :class="[cls.primary, 'mt-4 w-full']" :disabled="busy">Buat &amp; dapatkan kode</button>
+        <input id="cv-name" v-model="newName" required minlength="3" maxlength="60" placeholder="mis. Touring Puncak Minggu" :class="cls.input" />
+        <p class="mt-1 text-xs text-gray-500">Wajib diisi, minimal 3 karakter.</p>
+        <button type="submit" :class="[cls.primary, 'mt-4 w-full']" :disabled="busy || !nameValid">Buat &amp; dapatkan kode</button>
       </form>
 
       <!-- Gabung -->
@@ -109,6 +110,11 @@ const invites = ref<any[]>([])
 const loading = ref(true)
 const busy = ref(false)
 const newName = ref('')
+// Sama dengan validasi server (server/omoride/convoy-name.ts): 3–60 karakter, ada huruf/angka.
+const nameValid = computed(() => {
+  const n = newName.value.replace(/\s+/g, ' ').trim()
+  return n.length >= 3 && n.length <= 60 && /[\p{L}\p{N}]/u.test(n)
+})
 const joinCode = ref('')
 const showAll = ref(false)
 
@@ -137,6 +143,7 @@ async function load() {
 }
 
 async function create() {
+  if (!nameValid.value) return
   busy.value = true
   try {
     const res: any = await $fetch('/api/omoride/convoys', { method: 'POST', body: { name: newName.value } })

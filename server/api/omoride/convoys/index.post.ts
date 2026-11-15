@@ -1,17 +1,22 @@
 /**
  * POST /api/omoride/convoys — buat konvoi baru; pembuat otomatis jadi leader.
- * Body: { name, destination?: { lat, lng, name } }
+ * Body: { name (wajib, 3–60 karakter), destination?: { lat, lng, name } }
  * Balasan: konvoi (termasuk `code` 6 karakter, `joinUrl`, `wsPath`).
  */
 import { and, eq, isNull, sql } from 'drizzle-orm'
 import { omorideConvoyMembers, omorideConvoys } from '~/lib/db/schema'
+import { CONVOY_NAME_MAX, CONVOY_NAME_MIN, cleanConvoyName } from '../../../omoride/convoy-name'
 
 export default defineEventHandler(async (event) => {
     const user = await requireOmoUser(event)
     const db = getOmoDb(event)
     const body = await readBody(event).catch(() => ({}))
 
-    const name = cleanText(body?.name, 60) || `Konvoi ${user.name || user.username}`
+    // Nama wajib diisi (dulu nama kosong diam-diam diganti nama otomatis).
+    const name = cleanConvoyName(body?.name)
+    if (!name) {
+        throw createError({ statusCode: 400, statusMessage: `Nama konvoi wajib diisi (${CONVOY_NAME_MIN}–${CONVOY_NAME_MAX} karakter, berisi huruf atau angka)` })
+    }
     let dest: { lat: number; lng: number; name: string } | null = null
     if (body?.destination) {
         const d = body.destination
