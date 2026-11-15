@@ -28,7 +28,8 @@ export default defineEventHandler(async (event) => {
 
     return {
         user: { id: user.id, username: user.username, name: user.name, email: user.email, avatar: user.avatar, verified: !!extra?.verified },
-        profile: { displayName: profile.displayName, ghostDefault: !!profile.ghostDefault },
+        // Nama tampilan konvoi = nama akun terbaru (lihat ws-gate).
+        profile: { displayName: user.name || user.username, ghostDefault: !!profile.ghostDefault },
         activeConvoys: convoys.map((r: any) => ({ ...convoyDto(r.convoy), myRole: r.role })),
         pendingInvites: Number(inv?.n ?? 0),
     }

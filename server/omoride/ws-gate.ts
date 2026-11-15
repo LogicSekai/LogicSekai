@@ -110,7 +110,9 @@ export async function handleConvoyWsUpgrade(request: Request, env: GateEnv): Pro
     const avatar = omoAvatarUrl(String(user.id), user.avatar)
     const profile = {
         username: user.username,
-        name: user.display_name || user.name || user.username,
+        // Nama akun Logic Sekai (selalu terbaru). omoride_profiles.display_name tidak dipakai: nilainya
+        // salinan nama saat profil dibuat (tidak ikut berubah saat akun diganti nama) dan tak ada UI-nya.
+        name: user.name || user.username,
         avatar,
     }
     const ghostParam = url.searchParams.get('ghost')

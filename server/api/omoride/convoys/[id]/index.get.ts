@@ -1,6 +1,6 @@
 /** GET /api/omoride/convoys/:id — detail konvoi + daftar anggota (khusus anggota aktif). */
 import { and, eq, isNull } from 'drizzle-orm'
-import { omorideConvoyMembers, omorideProfiles, users } from '~/lib/db/schema'
+import { omorideConvoyMembers, users } from '~/lib/db/schema'
 import { omoAvatarUrl } from '../../../../omoride/avatar'
 
 export default defineEventHandler(async (event) => {
@@ -16,11 +16,9 @@ export default defineEventHandler(async (event) => {
         username: users.username,
         name: users.name,
         avatar: users.avatar,
-        displayName: omorideProfiles.displayName,
     })
         .from(omorideConvoyMembers)
         .innerJoin(users, eq(users.id, omorideConvoyMembers.userId))
-        .leftJoin(omorideProfiles, eq(omorideProfiles.userId, omorideConvoyMembers.userId))
         .where(and(eq(omorideConvoyMembers.convoyId, id), isNull(omorideConvoyMembers.leftMs)))
 
     return {
@@ -30,7 +28,7 @@ export default defineEventHandler(async (event) => {
             role: r.role,
             joinedMs: r.joinedMs,
             username: r.username,
-            name: r.displayName || r.name,
+            name: r.name || r.username,
             avatar: omoAvatarUrl(r.userId, r.avatar),
         })),
     }
