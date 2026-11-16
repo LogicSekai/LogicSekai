@@ -68,6 +68,8 @@ export {
     omorideConvoyInvites,
     omorideEntitlements,
     omoridePayments,
+    omorideTrips,
+    omorideTripMoments,
 } from './omoride';
 export { emailVerificationCodes } from './email-verification';
 

@@ -3,7 +3,8 @@
  * aplikasi dan dari web).
  *
  * - `omoride`: hapus semua data OmoRide (keanggotaan & undangan konvoi, profil, laporan jalan &
- *   suaranya). Konvoi yang dipimpin diakhiri untuk semua anggota. Akun Logic Sekai tetap ada.
+ *   suaranya, cadangan cloud perjalanan & foto). Konvoi yang dipimpin diakhiri untuk semua
+ *   anggota. Akun Logic Sekai tetap ada.
  * - `all`: data OmoRide + akun Logic Sekai: ditandai terhapus, data pribadi dianonimkan (nama, email,
  *   username, foto, kata sandi), semua sesi dicabut. Riwayat transaksi tetap ada untuk pembukuan,
  *   tetapi tidak lagi terhubung ke identitas.
@@ -12,8 +13,9 @@ import type { H3Event } from 'h3'
 import { and, eq, isNull, or } from 'drizzle-orm'
 import {
     omorideConvoyInvites, omorideConvoyMembers, omorideConvoys, omorideEntitlements, omorideProfiles,
-    omorideReportVotes, omorideReports, userSessions, users,
+    omorideReportVotes, omorideReports, omorideTripMoments, omorideTrips, userSessions, users,
 } from '~/lib/db/schema'
+import { deleteAllCloudFiles } from './cloud-sync'
 
 export type DeleteScope = 'omoride' | 'all'
 
@@ -36,7 +38,12 @@ export async function deleteOmoRideData(event: H3Event, db: any, userId: string)
     await db.delete(omorideReportVotes).where(eq(omorideReportVotes.userId, userId))
     await db.delete(omorideReports).where(eq(omorideReports.userId, userId))
     await db.delete(omorideProfiles).where(eq(omorideProfiles.userId, userId))
-    return { convoysEnded: led.length, convoysLeft: joined.length }
+    // Cadangan cloud (jejak GPS & foto momen): berkas R2 lalu barisnya.
+    const bucket = event.context.cloudflare?.env?.BUCKET
+    const cloudFiles = bucket ? await deleteAllCloudFiles(bucket, userId) : 0
+    await db.delete(omorideTripMoments).where(eq(omorideTripMoments.userId, userId))
+    await db.delete(omorideTrips).where(eq(omorideTrips.userId, userId))
+    return { convoysEnded: led.length, convoysLeft: joined.length, cloudFiles }
 }
 
 /** Akun Logic Sekai: tandai terhapus, anonimkan data pribadi, cabut semua sesi. */

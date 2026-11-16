@@ -118,3 +118,42 @@ export const omoridePayments = sqliteTable('omoride_payments', {
 }, (t) => [
     index('idx_omoride_payments_user').on(t.userId, t.createdMs),
 ])
+
+/** Cadangan cloud: ringkasan perjalanan (migrasi 0025). Jejak GPS ada di R2. */
+export const omorideTrips = sqliteTable('omoride_trips', {
+    userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    startMs: integer('start_ms').notNull(),
+    endMs: integer('end_ms').notNull(),
+    distanceM: real('distance_m').notNull(),
+    movingMs: integer('moving_ms').notNull(),
+    maxSpeed: real('max_speed').notNull(),
+    energyKwh: real('energy_kwh').notNull(),
+    costRp: real('cost_rp').notNull(),
+    category: text('category').notNull(),
+    note: text('note').notNull().default(''),
+    startPlace: text('start_place'),
+    endPlace: text('end_place'),
+    version: text('version').notNull(),
+    pointsCount: integer('points_count').notNull().default(0),
+    pointsBytes: integer('points_bytes').notNull().default(0),
+    updatedMs: integer('updated_ms').notNull(),
+    deletedMs: integer('deleted_ms'),
+}, (t) => [
+    primaryKey({ columns: [t.userId, t.startMs] }),
+])
+
+/** Cadangan cloud: foto momen perjalanan (migrasi 0025). id = SHA-256 isi foto; berkas di R2. */
+export const omorideTripMoments = sqliteTable('omoride_trip_moments', {
+    userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    id: text('id').notNull(),
+    tripStartMs: integer('trip_start_ms').notNull(),
+    takenMs: integer('taken_ms').notNull(),
+    lat: real('lat'),
+    lng: real('lng'),
+    bytes: integer('bytes').notNull(),
+    createdMs: integer('created_ms').notNull(),
+    deletedMs: integer('deleted_ms'),
+}, (t) => [
+    primaryKey({ columns: [t.userId, t.id] }),
+    index('idx_omoride_trip_moments_trip').on(t.userId, t.tripStartMs),
+])

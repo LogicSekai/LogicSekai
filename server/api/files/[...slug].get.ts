@@ -1,3 +1,5 @@
+import { isPrivateKey } from '../../omoride/cloud-sync'
+
 export default defineEventHandler(async (event) => {
     const slug = getRouterParam(event, 'slug')
     if (!slug) throw createError({ statusCode: 400, statusMessage: 'File path required' })
@@ -7,6 +9,8 @@ export default defineEventHandler(async (event) => {
 
     // slug already contains full R2 key, e.g. "uploads/thumbnail/userId/file.png"
     const key = slug
+    // Data pribadi (mis. cadangan cloud OmoRide: jejak GPS & foto) hanya lewat rute berotorisasi.
+    if (isPrivateKey(key)) throw createError({ statusCode: 404, statusMessage: 'File not found' })
 
     const object = await bucket.get(key)
     if (!object) throw createError({ statusCode: 404, statusMessage: 'File not found' })
