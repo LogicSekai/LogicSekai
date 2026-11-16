@@ -84,3 +84,38 @@ export function limitsFor(plan: OmoPlan, enforced: boolean): OmoLimits {
 export function plansEnforced(raw: unknown): boolean {
     return raw === true || raw === 1 || raw === '1' || raw === 'true'
 }
+
+// ---- Harga & perpanjangan (pembayaran web / Midtrans) -------------------------------------------
+
+export type OmoPeriod = 'month' | 'year'
+export type PaidPlan = Exclude<OmoPlan, 'free'>
+
+/** Harga dalam Rupiah (sama dengan docs/rencana-langganan.md & halaman OmoRide Plus). */
+export const PLAN_PRICES: Record<PaidPlan, Record<OmoPeriod, number>> = {
+    plus: { month: 19_000, year: 149_000 },
+    klub: { month: 49_000, year: 449_000 },
+}
+export const PERIOD_DAYS: Record<OmoPeriod, number> = { month: 30, year: 365 }
+const DAY_MS = 24 * 60 * 60_000
+
+export interface CurrentEntitlement extends EntitlementRow {
+    source: string
+}
+
+/**
+ * Masa berlaku baru setelah pembayaran [plan]/[period] berhasil. Paket yang sama dan masih
+ * aktif (web/admin bertenggat) ditambahkan ke sisa waktunya; paket berbeda / sudah habis mulai
+ * dari sekarang. Langganan Google Play yang aktif tidak boleh ditimpa (lihat [canBuyOnWeb]).
+ */
+export function extendEntitlement(current: CurrentEntitlement | null | undefined, plan: PaidPlan, period: OmoPeriod, nowMs: number) {
+    const add = PERIOD_DAYS[period] * DAY_MS
+    const active = current && effectivePlan(current, nowMs) === plan && current.expiresMs != null && current.expiresMs > nowMs
+    const base = active ? current!.expiresMs! : nowMs
+    return { plan, expiresMs: base + add }
+}
+
+/** Pembelian lewat web ditolak bila masih ada langganan Google Play yang berjalan. */
+export function canBuyOnWeb(current: CurrentEntitlement | null | undefined, nowMs: number): boolean {
+    if (!current || current.source !== 'play') return true
+    return effectivePlan(current, nowMs) === 'free'
+}

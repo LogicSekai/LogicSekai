@@ -123,6 +123,8 @@ export default defineNuxtConfig({
     // Langganan OmoRide: '1' = batas paket diberlakukan. Kosong = semua pengguna memakai batas lama
     // (dipakai sampai pembayaran dibuka). Lihat server/omoride/plans.ts.
     omoridePlansEnforced: process.env.NUXT_OMORIDE_PLANS_ENFORCED || '',
+    // '1' = pembayaran langganan OmoRide dibuka untuk umum (sebelum itu hanya admin, uji sandbox).
+    omoridePaymentsOpen: process.env.NUXT_OMORIDE_PAYMENTS_OPEN || '',
     emailFrom: process.env.NUXT_EMAIL_FROM || 'Logic Sekai <noreply@support.logicsekai.com>',
     cloudflareAccountId: process.env.CLOUDFLARE_ACCOUNT_ID,
     cloudflareDatabaseId: process.env.CLOUDFLARE_DATABASE_ID,

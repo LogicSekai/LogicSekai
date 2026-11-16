@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { GRACE_MS, LEGACY_LIMITS, PLAN_LIMITS, effectivePlan, limitsFor, plansEnforced } from '../../server/omoride/plans'
+import { GRACE_MS, LEGACY_LIMITS, PLAN_LIMITS, PLAN_PRICES, canBuyOnWeb, effectivePlan, extendEntitlement, limitsFor, plansEnforced } from '../../server/omoride/plans'
 
 const now = 1_800_000_000_000
 
@@ -44,5 +44,26 @@ describe('limitsFor', () => {
         expect(plansEnforced('true')).toBe(true)
         expect(plansEnforced('')).toBe(false)
         expect(plansEnforced(undefined)).toBe(false)
+    })
+})
+
+describe('pembayaran web: perpanjangan', () => {
+    const DAY = 24 * 60 * 60_000
+    it('paket sama yang masih aktif ditambahkan ke sisa waktu', () => {
+        const cur = { plan: 'plus', status: 'active', expiresMs: now + 10 * DAY, source: 'web' }
+        expect(extendEntitlement(cur, 'plus', 'month', now).expiresMs).toBe(now + 40 * DAY)
+    })
+    it('paket berbeda / habis / tanpa hak mulai dari sekarang', () => {
+        expect(extendEntitlement({ plan: 'plus', status: 'active', expiresMs: now + 10 * DAY, source: 'web' }, 'klub', 'year', now).expiresMs).toBe(now + 365 * DAY)
+        expect(extendEntitlement({ plan: 'plus', status: 'active', expiresMs: now - DAY, source: 'web' }, 'plus', 'month', now).expiresMs).toBe(now + 30 * DAY)
+        expect(extendEntitlement(null, 'plus', 'month', now).expiresMs).toBe(now + 30 * DAY)
+        // Hak admin tanpa batas → pembelian memberi tenggat dari sekarang.
+        expect(extendEntitlement({ plan: 'plus', status: 'active', expiresMs: null, source: 'admin' }, 'plus', 'month', now).expiresMs).toBe(now + 30 * DAY)
+    })
+    it('langganan Play aktif tidak bisa ditimpa dari web', () => {
+        expect(canBuyOnWeb({ plan: 'plus', status: 'active', expiresMs: now + DAY, source: 'play' }, now)).toBe(false)
+        expect(canBuyOnWeb({ plan: 'plus', status: 'active', expiresMs: now - GRACE_MS * 2, source: 'play' }, now)).toBe(true)
+        expect(canBuyOnWeb({ plan: 'plus', status: 'active', expiresMs: now + DAY, source: 'web' }, now)).toBe(true)
+        expect(PLAN_PRICES.plus.month).toBe(19_000)
     })
 })

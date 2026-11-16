@@ -109,6 +109,45 @@ export async function createDonationSnap(
     }
 }
 
+// ─── Snap umum (pesanan selain donasi, mis. langganan OmoRide) ───────────────────
+
+export interface OrderSnapInput {
+    orderId: string
+    amount: number
+    itemId: string
+    itemName: string
+    customerName: string
+    customerEmail: string
+    /** Halaman tujuan setelah bayar (Midtrans menambahkan parameter status). */
+    finishUrl: string
+    /** Webhook notifikasi khusus pesanan ini (X-Override-Notification). */
+    notificationUrl: string
+}
+
+export async function createOrderSnap(serverKey: string, mode: 'sandbox' | 'live', input: OrderSnapInput): Promise<DonationSnapResult> {
+    if (!serverKey) throw new Error('MIDTRANS_SERVER_KEY is not configured.')
+    const grossAmount = Math.round(input.amount)
+    const body = {
+        transaction_details: { order_id: input.orderId, gross_amount: grossAmount },
+        customer_details: { first_name: input.customerName.slice(0, 100), email: input.customerEmail || undefined },
+        item_details: [{ id: input.itemId, price: grossAmount, quantity: 1, name: input.itemName.slice(0, 50) }],
+        callbacks: { finish: input.finishUrl, error: input.finishUrl, pending: input.finishUrl },
+    }
+    const response = await fetch(SNAP_URL[mode], {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': `Basic ${btoa(`${serverKey}:`)}`,
+            'X-Override-Notification': input.notificationUrl,
+        },
+        body: JSON.stringify(body),
+    })
+    if (!response.ok) throw new Error(`Midtrans Snap API ${response.status}: ${await response.text()}`)
+    const result = await response.json() as { token: string; redirect_url: string }
+    return { snapToken: result.token, paymentUrl: result.redirect_url }
+}
+
 // ─── Core API: check transaction status ──────────────────────────────────────
 
 const STATUS_API_URL = {

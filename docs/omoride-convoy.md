@@ -51,6 +51,7 @@ jalan untuk REST & UI, tapi tanpa Durable Object (WS → 426, `/live` → 503).
 | `GET convoys/:id/live` | — | snapshot room (fallback polling) |
 | `POST convoys/:id/leave` | — | anggota keluar (leader tidak bisa) |
 | `GET me` → `subscription` | — | paket langganan: `plan` (free/plus/klub), `enforced`, `limits` (convoyMembers, convoysLed, momentsPerTrip, slideshowPhotos, videoMaxHeight, videoPro, reportsFull, extraThemes, cloudSync), `source`, `expiresMs`, `status`, `autoRenew`. Batas konvoi ditegakkan server dari paket leader. Sakelar env `NUXT_OMORIDE_PLANS_ENFORCED` |
+| `POST billing/web/checkout` · `notification` · `verify` · `GET billing/web/history` | `{plan, period}` · webhook Midtrans · `{orderId}` | langganan web (Midtrans Snap, order_id `OMO-…`, D1 `omoride_payments` migrasi 0024). Halaman `/omo/plus`. Sakelar `NUXT_OMORIDE_PAYMENTS_OPEN` (sebelumnya hanya superadmin) |
 | `GET/POST /api/admin/omoride/entitlements` | `{username, plan, days?, note?}` | admin: daftar / beri / cabut paket manual (D1 `omoride_entitlements`, migrasi 0023) |
 | `POST account/delete` | `{password, scope:'omoride'\|'all'}` | hapus data OmoRide (konvoi diakhiri/ditinggalkan, undangan, profil, laporan) atau seluruh akun (soft delete + anonimkan + cabut sesi); akun kreator/admin ditolak untuk `all`. Web: `/omo/hapus-akun`, privasi: `/omo/privasi` |
 | `POST convoys/:id/leader` | `{userId}` | khusus leader; serahkan peran leader (D1 lalu room → pesan `leader`) |

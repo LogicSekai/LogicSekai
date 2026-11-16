@@ -99,3 +99,22 @@ export const omorideEntitlements = sqliteTable('omoride_entitlements', {
 }, (t) => [
     index('idx_omoride_entitlements_expires').on(t.expiresMs),
 ])
+
+/** Pembayaran langganan OmoRide lewat web (Midtrans). id = order_id. */
+export const omoridePayments = sqliteTable('omoride_payments', {
+    id: text('id').primaryKey(),
+    userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    plan: text('plan').notNull(),
+    period: text('period').notNull(),
+    amount: integer('amount').notNull(),
+    status: text('status').notNull().default('pending'),
+    snapToken: text('snap_token'),
+    paymentUrl: text('payment_url'),
+    paymentType: text('payment_type'),
+    transactionId: text('transaction_id'),
+    expiresAfterMs: integer('expires_after_ms'),
+    createdMs: integer('created_ms').notNull(),
+    paidMs: integer('paid_ms'),
+}, (t) => [
+    index('idx_omoride_payments_user').on(t.userId, t.createdMs),
+])
