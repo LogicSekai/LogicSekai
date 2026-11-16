@@ -83,3 +83,19 @@ export const omorideConvoyInvites = sqliteTable('omoride_convoy_invites', {
     uniqueIndex('idx_omoride_invites_unique').on(t.convoyId, t.toUserId),
     index('idx_omoride_invites_to').on(t.toUserId, t.status),
 ])
+
+/** Hak langganan OmoRide (Plus/Klub) yang berlaku per akun. Lihat server/omoride/plans.ts. */
+export const omorideEntitlements = sqliteTable('omoride_entitlements', {
+    userId: text('user_id').primaryKey().references(() => users.id, { onDelete: 'cascade' }),
+    plan: text('plan').notNull(),
+    source: text('source').notNull(),
+    status: text('status').notNull().default('active'),
+    expiresMs: integer('expires_ms'),
+    autoRenew: integer('auto_renew', { mode: 'boolean' }).notNull().default(false),
+    externalRef: text('external_ref'),
+    note: text('note'),
+    createdMs: integer('created_ms').notNull(),
+    updatedMs: integer('updated_ms').notNull(),
+}, (t) => [
+    index('idx_omoride_entitlements_expires').on(t.expiresMs),
+])

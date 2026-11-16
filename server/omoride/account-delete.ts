@@ -11,7 +11,7 @@
 import type { H3Event } from 'h3'
 import { and, eq, isNull, or } from 'drizzle-orm'
 import {
-    omorideConvoyInvites, omorideConvoyMembers, omorideConvoys, omorideProfiles,
+    omorideConvoyInvites, omorideConvoyMembers, omorideConvoys, omorideEntitlements, omorideProfiles,
     omorideReportVotes, omorideReports, userSessions, users,
 } from '~/lib/db/schema'
 
@@ -54,4 +54,6 @@ export async function deleteLogicSekaiAccount(db: any, userId: string) {
         password: `deleted:${random}`,
     }).where(eq(users.id, userId))
     await db.delete(userSessions).where(eq(userSessions.userId, userId))
+    // Hak langganan dihapus bersama akun (langganan Google Play tetap dibatalkan pengguna di Play Store).
+    await db.delete(omorideEntitlements).where(eq(omorideEntitlements.userId, userId))
 }

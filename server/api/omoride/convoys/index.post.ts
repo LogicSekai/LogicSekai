@@ -27,8 +27,9 @@ export default defineEventHandler(async (event) => {
     const [led] = await db.select({ n: sql<number>`count(*)` })
         .from(omorideConvoys)
         .where(and(eq(omorideConvoys.leaderId, user.id), eq(omorideConvoys.status, 'active')))
-    if (Number(led?.n ?? 0) >= OMO_MAX_ACTIVE_LED) {
-        throw createError({ statusCode: 409, statusMessage: `Maksimal ${OMO_MAX_ACTIVE_LED} konvoi aktif yang Anda pimpin. Akhiri salah satu dulu.` })
+    const maxLed = (await getOmoPlan(event, db, user.id)).limits.convoysLed
+    if (Number(led?.n ?? 0) >= maxLed) {
+        throw createError({ statusCode: 409, statusMessage: `Maksimal ${maxLed} konvoi aktif yang Anda pimpin. Akhiri salah satu dulu.` })
     }
 
     const now = Date.now()

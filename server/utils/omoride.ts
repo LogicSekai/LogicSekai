@@ -13,7 +13,8 @@
 import type { H3Event } from 'h3'
 import { and, eq, isNull, sql } from 'drizzle-orm'
 import { getDB, initializeDB } from '~/lib/db/connection'
-import { omorideConvoyInvites, omorideConvoyMembers, omorideConvoys, users } from '~/lib/db/schema'
+import { omorideConvoyInvites, omorideConvoyMembers, omorideConvoys, omorideEntitlements, users } from '~/lib/db/schema'
+import { effectivePlan, limitsFor, plansEnforced } from '../omoride/plans'
 import { getBearerToken, resolveSessionToken, type SessionUser } from './session'
 
 export const OMO_REPORT_TYPES = ['jam', 'police', 'pothole', 'flood', 'crash', 'hazard'] as const
@@ -164,7 +165,7 @@ export function convoyDto(c: any) {
  * Masukkan user ke konvoi aktif (kode, tautan, atau terima undangan). Idempoten.
  * Anggota yang dikeluarkan leader (`role = 'removed'`) hanya bisa masuk lagi lewat undangan.
  */
-export async function joinConvoy(db: any, convoy: any, userId: string, opts: { viaInvite?: boolean } = {}) {
+export async function joinConvoy(db: any, convoy: any, userId: string, opts: { viaInvite?: boolean; event?: H3Event } = {}) {
     const now = Date.now()
     const [existing] = await db.select().from(omorideConvoyMembers)
         .where(and(eq(omorideConvoyMembers.convoyId, convoy.id), eq(omorideConvoyMembers.userId, userId))).limit(1)
@@ -175,8 +176,9 @@ export async function joinConvoy(db: any, convoy: any, userId: string, opts: { v
     if (!existing || existing.leftMs != null) {
         const [cnt] = await db.select({ n: sql<number>`count(*)` }).from(omorideConvoyMembers)
             .where(and(eq(omorideConvoyMembers.convoyId, convoy.id), isNull(omorideConvoyMembers.leftMs)))
-        if (Number(cnt?.n ?? 0) >= OMO_MAX_MEMBERS) {
-            throw createError({ statusCode: 409, statusMessage: `Konvoi penuh (maks. ${OMO_MAX_MEMBERS} anggota)` })
+        const max = opts.event ? (await getOmoPlan(opts.event, db, convoy.leaderId)).limits.convoyMembers : OMO_MAX_MEMBERS
+        if (Number(cnt?.n ?? 0) >= max) {
+            throw createError({ statusCode: 409, statusMessage: `Konvoi penuh (maks. ${max} anggota)` })
         }
     }
 
@@ -208,5 +210,26 @@ export function reportDto(r: any, viewerId?: string) {
         confirms: r.confirms ?? 0,
         clears: r.clears ?? 0,
         mine: !!viewerId && r.userId === viewerId,
+    }
+}
+
+// ---- Langganan (paket & batas) --------------------------------------------------------------
+
+/** Paket, batas dan sumber hak langganan akun [userId]. */
+export async function getOmoPlan(event: H3Event, db: any, userId: string) {
+    // Tabel belum dimigrasi (deploy sebelum migrasi 0023) → anggap gratis dengan batas lama, jangan gagal.
+    const [row] = await db.select().from(omorideEntitlements).where(eq(omorideEntitlements.userId, userId)).limit(1)
+        .catch((e: unknown) => { console.warn('[omoride] omoride_entitlements belum tersedia', e); return [] })
+    const now = Date.now()
+    const plan = effectivePlan(row ?? null, now)
+    const enforced = plansEnforced(useRuntimeConfig(event).omoridePlansEnforced)
+    return {
+        plan,
+        enforced,
+        limits: limitsFor(plan, enforced),
+        source: plan === 'free' ? null : (row?.source ?? null) as string | null,
+        expiresMs: plan === 'free' ? null : (row?.expiresMs ?? null) as number | null,
+        status: plan === 'free' ? null : (row?.status ?? null) as string | null,
+        autoRenew: plan === 'free' ? false : !!row?.autoRenew,
     }
 }

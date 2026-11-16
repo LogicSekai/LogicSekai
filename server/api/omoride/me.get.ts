@@ -32,5 +32,7 @@ export default defineEventHandler(async (event) => {
         profile: { displayName: user.name || user.username, ghostDefault: !!profile.ghostDefault },
         activeConvoys: convoys.map((r: any) => ({ ...convoyDto(r.convoy), myRole: r.role })),
         pendingInvites: Number(inv?.n ?? 0),
+        // Paket & batas langganan (aplikasi memakai `limits`; server tetap menegakkan batas konvoi).
+        subscription: await getOmoPlan(event, db, user.id),
     }
 })

@@ -120,6 +120,9 @@ export default defineNuxtConfig({
     // Email transaksional (kode verifikasi) via Resend — domain terverifikasi: support.logicsekai.com.
     // Di Cloudflare Pages cukup isi secret NUXT_RESEND_API_KEY; NUXT_EMAIL_FROM opsional.
     resendApiKey: process.env.NUXT_RESEND_API_KEY || '',
+    // Langganan OmoRide: '1' = batas paket diberlakukan. Kosong = semua pengguna memakai batas lama
+    // (dipakai sampai pembayaran dibuka). Lihat server/omoride/plans.ts.
+    omoridePlansEnforced: process.env.NUXT_OMORIDE_PLANS_ENFORCED || '',
     emailFrom: process.env.NUXT_EMAIL_FROM || 'Logic Sekai <noreply@support.logicsekai.com>',
     cloudflareAccountId: process.env.CLOUDFLARE_ACCOUNT_ID,
     cloudflareDatabaseId: process.env.CLOUDFLARE_DATABASE_ID,
