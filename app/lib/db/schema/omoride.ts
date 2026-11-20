@@ -157,3 +157,9 @@ export const omorideTripMoments = sqliteTable('omoride_trip_moments', {
     primaryKey({ columns: [t.userId, t.id] }),
     index('idx_omoride_trip_moments_trip').on(t.userId, t.tripStartMs),
 ])
+
+/** Masa simpan cadangan cloud setelah langganan berakhir (migrasi 0026). */
+export const omorideCloudRetention = sqliteTable('omoride_cloud_retention', {
+    userId: text('user_id').primaryKey().references(() => users.id, { onDelete: 'cascade' }),
+    lapsedMs: integer('lapsed_ms').notNull(),
+})

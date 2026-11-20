@@ -13,7 +13,7 @@ import type { H3Event } from 'h3'
 import { and, eq, isNull, or } from 'drizzle-orm'
 import {
     omorideConvoyInvites, omorideConvoyMembers, omorideConvoys, omorideEntitlements, omorideProfiles,
-    omorideReportVotes, omorideReports, omorideTripMoments, omorideTrips, userSessions, users,
+    omorideCloudRetention, omorideReportVotes, omorideReports, omorideTripMoments, omorideTrips, userSessions, users,
 } from '~/lib/db/schema'
 import { deleteAllCloudFiles } from './cloud-sync'
 
@@ -43,6 +43,7 @@ export async function deleteOmoRideData(event: H3Event, db: any, userId: string)
     const cloudFiles = bucket ? await deleteAllCloudFiles(bucket, userId) : 0
     await db.delete(omorideTripMoments).where(eq(omorideTripMoments.userId, userId))
     await db.delete(omorideTrips).where(eq(omorideTrips.userId, userId))
+    await db.delete(omorideCloudRetention).where(eq(omorideCloudRetention.userId, userId)).catch(() => undefined)
     return { convoysEnded: led.length, convoysLeft: joined.length, cloudFiles }
 }
 

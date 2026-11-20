@@ -70,6 +70,7 @@ export {
     omoridePayments,
     omorideTrips,
     omorideTripMoments,
+    omorideCloudRetention,
 } from './omoride';
 export { emailVerificationCodes } from './email-verification';
 

@@ -14,6 +14,15 @@ binding = "DB"
 database_name = "logic-sekai-db"
 database_id = "8e584977-b7e9-4f7d-aa4c-a30fab656636"
 
+# R2 yang SAMA dengan Logic Sekai: pembersihan cadangan cloud OmoRide (prefix private/omoride/)
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "logicsekai-uploads"
+
+# Harian 03:17 UTC (10:17 WIB): masa simpan 90 hari cadangan cloud (server/omoride/cloud-retention.ts)
+[triggers]
+crons = ["17 3 * * *"]
+
 [[durable_objects.bindings]]
 name = "CONVOY_ROOM"
 class_name = "ConvoyRoom"
